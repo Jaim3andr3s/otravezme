@@ -1,1276 +1,1488 @@
+// ----------------------------------------------------------------------
+// --- App.jsx: BIBLIOSUEÑOS - VERSIÓN CORREGIDA con DELETE, Archivos (URL) y DEMO DATA AMPLIADA
+// ----------------------------------------------------------------------
+
 // --- IMPORTACIONES ---
-// React, hooks, y librerías para animación e iconos.
-import React, { useState, useEffect, createContext, useContext, useRef } from 'react';
+import React, { useState, useEffect, createContext, useContext, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Home, Book, Award, Users, User, Sun, Moon, Menu, X,
     Sparkles, BookHeart, Wind, Feather, Star, XCircle,
     Search, Calendar, MessageSquare, BookOpenCheck, ChevronRight,
-    PlayCircle, PauseCircle, StopCircle, UserSquare2, BrainCircuit, Loader2,
-    Wand2, MessageCircleHeart, StarHalf, Mic, Badge,
-    ShieldCheck, Gem, Rocket, Send, ThumbsUp, ThumbsDown, MessageCircleQuestion,
-    Gamepad2, Palette, Trophy, Loader, ChevronLeft, Volume2, VolumeX, Eraser, Check
+    PlayCircle, PauseCircle, StopCircle, UserSquare2, Loader2,
+    MessageCircleHeart, StarHalf, Mic, Badge, Edit,
+    ShieldCheck, Gem, Rocket, Send, ThumbsUp, ThumbsDown,
+    Gamepad2, Palette, Trophy, Loader, ChevronLeft, Volume2, VolumeX, Key, Megaphone, Eraser, Check, Trash2,
+    Plus, Globe, NotebookText, Heart, XOctagon, Landmark, Zap
 } from 'lucide-react';
+import 'tailwindcss/tailwind.css';
+
+// --- CONSTANTES ---
+const API_BASE_URL = 'http://localhost:4000/api';
+const DEMO_USER_ID = 12345;
+const ADMIN_KEY_SECRET = "colombia2025"; 
 
 // --- CONTEXTO DE LA APLICACIÓN ---
-// MEJORA: Ahora también gestiona favoritos, XP y el avatar del usuario.
 const AppContext = createContext();
+const useAppContext = () => useContext(AppContext);
 
-// --- DATOS AMPLIADOS Y ENRIQUECIDOS DE LA BIBLIOTECA ---
-const masterBookList = [
-    { id: 1, title: 'El Principito', author: 'Antoine de Saint-Exupéry', category: 'Infantil', cover: 'https://images.cdn1.buscalibre.com/fit-in/360x360/34/29/34292c8e89f726f2ef8924073ff4c382.jpg', description: 'Un cuento poético y filosófico sobre la amistad, el amor y la pérdida.', status: 'Disponible', ageRange: '8-12 años', isStaffPick: false, readOnlineUrl: 'https://web.seducoahuila.gob.mx/biblioweb/upload/el%20principito.pdf', dateAdded: '2025-06-20T10:00:00Z', rating: 4.9, reviews: 124 },
-    { id: 2, title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', category: 'Novela', cover: 'https://images.cdn3.buscalibre.com/fit-in/520x520/90/d6/90d6455083f95cb36dc10052fe29f2ea.jpg', description: 'La obra maestra del realismo mágico que narra la historia de la familia Buendía en Macondo.', status: 'Disponible', ageRange: 'Adultos', isStaffPick: true, readOnlineUrl: 'https://www.secst.cl/upfiles/documentos/19072016_1207am_578dc39115fe9.pdf', dateAdded: '2025-06-18T10:00:00Z', rating: 4.8, reviews: 210 },
-    { id: 3, title: 'Cartilla "Aprende a Leer"', author: 'Recurso Educativo Abierto', category: 'Aprender a leer', cover: 'https://panamericana.vtexassets.com/arquivos/ids/333632/nacho-libro-inicial-de-lectura-9789580700425.jpg?v=637010406948870000', description: 'Una cartilla de dominio público con ejercicios para guiar a los nuevos lectores.', status: 'Disponible', ageRange: '4-7 años', isStaffPick: true, readOnlineUrl: 'https://www.suescun.com.co/wp-content/uploads/2022/06/Cartilla-Nacho-PDF.pdf', dateAdded: '2025-06-15T10:00:00Z', rating: 4.5, reviews: 45 },
-    { id: 4, title: '¿A qué sabe la luna?', author: 'Michael Grejniec', category: 'Infantil', cover: 'https://images.cdn1.buscalibre.com/fit-in/360x360/16/8b/168b4cca7ee5e4ba2aaff982778ce1dd.jpg', description: 'Un maravilloso cuento sobre la cooperación para alcanzar un sueño común.', status: 'Disponible', ageRange: '3-6 años', isStaffPick: false, readOnlineUrl: 'https://jmhuarte.educacion.navarra.es/web1/wp-content/uploads/2020/04/A-QUE-SABE-LA-LUNA-PDF.pdf.pdf.pdf', dateAdded: '2025-06-12T10:00:00Z', rating: 4.9, reviews: 98 },
-    { id: 5, title: 'El Monstruo de Colores', author: 'Anna Llenas', category: 'Infantil', cover: 'https://images.cdn2.buscalibre.com/fit-in/360x360/cc/12/cc12b7f5a825d75f07d9ec7ad393d8a8.jpg', description: 'Una encantadora historia que ayuda a los niños a identificar y gestionar sus emociones a través de colores.', status: 'Disponible', ageRange: '3-6 años', isStaffPick: true, readOnlineUrl: 'https://www.educacionbc.edu.mx/materialdeapoyo/public/site/pdf/educacionbasica/preescolar/libromonstruodecolores.pdf', dateAdded: '2025-07-01T10:00:00Z', rating: 4.8, reviews: 150 },
-    { id: 6, title: 'Donde viven los monstruos', author: 'Maurice Sendak', category: 'Infantil', cover: 'https://0.academia-photos.com/attachment_thumbnails/64582498/mini_magick20201002-15602-8t9qco.png?1601657771', description: 'La historia de Max y su viaje a una isla habitada por monstruos, explorando de forma magistral las emociones infantiles.', status: 'Prestado', ageRange: '4-8 años', isStaffPick: false, readOnlineUrl: 'https://www.formarse.com.ar/libros/Libros-recomendados-pdf/Donde%20viven%20los%20monstruos-Maurice%20Sendak.pdf', dateAdded: '2025-06-10T10:00:00Z', rating: 4.7, reviews: 88 },
-    { id: 7, title: 'Breve historia del tiempo', author: 'Stephen Hawking', category: 'Ciencia', cover: 'https://images.cdn2.buscalibre.com/fit-in/360x360/b2/f6/b2f6f1943485f7c3527a44f808546b53.jpg', description: 'Una introducción accesible a los misterios del universo, desde el Big Bang hasta los agujeros negros.', status: 'Disponible', ageRange: 'Jóvenes y Adultos', isStaffPick: true, readOnlineUrl: 'https://www.fisica.net/relatividad/stephen_hawking_-_historia_del_tiempo.pdf', dateAdded: '2025-05-28T10:00:00Z', rating: 4.9, reviews: 180 },
-    { id: 9, title: 'Fahrenheit 451', author: 'Ray Bradbury', category: 'Ciencia Ficción', cover: 'https://images.cdn3.buscalibre.com/fit-in/360x360/23/e3/23e3b0699ae46fc450e85f4354328c3a.jpg', description: 'Una novela distópica que presenta una sociedad futura donde los libros están prohibidos.', status: 'Disponible', ageRange: 'Jóvenes y Adultos', isStaffPick: false, readOnlineUrl: 'https://proletarios.org/books/Bradbury-Fahrenheit-451-novela-grafica.pdf', dateAdded: '2025-07-02T11:00:00Z', rating: 4.7, reviews: 195 },
-    { id: 10, title: 'El Hobbit', author: 'J.R.R. Tolkien', category: 'Fantasía', cover: 'https://online.fliphtml5.com/mpfea/buqd/files/large/1.webp?1592859127&1592859127', description: 'La aventura de Bilbo Bolsón, un hobbit que se embarca en un viaje inesperado para recuperar un tesoro.', status: 'Disponible', ageRange: 'Jóvenes y Adultos', isStaffPick: true, readOnlineUrl: 'https://web.seducoahuila.gob.mx/biblioweb/upload/J.R.R.%20Tolkien%20-%20El%20Hobbit.pdf', dateAdded: '2025-07-05T10:00:00Z', rating: 4.9, reviews: 320 },
-    { id: 11, title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling', category: 'Fantasía', cover: 'https://www.tornamesa.co/imagenes/9789585/978958523404.GIF', description: 'El inicio de la saga del joven mago que descubre su verdadera identidad y su destino en Hogwarts.', status: 'Prestado', ageRange: '10-14 años', isStaffPick: false, readOnlineUrl: 'https://biblioteca-digital.universidadcolumbia.edu.mx/acervo/LITERATURA/Harry_Potter_y_la_Piedra_Filosofal-J_K_Rowling.pdf', dateAdded: '2025-07-04T10:00:00Z', rating: 4.9, reviews: 450 },
-    { id: 12, title: 'Poesía Completa', author: 'Jorge Luis Borges', category: 'Poesía', cover: 'https://images.cdn3.buscalibre.com/fit-in/360x360/b1/4b/b14bf4593f0b2f70b616421c97ac388a.jpg', description: 'Una recopilación esencial de la obra poética de uno de los escritores más influyentes del siglo XX.', status: 'Disponible', ageRange: 'Adultos', isStaffPick: true, readOnlineUrl: '#', dateAdded: '2025-04-20T10:00:00Z', rating: 4.8, reviews: 130 },
-    { id: 13, title: 'Cosmos', author: 'Carl Sagan', category: 'Ciencia', cover: 'https://images.cdn1.buscalibre.com/fit-in/360x360/a6/53/a6532454a8e6f1f440536c642878c75d.jpg', description: 'Un viaje inspirador a través del espacio y el tiempo, explorando las maravillas del universo.', status: 'Disponible', ageRange: 'Jóvenes y Adultos', isStaffPick: false, readOnlineUrl: '#', dateAdded: '2025-03-10T10:00:00Z', rating: 5.0, reviews: 255 },
+// --- ESTRUCTURAS DE DATOS BASE (Fallback/Demo) ---
+// 🚨 DEMO_BOOKS AMPLIADO (6 Libros)
+const DEMO_BOOKS = [
+    { id: 1, title: 'El Principito', author: 'Antoine de Saint-Exupéry', category: 'Infantil', cover: 'https://images.cdn1.buscalibre.com/fit-in/360x360/34/29/34292c8e89f726f2ef8924073ff4c382.jpg', description: 'Un cuento poético y filosófico sobre la amistad, el amor y la pérdida.', status: 'Disponible', ageRange: '8-12 años', isStaffPick: true, readOnlineUrl: 'https://web.seducoahuila.gob.mx/biblioweb/upload/el%20principito.pdf', dateAdded: '2025-06-20T10:00:00Z', rating: 4.9, reviews: 124 },
+    { id: 2, title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', category: 'Novela', cover: 'https://images.cdn3.buscalibre.com/fit-in/520x520/90/d6/90d6455083f95cb36dc10052fe29f2ea.jpg', description: 'La obra maestra del realismo mágico que narra la historia de la familia Buendía en Macondo.', status: 'Prestado', ageRange: 'Adultos', isStaffPick: true, readOnlineUrl: '#', dateAdded: '2025-05-15T10:00:00Z', rating: 4.8, reviews: 980 },
+    { id: 3, title: 'La Sombra del Viento', author: 'Carlos Ruiz Zafón', category: 'Misterio', cover: 'https://m.media-amazon.com/images/I/510wV-vE8rL._SL1000_.jpg', description: 'Una novela ambientada en la Barcelona de posguerra que sigue la historia de Daniel Sempere.', status: 'Disponible', ageRange: 'Adultos', isStaffPick: false, readOnlineUrl: '#', dateAdded: '2025-07-20T10:00:00Z', rating: 4.7, reviews: 550 },
+    { id: 4, title: 'Donde Viven los Monstruos', author: 'Maurice Sendak', category: 'Infantil', cover: 'https://images.cdn1.buscalibre.com/fit-in/360x360/f2/cf/f2cf1902092cc7713e20e8b233a01a61.jpg', description: 'El clásico sobre un niño, Max, que es enviado a su habitación y navega a una tierra de monstruos.', status: 'Disponible', ageRange: '4-7 años', isStaffPick: false, readOnlineUrl: '#', dateAdded: '2025-08-01T10:00:00Z', rating: 4.9, reviews: 320 },
+    { id: 11, title: 'Harry Potter y la Piedra Filosofal', author: 'J.K. Rowling', category: 'Fantasía', cover: 'https://m.media-amazon.com/images/I/51-2yG1qNqL._SL1500_.jpg', description: 'El inicio de la saga del joven mago que descubre su verdadera identidad y su destino en Hogwarts.', status: 'Prestado', ageRange: '10-14 años', isStaffPick: false, readOnlineUrl: 'https://biblioteca-digital.universidadcolumbia.edu.mx/acervo/LITERATURA/Harry_Potter_y_la_Piedra_Filosofal-J_K_Rowling.pdf', dateAdded: '2025-07-04T10:00:00Z', rating: 4.9, reviews: 450 },
+    { id: 12, title: 'Poesía Completa', author: 'Jorge Luis Borges', category: 'Poesía', cover: 'https://images.cdn3.buscalibre.com/fit-in/360x360/b1/4b/b14bf4593f0b2f70b616421c97ac388a.jpg', description: 'Una recopilación esencial de la obra poética de uno de los escritores más influyentes del siglo XX.', status: 'Disponible', ageRange: 'Adultos', isStaffPick: true, readOnlineUrl: '#', dateAdded: '2025-04-20T10:00:00Z', rating: 4.7, reviews: 210 },
 ];
-
-// --- NUEVO: Datos para Citas Célebres y Autores ---
-const quotes = [
-    { quote: "Un lector vive mil vidas antes de morir... El que nunca lee vive solo una.", author: "George R.R. Martin" },
-    { quote: "Siempre imaginé que el Paraíso sería algún tipo de biblioteca.", author: "Jorge Luis Borges" },
-    { quote: "Los libros son espejos: sólo se ve en ellos lo que uno ya lleva dentro.", author: "Carlos Ruiz Zafón" },
-    { quote: "No hay amigo tan leal como un libro.", author: "Ernest Hemingway" }
+const DEMO_EVENTS = [
+   
 ];
-
-const authors = [
-    { id: 1, name: 'Gabriel García Márquez', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Gabriel_Garcia_Marquez.jpg/800px-Gabriel_Garcia_Marquez.jpg', bio: 'Escritor colombiano, premio Nobel de Literatura en 1982. Figura central del realismo mágico, su obra "Cien Años de Soledad" es un hito de la literatura universal.', books: [2] },
-    { id: 2, name: 'J.R.R. Tolkien', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/J._R._R._Tolkien%2C_1940s.jpg/800px-J._R._R._Tolkien%2C_1940s.jpg', bio: 'Escritor y filólogo británico, conocido por sus obras de fantasía épica "El Hobbit" y "El Señor de los Anillos".', books: [10] },
-    { id: 3, name: 'J.K. Rowling', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/J._K._Rowling_2010.jpg/800px-J._K._Rowling_2010.jpg', bio: 'Autora británica, creadora de la mundialmente famosa saga de Harry Potter, que ha inspirado a una generación de lectores.', books: [11] },
-    { id: 4, name: 'Carl Sagan', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Carl_Sagan_in_1980.jpg/800px-Carl_Sagan_in_1980.jpg', bio: 'Astrónomo y divulgador científico. Su libro y serie "Cosmos" acercaron las maravillas del universo a millones de personas.', books: [13] }
-];
-
-// NUEVO: Avatares disponibles
-const avatars = [
-    { id: 'avatar1', name: 'Explorador', src: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Annie&flip=true' },
-    { id: 'avatar2', name: 'Mago', src: 'https://api.dicebear.com/8.x/bottts/svg?seed=Bandit&mouth=smile&eyes=hearts' },
-    { id: 'avatar3', name: 'Estudiante', src: 'https://api.dicebear.com/8.x/fun-emoji/svg?seed=Princess&eyes=closed&mouth=cute' },
-    { id: 'avatar4', name: 'Sabio', src: 'https://api.dicebear.com/8.x/notionists/svg?seed=Buddy&glasses=true' },
-    { id: 'avatar5', name: 'Artista', src: 'https://api.dicebear.com/8.x/personas/svg?seed=Felix&earrings=true' },
-    { id: 'avatar6', name: 'Científico', src: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Leo&accessories=true&beard=true' },
-];
-
-// Palabras para el juego "Adivina la Palabra"
-const gameWords = [
-    { word: "BIBLIOTECA", hint: "Un lugar lleno de libros." },
-    { word: "LECTURA", hint: "La acción de descifrar letras." },
-    { word: "NOVELA", hint: "Un género literario extenso." },
-    { word: "POESIA", hint: "Arte de expresar la belleza por medio de la palabra." },
-    { word: "AUTOR", hint: "Quien escribe un libro." },
-    { word: "IMAGINACION", hint: "Lo que se usa para crear historias." },
-    { word: "CUENTO", hint: "Una narración breve." },
-    { word: "CONOCIMIENTO", hint: "Lo que adquieres al leer." }
-];
-
-
-// --- HOOKS MEJORADOS Y NUEVOS ---
-const useSpeechSynthesis = () => {
-    const [voices, setVoices] = useState([]);
-    const [spanishVoice, setSpanishVoice] = useState(null);
-    const [isSpeaking, setIsSpeaking] = useState(false);
-    const [isPaused, setIsPaused] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isMuted, setIsMuted] = useState(false); // Nuevo estado para silenciar
-
-    useEffect(() => {
-        const loadVoices = () => {
-            const availableVoices = speechSynthesis.getVoices();
-            if (availableVoices.length > 0) {
-                const esVoice = availableVoices.find(v => v.lang.startsWith('es-')) || availableVoices.find(v => v.lang.startsWith('es'));
-                setVoices(availableVoices);
-                setSpanishVoice(esVoice);
-                setIsLoading(false);
-                speechSynthesis.onvoiceschanged = null; // Remove listener after loading
-            }
-        };
-
-        loadVoices();
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = loadVoices;
-        }
-
-        return () => {
-            speechSynthesis.cancel();
-        }
-    }, []);
-
-    const speak = (text) => {
-        if (isLoading || !text || isMuted) return; // No hablar si está silenciado
-
-        if (speechSynthesis.paused && isPaused) {
-            speechSynthesis.resume();
-            setIsPaused(false);
-            return;
-        }
-
-        speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        if (spanishVoice) {
-            utterance.voice = spanishVoice;
-            utterance.lang = spanishVoice.lang;
-        } else {
-            utterance.lang = 'es-ES';
-        }
-        utterance.pitch = 1;
-        utterance.rate = 1;
-
-        utterance.onstart = () => { setIsSpeaking(true); setIsPaused(false); };
-        utterance.onend = () => { setIsSpeaking(false); setIsPaused(false); };
-        utterance.onerror = () => { setIsSpeaking(false); setIsPaused(false); };
-
-        speechSynthesis.speak(utterance);
-    };
-
-    const pause = () => {
-        if (isSpeaking && !isPaused) {
-            speechSynthesis.pause();
-            setIsPaused(true);
-        }
-    };
-
-    const cancel = () => {
-        speechSynthesis.cancel();
-        setIsSpeaking(false);
-        setIsPaused(false);
-    };
-
-    const toggleMute = () => { // Nueva función para silenciar/desilenciar
-        if (!isMuted) {
-            cancel(); // Detener cualquier habla actual si se va a silenciar
-        }
-        setIsMuted(prev => !prev);
-    };
-
-    return { speak, pause, cancel, isSpeaking, isPaused, isLoading, isMuted, toggleMute };
+const DEMO_READING_PLANS = [];
+const DEMO_PROFILE = {
+    id: DEMO_USER_ID,
+    name: "Lector Invitado",
+    email: "demo@biblio.com",
+    bio: "Perfil de demostración.",
+    avatar: "https://api.dicebear.com/8.x/adventurer/svg?seed=Annie&flip=true",
+    favorites: [],
+    read: [],
+    joinedAt: "2025-01-01T00:00:00Z",
 };
 
 
-// --- NUEVO: Hook para la lógica del Asistente (Chatbot) ---
-const useChatbot = () => {
-    const [messages, setMessages] = useState([{ from: 'bot', text: '¡Hola! Soy BiblioBot. ¿En qué te puedo ayudar?' }]);
-    const [isTyping, setIsTyping] = useState(false);
-    const sendMessage = async (text) => {
-        setMessages(prev => [...prev, { from: 'user', text }]);
-        setIsTyping(true);
+// --- UTILITIES Y FUNCIONES AUXILIARES ---
+
+// Función robusta para fetch con reintentos
+const fetchWithRetry = async (url, options = {}, maxRetries = 3, delay = 1000) => {
+    for (let i = 0; i < maxRetries; i++) {
         try {
-            const aiPrompt = `Eres BiblioBot, un asistente amigable. Responde de forma breve y útil. El usuario dijo: "${text}"`;
-            const payload = { contents: [{ role: "user", parts: [{ text: aiPrompt }] }] };
-            const apiKey = ""; // Dejar vacío para que el entorno lo gestione
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await response.json();
-            const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No pude procesar eso.';
-            setMessages(prev => [...prev, { from: 'bot', text: botResponse }]);
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.error(`Error 404: No encontrado en ${url}`);
+                    if (options.method === 'GET') return null;
+                }
+                const errorText = await response.text();
+                let errorMessage = `HTTP error! status: ${response.status}.`;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.message || errorMessage;
+                } catch {
+                    errorMessage = errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+            if (options.method === 'DELETE' && response.status === 204) {
+                 return { message: 'Eliminado exitosamente.' };
+            }
+            const text = await response.text();
+            return text ? JSON.parse(text) : { message: 'Operación exitosa sin contenido de respuesta.' };
+
         } catch (error) {
-            console.error("Error en chatbot:", error);
-            setMessages(prev => [...prev, { from: 'bot', text: 'Hay un problema de conexión.' }]);
-        } finally {
-            setIsTyping(false);
+            console.warn(`Fetch fallido (Intento ${i + 1}/${maxRetries}):`, error.message);
+            if (i === maxRetries - 1) {
+                throw new Error(error.message || `Fallo en la conexión después de ${maxRetries} intentos.`);
+            }
+            await new Promise(resolve => setTimeout(resolve, delay * (2 ** i)));
         }
-    };
-    return { messages, sendMessage, isTyping }; 
+    }
 };
 
-// --- COMPONENTES REUTILIZABLES ---
+// Función para generar avatares (no utilizada actualmente pero mantenida)
+// const getAvatarUrl = (name) => {
+//     const seed = name.replace(/\s/g, '').toLowerCase();
+//     return `https://api.dicebear.com/8.x/adventurer/svg?seed=${seed}&flip=true`;
+// };
 
-const SplashScreen = () => (
-    <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0, transition: { delay: 2.5, duration: 0.5 } }}
-        className="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col items-center justify-center z-[200]"
-    >
+
+// --- COMPONENTES UI REUTILIZABLES ---
+
+const ModalWrapper = ({ children, title, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-75 z-[160] flex items-center justify-center p-4">
         <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0, transition: { type: 'spring', stiffness: 100, damping: 15, delay: 0.5 } }}
+            initial={{ y: "-100vh", opacity: 0 }}
+            animate={{ y: "0", opacity: 1 }}
+            exit={{ y: "100vh", opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
         >
-            <BookHeart size={80} className="text-indigo-500" />
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900 z-10">
+                <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{title}</h2>
+                <button onClick={onClose} className="text-gray-500 hover:text-red-500 transition">
+                    <XCircle className="w-6 h-6" />
+                </button>
+            </div>
+            {children}
         </motion.div>
-        <motion.h1
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1, transition: { delay: 1.2 } }}
-            className="mt-6 text-3xl font-bold font-poppins bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-pink-500"
-        >
-            BiblioSueños
-        </motion.h1>
-        <p className="text-gray-600 dark:text-gray-400">Tu comunidad para leer y soñar.</p>
-    </motion.div>
+    </div>
 );
 
-const StarRating = ({ rating, totalReviews }) => {
+const IconButton = ({ icon: Icon, onClick, className = '', title = '', disabled = false }) => (
+    <button
+        onClick={onClick}
+        title={title}
+        disabled={disabled}
+        className={`p-2 rounded-full transition duration-200 ease-in-out shadow-lg transform hover:scale-105 ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+        <Icon className="w-6 h-6" />
+    </button>
+);
+
+const LoadingScreen = () => { return (
+        <motion.div
+            className="fixed inset-0 flex flex-col items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm z-[100] p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+                <BookOpenCheck className="w-16 h-16 text-emerald-500" />
+            </motion.div>
+            <h1 className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-white">
+                Cargando BiblioSueños...
+            </h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Conectando con el universo literario.
+            </p>
+        </motion.div>
+    );
+};
+
+const Notification = ({ message, type = 'info', onClose }) => {
+    const Icon = {
+        info: MessageSquare,
+        success: Check,
+        error: XCircle,
+    }[type];
+
+    const colorClasses = {
+        info: 'bg-blue-500 border-blue-600',
+        success: 'bg-emerald-500 border-emerald-600',
+        error: 'bg-red-500 border-red-600',
+    }[type];
+
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 0.8 }}
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-xl shadow-2xl text-white font-semibold flex items-center space-x-3 z-[150] ${colorClasses} border-b-4`}
+        >
+            <Icon className="w-6 h-6" />
+            <span>{message}</span>
+        </motion.div>
+    );
+};
+
+// Componente para mostrar clasificación de libro
+const Pill = ({ icon: Icon, text, color = 'bg-gray-100 dark:bg-gray-700', textColor = 'text-gray-600 dark:text-gray-200' }) => (
+    <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${color} ${textColor}`}>
+        {Icon && <Icon className="w-4 h-4 mr-1" />}
+        {text}
+    </span>
+);
+
+const StarRating = ({ rating, reviews }) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     return (
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center">
-                {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} size={16} className="text-amber-400 fill-amber-400" />)}
-                {hasHalfStar && <StarHalf size={16} className="text-amber-400 fill-amber-400" />}
-                {[...Array(emptyStars)].map((_, i) => <Star key={`empty-${i}`} size={16} className="text-gray-300 dark:text-gray-600" />)}
-            </div>
-            <span className="font-semibold">{rating.toFixed(1)}</span>
-            <span>({totalReviews} reseñas)</span>
-        </div>
-    );
-};
-
-const BookModal = ({ book, onClose, onVote, onToggleFavorite, isFavorite, onBookReadComplete }) => {
-    if (!book) return null;
-    const { speak, pause, cancel, isSpeaking, isPaused, isLoading: isVoiceLoading, isMuted, toggleMute } = useSpeechSynthesis();
-    const [voted, setVoted] = useState(null);
-    const [hasRead, setHasRead] = useState(false); // Estado para simular la lectura
-
-    useEffect(() => {
-        return () => cancel();
-    }, [cancel]);
-
-    const handleVote = (type) => {
-        if (!voted) {
-            onVote(book.id, type);
-            setVoted(type);
-        }
-    };
-
-    // Simular que el libro se ha "leído" al abrir el modal y luego cerrarlo
-    const handleCloseModal = () => {
-        if (!hasRead) {
-            onBookReadComplete(book.id);
-            setHasRead(true);
-        }
-        onClose();
-    };
-
-    return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4"
-                onClick={handleCloseModal} // Usar el nuevo manejador de cierre
-            >
-                <motion.div
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: -20 }}
-                    className="bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                        <h2 className="text-xl font-bold text-gray-800 dark:text-white truncate font-poppins">{book.title}</h2>
-                        <button onClick={handleCloseModal} className="text-gray-400 hover:text-red-500 transition-colors">
-                            <XCircle size={28} />
-                        </button>
-                    </div>
-
-                    <div className="p-6 md:p-8 grid md:grid-cols-10 gap-8 overflow-y-auto">
-                        <div className="md:col-span-3 flex flex-col items-center">
-                            <motion.img
-                                src={book.cover}
-                                alt={`Portada de ${book.title}`}
-                                className="rounded-lg shadow-lg w-full max-w-xs object-cover aspect-[2/3]"
-                                layoutId={`book-cover-${book.id}`}
-                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/300x450/cccccc/ffffff?text=Imagen+no+disponible'; }}
-                            />
-                        </div>
-                        <div className="md:col-span-7 flex flex-col space-y-4">
-                            <div>
-                                <h3 className="text-4xl font-extrabold text-gray-800 dark:text-white font-poppins">{book.title}</h3>
-                                <p className="text-lg text-gray-500 dark:text-gray-400 mb-2">{book.author}</p>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                    <StarRating rating={book.rating} totalReviews={book.reviews} />
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">¿Te gustó?</span>
-                                        <button onClick={() => handleVote('up')} disabled={!!voted} className={`p-2 rounded-full transition-colors ${voted === 'up' ? 'bg-green-100 text-green-600' : 'hover:bg-green-100 disabled:opacity-50'}`}>
-                                            <ThumbsUp size={18} />
-                                        </button>
-                                        <button onClick={() => handleVote('down')} disabled={!!voted} className={`p-2 rounded-full transition-colors ${voted === 'down' ? 'bg-red-100 text-red-600' : 'hover:bg-red-100 disabled:opacity-50'}`}>
-                                            <ThumbsDown size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <p className={`text-gray-600 dark:text-gray-300 transition-colors duration-300 ${isSpeaking && !isPaused ? 'text-indigo-600 dark:text-indigo-300' : ''}`}>
-                                    {book.description}
-                                </p>
-                                <div className="flex items-center gap-2 pt-2">
-                                    <button onClick={() => speak(book.description)} disabled={isVoiceLoading || (isSpeaking && !isPaused) || isMuted} className="flex items-center gap-1.5 text-sm px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-200 transition-colors">
-                                        {isVoiceLoading ? <Loader2 size={16} className="animate-spin" /> : isSpeaking && !isPaused ? <Mic size={16} /> : <PlayCircle size={16} />}
-                                        {isVoiceLoading ? 'Cargando...' : isSpeaking && !isPaused ? 'Hablando...' : 'Escuchar'}
-                                    </button>
-                                    <button onClick={pause} disabled={!isSpeaking || isPaused || isMuted} className="flex items-center gap-1 text-sm text-yellow-600 disabled:opacity-50"><PauseCircle size={18} /> Pausar</button>
-                                    <button onClick={cancel} disabled={!isSpeaking && !isPaused || isMuted} className="flex items-center gap-1 text-sm text-red-600 disabled:opacity-50"><StopCircle size={18} /> Detener</button>
-                                    <button onClick={toggleMute} className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-                                        {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                                        {isMuted ? 'Desmutear' : 'Mutear'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <h4 className="flex items-center gap-2 font-bold text-gray-700 dark:text-gray-200"><MessageCircleHeart size={20} /> Reseñas de la Comunidad</h4>
-                                <div className="space-y-3 max-h-32 overflow-y-auto pr-2">
-                                    <div className="text-sm p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                        <p className="text-gray-600 dark:text-gray-300">"Una obra que te cambia la perspectiva. La narrativa es simplemente sublime."</p>
-                                        <p className="font-semibold text-gray-500 dark:text-gray-400 text-right mt-1">- Lector Anónimo</p>
-                                    </div>
-                                    <div className="text-sm p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                        <p className="text-gray-600 dark:text-gray-300">"Perfecto para leer con los niños antes de dormir. ¡Nos encantó!"</p>
-                                        <p className="font-semibold text-gray-500 dark:text-gray-400 text-right mt-1">- Familia G.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <a href={book.readOnlineUrl} target="_blank" rel="noopener noreferrer" className="flex-grow text-center bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
-                                    <BookOpenCheck size={20} />
-                                    {book.readOnlineUrl.includes('youtube') ? 'Ver Video-Cuento' : 'Leer Online'}
-                                </a>
-                                <button onClick={() => onToggleFavorite(book.id)} className={`p-3 rounded-lg border-2 transition-colors ${isFavorite ? 'bg-pink-500 border-pink-500 text-white' : 'bg-transparent border-gray-300 dark:border-gray-600 hover:border-pink-400 hover:text-pink-400'}`} title={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}>
-                                    <BookHeart size={20} className={isFavorite ? 'fill-current' : ''} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
-    );
-};
-
-const BookCard = ({ book, onCardClick }) => (
-    <motion.div
-        className="cursor-pointer group relative"
-        onClick={() => onCardClick(book)}
-        whileHover={{ y: -8 }}
-        transition={{ type: 'spring', stiffness: 300 }}
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-    >
-        {book.isStaffPick && (
-            <div className="absolute top-2 right-2 bg-amber-400 text-white p-2 rounded-full z-10 shadow-lg" title="Selección del Equipo">
-                <Star size={16} />
-            </div>
-        )}
-        <motion.img
-            src={book.cover}
-            alt={`Portada de ${book.title}`}
-            className="rounded-lg shadow-lg group-hover:shadow-xl transition-shadow w-full h-auto aspect-[2/3] object-cover bg-gray-200"
-            layoutId={`book-cover-${book.id}`}
-            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/300x450/cccccc/ffffff?text=Error'; }}
-        />
-        <h3 className="mt-3 font-bold text-gray-800 dark:text-white group-hover:text-indigo-500 transition-colors truncate">{book.title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{book.author}</p>
-    </motion.div>
-);
-
-const PageHeader = ({ title, subtitle, icon: Icon }) => (
-    <div className="mb-12 text-center">
-        {Icon && <Icon size={48} className="mx-auto text-indigo-400 mb-4" />}
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white font-poppins">{title}</h1>
-        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">{subtitle}</p>
-    </div>
-);
-
-const QuoteOfTheDay = () => {
-    const [quote, setQuote] = useState({ quote: '', author: '' });
-
-    useEffect(() => {
-        setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-    }, []);
-
-    return (
-        <div className="my-16 text-center bg-gray-50 dark:bg-gray-800/50 p-8 rounded-2xl">
-            <blockquote className="text-xl italic text-gray-700 dark:text-gray-300">"{quote.quote}"</blockquote>
-            <cite className="block mt-2 text-md text-gray-500 dark:text-gray-400 font-semibold">- {quote.author}</cite>
-        </div>
-    );
-}
-
-// --- PÁGINAS DE LA APLICACIÓN ---
-
-const HomePage = ({ onNavigate, onBookClick }) => {
-    const { books } = useContext(AppContext);
-    const newestBooks = [...books].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded)).slice(0, 5);
-    const bookOfTheDay = books.find(b => b.id === 5) || books[0];
-
-    return (
-        <div>
-            <div className="text-center p-10 md:p-16 bg-gradient-to-br from-indigo-100 to-pink-100 dark:from-gray-800 dark:to-indigo-900/50 rounded-3xl mb-16 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-white/20 dark:bg-white/5 rounded-full filter blur-2xl opacity-50 -translate-x-1/2 -translate-y-1/2"></div>
-                <div className="absolute bottom-0 right-0 w-48 h-48 bg-pink-300/20 dark:bg-pink-500/10 rounded-full filter blur-3xl opacity-60 translate-x-1/4 translate-y-1/4"></div>
-                <motion.h1
-                    className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white font-poppins relative"
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                >
-                    BiblioYene
-                </motion.h1>
-                <motion.p
-                    className="mt-4 text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto relative"
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
-                >
-                    Tu espacio de encuentro con la imaginación, el conocimiento y la comunidad. 
-                </motion.p>
-            </div>
-
-            <section className="mb-16">
-                <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white font-poppins flex items-center gap-3"><Star className="text-amber-400" /> Libro del Día</h2>
-                <div onClick={() => onBookClick(bookOfTheDay)} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col md:flex-row items-center gap-8 cursor-pointer hover:shadow-xl transition-shadow border border-transparent hover:border-indigo-300 dark:hover:border-indigo-600">
-                    <motion.img src={bookOfTheDay.cover} layoutId={`book-cover-${bookOfTheDay.id}-day`} className="w-32 h-auto rounded-lg shadow-md" />
-                    <div className="text-center md:text-left">
-                        <h3 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bookOfTheDay.title}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 font-semibold mb-2">{bookOfTheDay.author}</p>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4 max-w-lg">{bookOfTheDay.description}</p>
-                        <StarRating rating={bookOfTheDay.rating} totalReviews={bookOfTheDay.reviews} />
-                    </div>
-                </div>
-            </section>
-
-            <QuoteOfTheDay />
-
-            <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white font-poppins">Recién Llegados</h2>
-            <motion.div
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-10"
-                initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } }, hidden: {} }}
-            >
-                {newestBooks.map(book => <BookCard key={book.id} book={book} onCardClick={onBookClick} />)}
-            </motion.div>
-        </div>
-    );
-};
-
-const AiStoryGeneratorPage = () => {
-    const [prompt, setPrompt] = useState('');
-    const [story, setStory] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleGenerate = async () => { // Marked as async
-        if (!prompt) return;
-        setIsLoading(true);
-        setStory('');
-
-        try {
-            let chatHistory = [];
-            // Create a more engaging prompt for the AI
-            const aiPrompt = `Genera un cuento corto y creativo basado en la siguiente idea, que sea apto para niños y contenga un mensaje positivo. La idea principal es: "${prompt}". Debe tener una extensión de unos 3-5 párrafos.`;
-            chatHistory.push({ role: "user", parts: [{ text: aiPrompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = ""; // If you want to use models other than gemini-2.0-flash or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json(); // Await the JSON parsing
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                const text = result.candidates[0].content.parts[0].text;
-                setStory(text);
-            } else {
-                console.error("AI response structure is unexpected or content is missing:", result);
-                setStory("Lo siento, no pude generar una historia con esa idea. Intenta con algo diferente.");
-            }
-        } catch (error) {
-            console.error("Error calling Gemini API:", error);
-            setStory("Hubo un error al generar la historia. Por favor, inténtalo de nuevo más tarde.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div>
-            <PageHeader title="Crea tu Propio Cuento" subtitle="Escribe una idea y deja que la magia de la IA cree una historia única para ti." icon={Wand2} />
-            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col gap-4">
-                    <textarea
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Ej: un dragón que horneaba galletas, una princesa astronauta..."
-                        className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                        rows="3"
-                    />
-                    <button
-                        onClick={handleGenerate}
-                        disabled={isLoading || !prompt}
-                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100"
-                    >
-                        {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                        {isLoading ? 'Creando Magia...' : 'Generar Historia'}
-                    </button>
-                </div>
-
-                {story && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 p-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border-l-4 border-indigo-400"
-                    >
-                        <h4 className="font-bold text-lg mb-2">Tu Historia:</h4>
-                        <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{story}</p>
-                    </motion.div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-
-const CatalogPage = ({ onBookClick }) => {
-    const { books } = useContext(AppContext);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('Todos');
-
-    const categories = ['Todos', ...new Set(books.map(book => book.category))];
-
-    const filteredBooks = books.filter(book => {
-        const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || book.author.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'Todos' || book.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
-
-    return (
-        <div>
-            <PageHeader title="Nuestro Catálogo" subtitle="Encuentra tu próxima aventura entre nuestras estanterías virtuales." icon={Book} />
-            <div className="mb-8 flex flex-col md:flex-row gap-4 sticky top-[85px] bg-gray-100/80 dark:bg-gray-950/80 backdrop-blur-sm py-4 z-20">
-                <div className="relative flex-grow">
-                    <input type="text" placeholder="Busca por título o autor..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
-                    />
-                    <Search size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                </div>
-            </div>
-            <div className="mb-8 flex items-center justify-center flex-wrap gap-2">
-                {categories.map(category => (
-                    <button key={category} onClick={() => setSelectedCategory(category)}
-                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${selectedCategory === category ? 'bg-indigo-600 text-white shadow-md scale-110' : 'bg-white dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-gray-600'}`}
-                    >
-                        {category}
-                    </button>
-                ))}
-            </div>
-            {filteredBooks.length > 0 ? (
-                <motion.div
-                    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10"
-                    initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
-                >
-                    {filteredBooks.map(book => <BookCard key={book.id} book={book} onCardClick={onBookClick} />)}
-                </motion.div>
-            ) : (
-                <p className="text-center text-gray-500 mt-16">No se encontraron libros que coincidan con tu búsqueda.</p>
+        <div className="flex items-center">
+            {[...Array(fullStars)].map((_, i) => (
+                <Star key={`full-${i}`} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            ))}
+            {hasHalfStar && (
+                <StarHalf key="half" className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            )}
+            {[...Array(emptyStars)].map((_, i) => (
+                <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+            ))}
+            {reviews !== undefined && (
+                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({reviews} opiniones)</span>
             )}
         </div>
     );
 };
 
-const AuthorsPage = ({ onBookClick }) => {
-    const { books } = useContext(AppContext);
+// BookCard: Muestra la clasificación de forma prominente.
+const BookCard = ({ book, onClick }) => {
+    const { isFavorite } = useAppContext();
+    const favorite = isFavorite(book.id);
 
     return (
-        <div>
-            <PageHeader title="Autores Destacados" subtitle="Conoce a las mentes maestras detrás de tus historias favoritas." icon={Feather} />
-            <div className="space-y-12">
-                {authors.map(author => (
+        <motion.div
+            className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden transform hover:scale-[1.02]"
+            onClick={() => onClick(book)}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            layout
+        >
+            <div className="relative overflow-hidden w-full h-56 flex-shrink-0">
+                <img
+                    src={book.cover}
+                    alt={`Portada de ${book.title}`}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/360x560/E2E8F0/1F2937?text=Sin+Portada" }}
+                />
+                {favorite && (
                     <motion.div
-                        key={author.id}
-                        className="grid md:grid-cols-3 gap-8 items-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.5 }}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full shadow-lg"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
                     >
-                        <img src={author.image} alt={author.name} className="rounded-full w-40 h-40 object-cover mx-auto md:mx-0 shadow-md border-4 border-white dark:border-gray-700" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/160x160/cccccc/ffffff?text=Autor'; }} />
-                        <div className="md:col-span-2 text-center md:text-left">
-                            <h3 className="text-3xl font-bold font-poppins text-indigo-600 dark:text-indigo-400">{author.name}</h3>
-                            <p className="mt-2 text-gray-600 dark:text-gray-300">{author.bio}</p>
-                            <div className="mt-4">
-                                <h4 className="font-bold text-sm uppercase text-gray-500">Libros en nuestra colección:</h4>
-                                <div className="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
-                                    {author.books.map(bookId => {
-                                        const book = books.find(b => b.id === bookId);
-                                        return book ? (
-                                            <button key={bookId} onClick={() => onBookClick(book)} className="text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full hover:bg-indigo-200 transition-colors">
-                                                {book.title}
-                                            </button>
-                                        ) : null;
-                                    })}
-                                </div>
-                            </div>
-                        </div>
+                        <Heart className="w-4 h-4 text-white fill-white" />
                     </motion.div>
-                ))}
+                )}
+                {book.isStaffPick && (
+                    <div className="absolute top-2 left-2">
+                        <Pill icon={Sparkles} text="Selección Staff" color="bg-yellow-400/90" textColor="text-yellow-900" />
+                    </div>
+                )}
             </div>
-        </div>
-    )
+            <div className="p-4 flex flex-col flex-grow">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">{book.title}</h3>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-3">{book.author}</p>
+                <div className="mt-auto">
+                    <StarRating rating={book.rating} />
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {/* CLASIFICACIÓN (CATEGORÍA) */}
+                        <Pill text={book.category} color="bg-indigo-100 dark:bg-indigo-700/50" textColor="text-indigo-600 dark:text-indigo-300" />
+                        {/* CLASIFICACIÓN (RANGO DE EDAD) */}
+                        <Pill text={book.ageRange} color="bg-teal-100 dark:bg-teal-700/50" textColor="text-teal-600 dark:text-teal-300" />
+                        {/* CLASIFICACIÓN (ESTADO) */}
+                        <Pill icon={book.status === 'Disponible' ? Check : XOctagon} text={book.status} color={book.status === 'Disponible' ? 'bg-emerald-100 dark:bg-emerald-700/50' : 'bg-red-100 dark:bg-red-700/50'} textColor={book.status === 'Disponible' ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-600 dark:text-red-300'} />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
 };
 
-
-const ProfilePage = () => {
-    const { favorites, books, onBookClick, user, setUser } = useContext(AppContext);
-    const favoriteBooks = books.filter(book => favorites.includes(book.id));
-
-    // Calculate level based on XP (example: 100 XP per level)
-    const level = Math.floor(user.xp / 100) + 1;
-    const xpForNextLevel = 100;
-    const xpProgress = (user.xp % 100); // XP within current level
-
-    const badges = [
-        { id: 1, icon: BookHeart, name: "Lector Pionero", description: "Leíste tu primer libro", color: "text-pink-500", condition: user.booksRead > 0 },
-        { id: 2, icon: Rocket, name: "Viajero de Géneros", description: "Exploraste 3 géneros", color: "text-purple-500", condition: user.booksRead >= 3 }, // Simplified condition
-        { id: 3, icon: ShieldCheck, name: "Héroe del Verano", description: "Completaste el reto de verano", color: "text-green-500", condition: user.xp >= 300 }, // Example XP condition
-        { id: 4, icon: Gem, name: "Amigo de la Biblioteca", description: "Participaste en un evento", color: "text-sky-500", condition: user.playedGames > 0 }, // Example: played at least one game
-    ];
-
-    const handleAvatarSelect = (avatarId) => {
-        setUser(prevUser => ({ ...prevUser, avatar: avatarId }));
-    };
-
-    const currentAvatar = avatars.find(a => a.id === user.avatar) || avatars[0];
+// BookModal: Muestra la clasificación de forma detallada.
+const BookModal = ({ book, onClose, onVote, onToggleFavorite, isFavorite, onBookReadComplete, isAdminLoggedIn, onDelete }) => {
+    const { profile } = useAppContext();
+    const isRead = profile?.read?.some(r => r.bookId === book.id);
+    const buttonClass = "px-4 py-2 rounded-full font-semibold text-white transition-colors duration-200 shadow-md flex items-center justify-center";
+    
+    const handleVoteUp = () => onVote(book.id, 'up');
+    const handleVoteDown = () => onVote(book.id, 'down');
 
     return (
-        <div>
-            <PageHeader title="Mi Perfil" subtitle="¡Hola, Lector Entusiasta! Aquí puedes ver tu progreso y tus logros." icon={User} />
-
-            <div className="max-w-5xl mx-auto space-y-16">
-                {/* Sección de Avatar y Progreso XP */}
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-8">
-                    <div className="flex-shrink-0 relative">
-                        <img src={currentAvatar.src} alt="User Avatar" className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-indigo-400 shadow-xl" />
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => document.getElementById('avatar-modal').showModal()} // Abre el modal de avatares
-                            className="absolute bottom-0 right-0 bg-indigo-600 text-white rounded-full p-2 border-2 border-white dark:border-gray-800 shadow-md hover:bg-indigo-700 transition-colors"
-                            title="Cambiar avatar"
-                        >
-                            <Palette size={20} />
-                        </motion.button>
-                    </div>
-                    <div className="flex-grow text-center md:text-left">
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-poppins">{user.name}</h2>
-                        <div className="mt-4">
-                            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">Nivel: {level}</p>
-                            <div className="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700 mt-2">
-                                <motion.div
-                                    className="bg-indigo-500 h-3 rounded-full"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${(xpProgress / xpForNextLevel) * 100}%` }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                ></motion.div>
+        <ModalWrapper title={book.title} onClose={onClose}>
+            <div className="p-6 space-y-4 text-left">
+                <div className="flex flex-col md:flex-row gap-6">
+                    <img
+                        src={book.cover}
+                        alt={`Portada de ${book.title}`}
+                        className="w-40 h-56 object-cover rounded-lg shadow-lg flex-shrink-0"
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/160x224/AEC6CF/FFFFFF?text=Portada+No+Disponible"; }}
+                    />
+                    <div className="flex-grow">
+                        <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">{book.title}</h3>
+                        <p className="text-xl text-indigo-600 dark:text-indigo-400 font-semibold mb-3">{book.author}</p>
+                        
+                        {/* CLASIFICACIÓN DE LIBRO */}
+                        <div className="flex flex-wrap gap-4 mb-4 text-sm">
+                            <div className="flex items-center space-x-2">
+                                <Badge className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                <span className="bg-indigo-100 dark:bg-indigo-700/50 px-3 py-1 rounded-full text-xs font-medium text-indigo-600 dark:text-indigo-300">{book.category}</span>
                             </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{xpProgress} / {xpForNextLevel} XP para el siguiente nivel</p>
+                            <div className="flex items-center space-x-2">
+                                <Landmark className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                <span className="bg-teal-100 dark:bg-teal-700/50 px-3 py-1 rounded-full text-xs font-medium text-teal-600 dark:text-teal-300">{book.ageRange}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Star className="w-5 h-5 text-yellow-500" />
+                                <span className="font-bold text-gray-700 dark:text-gray-200">{book.rating}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Zap className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${book.status === 'Disponible' ? 'bg-emerald-100 dark:bg-emerald-700/50 text-emerald-600 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-700/50 text-red-600 dark:text-red-300'}`}>{book.status}</span>
+                            </div>
                         </div>
-                        <p className="text-md text-gray-600 dark:text-gray-400 mt-4">Libros leídos: <span className="font-bold text-indigo-500">{user.booksRead}</span></p>
-                        <p className="text-md text-gray-600 dark:text-gray-400">Juegos completados: <span className="font-bold text-indigo-500">{user.gamesCompleted}</span></p>
+
+                        <p className="text-gray-700 dark:text-gray-300 mb-4">{book.description}</p>
                     </div>
                 </div>
 
-                {/* Modal de selección de avatar */}
-                <dialog id="avatar-modal" className="modal bg-black bg-opacity-50">
-                    <div className="modal-box bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg max-w-lg mx-auto">
-                        <h3 className="font-bold text-2xl mb-6 text-gray-900 dark:text-white">Selecciona tu Avatar</h3>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                            {avatars.map(avatar => (
-                                <motion.button
-                                    key={avatar.id}
-                                    onClick={() => handleAvatarSelect(avatar.id)}
-                                    className={`p-2 rounded-full border-4 ${user.avatar === avatar.id ? 'border-indigo-500 ring-4 ring-indigo-300' : 'border-transparent hover:border-indigo-300'}`}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <img src={avatar.src} alt={avatar.name} className="w-20 h-20 rounded-full object-cover" />
-                                </motion.button>
-                            ))}
-                        </div>
-                        <div className="modal-action mt-6">
-                            <form method="dialog">
-                                <button className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-5 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">Cerrar</button>
-                            </form>
-                        </div>
-                    </div>
-                </dialog>
-
-
-                {/* Sección de Insignias */}
-                <div>
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white font-poppins">Mis Insignias</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {badges.map(badge => (
-                            <motion.div
-                                key={badge.id}
-                                className={`bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center transition-opacity duration-300 ${badge.condition ? 'opacity-100' : 'opacity-50 grayscale'}`}
-                                whileHover={{ scale: badge.condition ? 1.05 : 1 }}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: badge.condition ? 1 : 0.5, y: 0 }}
-                            >
-                                <div className={`p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4 ${badge.color}`}>
-                                    <badge.icon size={40} />
-                                </div>
-                                <h3 className="font-bold text-gray-800 dark:text-white">{badge.name}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{badge.description}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Sección de Libros Favoritos */}
-                <div>
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white font-poppins">Mis Libros Favoritos</h2>
-                    {favoriteBooks.length > 0 ? (
-                        <motion.div
-                            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10"
-                            initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                        href={book.readOnlineUrl && book.readOnlineUrl !== '#' ? book.readOnlineUrl : '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${buttonClass} bg-emerald-600 hover:bg-emerald-700 ${!book.readOnlineUrl || book.readOnlineUrl === '#' ? 'opacity-50 cursor-not-allowed' : ''} flex-grow`}
+                        onClick={(e) => { if (!book.readOnlineUrl || book.readOnlineUrl === '#') e.preventDefault(); }}
+                    >
+                        <BookOpenCheck className="w-5 h-5 mr-2" />
+                        {book.readOnlineUrl && book.readOnlineUrl !== '#' ? 'Leer en Línea' : 'Préstamo Físico'}
+                    </a>
+                    <button
+                        onClick={() => onToggleFavorite(book.id)}
+                        className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-500 hover:bg-gray-600'}`}
+                    >
+                        <Heart className={`w-5 h-5 ${isFavorite ? 'fill-white' : ''}`} />
+                    </button>
+                    <button
+                        onClick={() => onBookReadComplete(book.id)}
+                        className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${isRead ? 'bg-sky-500 hover:bg-sky-600' : 'bg-blue-500 hover:bg-blue-600'}`}
+                        title={isRead ? 'Marcar como No Leído' : 'Marcar como Leído'}
+                    >
+                        {isRead ? <Eraser className="w-5 h-5" /> : <Check className="w-5 h-5" />}
+                    </button>
+                    
+                    {/* BOTÓN DE ELIMINAR (ADMIN) */}
+                    {isAdminLoggedIn && (
+                         <button
+                            onClick={() => onDelete(book.id)} 
+                            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-red-600 hover:bg-red-700`}
+                            title="Eliminar Libro (Admin)"
                         >
-                            {favoriteBooks.map(book => <BookCard key={book.id} book={book} onCardClick={onBookClick} />)}
-                        </motion.div>
-                    ) : (
-                        <div className="text-center text-gray-500 bg-gray-100 dark:bg-gray-800 p-8 rounded-lg">
-                            <BookHeart size={40} className="mx-auto text-gray-400 mb-4" />
-                            <h3 className="font-bold text-lg">Aún no tienes favoritos</h3>
-                            <p>¡Explora el catálogo y añade los libros que más te gusten!</p>
-                        </div>
+                            <Trash2 className="w-5 h-5" />
+                        </button>
                     )}
                 </div>
-            </div>
-        </div>
-    );
-};
 
-
-const CommunityPage = () => {
-    const mockEvents = [
-        { id: 1, title: 'Club de Lectura "Macondo"', date: 'Sábado 29 Jun, 2025 - 10:00 AM', description: 'Analizaremos "Cien años de soledad".', type: 'Club de Lectura', icon: BookHeart },
-        { id: 2, title: 'Taller de Creatividad IA', date: 'Miércoles 2 Jul, 2025 - 4:00 PM', description: 'Aprende a usar nuestro generador de cuentos.', type: 'Taller', icon: Wand2 },
-        { id: 3, title: 'Cuentacuentos Mágico', date: 'Viernes 4 Jul, 2025 - 3:00 PM', description: 'Nuestros voluntarios narrarán "¿A qué sabe la luna?".', type: 'Cuentacuentos', icon: Star },
-    ];
-    return (
-        <div>
-            <PageHeader title="Nuestra Comunidad" subtitle="Eventos, testimonios y oportunidades para unirte." icon={Users} />
-            <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white font-poppins">Próximos Eventos</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockEvents.map(event => (
-                    <motion.div
-                        key={event.id}
-                        whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(99, 102, 241, 0.2), 0 4px 6px -2px rgba(99, 102, 241, 0.1)" }}
-                        className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 h-full flex flex-col"
-                    >
-                        <div className="flex items-center gap-4 mb-3">
-                            <div className="bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><event.icon size={24} className="text-indigo-500" /></div>
-                            <span className="text-sm font-bold uppercase text-indigo-500">{event.type}</span>
-                        </div>
-                        <h4 className="font-bold text-xl mt-2 text-gray-900 dark:text-white">{event.title}</h4>
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2"><Calendar size={14} /> {event.date}</p>
-                        <p className="text-gray-600 dark:text-gray-300 mt-3 flex-grow">{event.description}</p>
-                        <button className="w-full mt-4 text-center bg-indigo-50 text-indigo-600 font-bold py-2 px-4 rounded-lg hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900 transition-colors">
-                            Unirse al evento
-                        </button>
-                    </motion.div>
-                ))}
-            </div>
-        </div>
-    )
-}
-
-const ChatbotWindow = ({ isOpen, onClose }) => {
-    const { messages, sendMessage, isTyping } = useChatbot();
-    const [input, setInput] = useState('');
-    const messagesEndRef = useRef(null);
-
-    useEffect(() => {
-        if (isOpen) {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [messages, isOpen]);
-
-    const handleSend = (e) => {
-        e.preventDefault();
-        if (input.trim()) {
-            sendMessage(input.trim());
-            setInput('');
-        }
-    };
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed bottom-24 right-5 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-96 z-[150]"
-                >
-                    <header className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                            <BrainCircuit className="text-indigo-500" />
-                            <h3 className="font-bold text-lg">BiblioBot</h3>
-                        </div>
-                        <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>
-                    </header>
-                    <div className="flex-grow p-3 space-y-3 overflow-y-auto">
-                        {messages.map((msg, i) => (
-                            <div key={i} className={`flex ${msg.from === 'bot' ? 'justify-start' : 'justify-end'}`}>
-                                <p className={`max-w-[80%] text-sm px-3 py-2 rounded-xl ${msg.from === 'bot' ? 'bg-gray-100 dark:bg-gray-700' : 'bg-indigo-500 text-white'}`}>
-                                    {msg.text}
-                                </p>
-                            </div>
-                        ))}
-                        {isTyping && <div className="flex justify-start"><Loader2 className="animate-spin text-gray-400 ml-2" /></div>}
-                        <div ref={messagesEndRef} />
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">¿Te gustó el libro?</h4>
+                    <div className="flex items-center space-x-4">
+                        <IconButton
+                            icon={ThumbsUp}
+                            onClick={handleVoteUp}
+                            className="bg-emerald-500 text-white hover:bg-emerald-600"
+                            title="Votar Positivo"
+                        />
+                        <IconButton
+                            icon={ThumbsDown}
+                            onClick={handleVoteDown}
+                            className="bg-red-500 text-white hover:bg-red-600"
+                            title="Votar Negativo"
+                        />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Ayuda a otros lectores a descubrir.
+                        </span>
                     </div>
-                    <form onSubmit={handleSend} className="p-2 border-t border-gray-200 dark:border-gray-700 flex gap-2 flex-shrink-0">
-                        <input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Escribe tu pregunta..." className="flex-grow bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
-                        <button type="submit" className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400" disabled={!input.trim()}>
-                            <Send size={18} />
-                        </button>
-                    </form>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                </div>
+
+            </div>
+        </ModalWrapper>
     );
 };
 
 
-// NUEVO: Componente del juego "Adivina la Palabra"
-const GuessTheWordGame = () => {
-    const { addXp, user } = useContext(AppContext);
-    const [currentWord, setCurrentWord] = useState(null);
-    const [guessedLetters, setGuessedLetters] = useState([]);
-    const [wrongGuesses, setWrongGuesses] = useState(0);
-    const [message, setMessage] = useState('');
-    const [isGameOver, setIsGameOver] = useState(false);
-    const [win, setWin] = useState(false);
-    const maxWrongGuesses = 6;
-    const inputRef = useRef(null);
+// --- COMPONENTES MODALES ADMINISTRATIVOS ---
 
-    useEffect(() => {
-        startNewGame();
-    }, []);
+const AdminLoginModal = ({ onClose, onLogin }) => {
+    const [key, setKey] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    useEffect(() => {
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [currentWord]);
-
-    const startNewGame = () => {
-        const randomIndex = Math.floor(Math.random() * gameWords.length);
-        setCurrentWord(gameWords[randomIndex]);
-        setGuessedLetters([]);
-        setWrongGuesses(0);
-        setMessage('');
-        setIsGameOver(false);
-        setWin(false);
-    };
-
-    const displayWord = currentWord ? currentWord.word.split('').map(letter =>
-        guessedLetters.includes(letter) ? letter : '_'
-    ).join(' ') : '';
-
-    const handleGuess = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const guess = e.target.elements.letterInput.value.toUpperCase();
-        e.target.elements.letterInput.value = ''; // Clear input field
-
-        if (isGameOver || !currentWord || !guess.match(/^[A-Z]$/)) {
-            setMessage('Por favor, ingresa una sola letra válida (A-Z).');
-            return;
-        }
-
-        if (guessedLetters.includes(guess)) {
-            setMessage(`Ya adivinaste la letra "${guess}".`);
-            return;
-        }
-
-        setGuessedLetters(prev => [...prev, guess]);
-
-        if (currentWord.word.includes(guess)) {
-            setMessage(`¡Correcto! La letra "${guess}" está en la palabra.`);
-            if (currentWord.word.split('').every(letter => guessedLetters.includes(letter) || letter === guess)) {
-                setMessage('¡Felicidades! ¡Has adivinado la palabra!');
-                setWin(true);
-                setIsGameOver(true);
-                addXp(50); // Ganar XP por completar el juego
+        setLoading(true);
+        setError('');
+        
+        setTimeout(() => {
+            if (key === ADMIN_KEY_SECRET) {
+                onLogin(key);
+                onClose();
+            } else {
+                setError('Clave incorrecta.');
             }
-        } else {
-            setWrongGuesses(prev => prev + 1);
-            setMessage(`Incorrecto. La letra "${guess}" no está.`);
-            if (wrongGuesses + 1 >= maxWrongGuesses) {
-                setMessage(`¡Juego Terminado! La palabra era: ${currentWord.word}`);
-                setIsGameOver(true);
-                setWin(false);
-            }
-        }
+            setLoading(false);
+        }, 500);
     };
-
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
     return (
-        <div>
-            <PageHeader title="Adivina la Palabra" subtitle="¡Demuestra tu conocimiento y gana XP! Adivina la palabra oculta letra por letra." icon={Gamepad2} />
-            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <h3 className="text-3xl font-bold font-poppins text-indigo-600 dark:text-indigo-400 mb-4 tracking-wider">{displayWord}</h3>
-                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">Pista: {currentWord?.hint}</p>
-
-                <div className="text-lg font-semibold mb-4">
-                    Intentos Incorrectos: <span className="text-red-500">{wrongGuesses}</span> / {maxWrongGuesses}
+        <ModalWrapper title="Acceso de Administrador" onClose={onClose}>
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                <div className="flex items-center space-x-2 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                    <ShieldCheck className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                        Solo para personal autorizado.
+                    </p>
                 </div>
+                <input
+                    type="password"
+                    value={key}
+                    onChange={(e) => setKey(e.target.value)}
+                    placeholder="Introduce la clave secreta de administrador"
+                    required
+                    className="input-field"
+                />
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" /> : <Key className="mr-2 w-5 h-5" />}
+                    {loading ? 'Verificando...' : 'Acceder'}
+                </button>
+                {error && <p className="text-sm text-center text-red-500 font-semibold">{error}</p>}
+            </form>
+        </ModalWrapper>
+    );
+};
 
-                <div className="flex justify-center items-center gap-2 mb-6">
-                    {alphabet.map(letter => (
-                        <button
-                            key={letter}
-                            onClick={() => handleGuess({ preventDefault: () => { }, target: { elements: { letterInput: { value: letter } } } })}
-                            disabled={guessedLetters.includes(letter) || isGameOver}
-                            className={`w-8 h-8 md:w-10 md:h-10 text-sm font-bold rounded-md transition-all
-                                ${guessedLetters.includes(letter)
-                                    ? currentWord?.word.includes(letter)
-                                        ? 'bg-green-200 text-green-800 cursor-not-allowed'
-                                        : 'bg-red-200 text-red-800 cursor-not-allowed'
-                                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
-                                } disabled:opacity-50`}
-                        >
-                            {letter}
-                        </button>
-                    ))}
-                </div>
+const PublishBookModal = ({ onClose, onPublish }) => {
+    const [formData, setFormData] = useState({
+        title: '', author: '', category: '', cover: '', description: '', ageRange: '', readOnlineUrl: ''
+    });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
 
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-                <form onSubmit={handleGuess} className="flex gap-2 justify-center mb-6">
-                    <input
-                        type="text"
-                        name="letterInput"
-                        maxLength="1"
-                        ref={inputRef}
-                        className="w-20 text-center text-3xl font-bold p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none uppercase"
-                        disabled={isGameOver}
-                    />
-                    <button
-                        type="submit"
-                        className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        disabled={isGameOver}
-                    >
-                        Adivinar
-                    </button>
-                </form>
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
 
-                {message && (
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`mt-4 text-lg font-semibold ${win ? 'text-green-600' : 'text-red-600'}`}
-                    >
-                        {message}
-                    </motion.p>
-                )}
+        onPublish(formData)
+            .then(() => {
+                setMessage('Libro publicado exitosamente!');
+                setFormData({ title: '', author: '', category: '', cover: '', description: '', ageRange: '', readOnlineUrl: '' });
+                setTimeout(onClose, 1500);
+            })
+            .catch((error) => {
+                setMessage(`Error: ${error.message}`);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
 
-                {isGameOver && (
-                    <motion.button
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-                        onClick={startNewGame}
-                        className="mt-8 bg-pink-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-pink-700 transition-transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
-                    >
-                        <Gamepad2 size={24} /> Jugar de Nuevo
-                    </motion.button>
-                )}
-            </div>
-        </div>
+    return (
+        <ModalWrapper title="Publicar Nuevo Libro" onClose={onClose}>
+            <form onSubmit={handleSubmit} className="p-4 space-y-3">
+                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Título del Libro" required className="input-field" />
+                <input type="text" name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required className="input-field" />
+                <input type="text" name="category" value={formData.category} onChange={handleChange} placeholder="Categoría (Ej: Fantasía, Novela)" required className="input-field" />
+                <input type="text" name="ageRange" value={formData.ageRange} onChange={handleChange} placeholder="Rango de Edad (Ej: 10-14 años)" required className="input-field" />
+                <input type="url" name="cover" value={formData.cover} onChange={handleChange} placeholder="URL de la Portada (Imagen)" required className="input-field" />
+                <input type="url" name="readOnlineUrl" value={formData.readOnlineUrl} onChange={handleChange} placeholder="URL de Lectura en Línea (Opcional)" className="input-field" />
+                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Descripción breve del libro" required className="input-field h-24"></textarea>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" /> : <Rocket className="mr-2 w-5 h-5" />}
+                    {loading ? 'Publicando...' : 'Publicar Libro'}
+                </button>
+                {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+            </form>
+        </ModalWrapper>
+    );
+};
+
+const CreateEventModal = ({ onClose, onCreate }) => {
+    const [formData, setFormData] = useState({
+        title: '', date: '', description: '', type: 'Club de Lectura'
+    });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+
+        onCreate(formData)
+            .then(() => {
+                setMessage('Evento creado exitosamente!');
+                setFormData({ title: '', date: '', description: '', type: 'Club de Lectura' });
+                setTimeout(onClose, 1500);
+            })
+            .catch((error) => {
+                setMessage(`Error: ${error.message}`);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    return (
+        <ModalWrapper title="Crear Nuevo Evento" onClose={onClose}>
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Título del Evento" required className="input-field" />
+                <input type="text" name="date" value={formData.date} onChange={handleChange} placeholder="Fecha y Hora (Ej: Sábado 10 Nov, 2025 - 4:00 PM)" required className="input-field" />
+                
+                <select name="type" value={formData.type} onChange={handleChange} className="input-field">
+                    <option value="Club de Lectura">Club de Lectura</option>
+                    <option value="Taller">Taller</option>
+                    <option value="Cuentacuentos">Cuentacuentos</option>
+                    <option value="Conferencia">Conferencia/Charla</option>
+                    <option value="General">General</option>
+                </select>
+
+                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Descripción completa del evento" required className="input-field h-16"></textarea>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" /> : <Megaphone className="mr-2 w-5 h-5" />}
+                    {loading ? 'Creando Evento...' : 'Crear Evento'}
+                </button>
+                {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+            </form>
+        </ModalWrapper>
+    );
+};
+
+// Modal con campo documentUrl
+const PublishReadingPlanModal = ({ onClose, onPublish }) => {
+    const [formData, setFormData] = useState({
+        title: '', description: '', level: '', durationWeeks: '', books: '', documentUrl: ''
+    });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+
+        if (!formData.title || !formData.description || !formData.level || !formData.durationWeeks || !formData.books) {
+            setMessage('Por favor, completa todos los campos obligatorios (*).');
+            setLoading(false);
+            return;
+        }
+
+        let booksArray;
+        try {
+            booksArray = JSON.parse(formData.books);
+            if (!Array.isArray(booksArray) || booksArray.length === 0 || !booksArray.every(item => item.bookId && item.week)) {
+                throw new Error('Formato de libros incorrecto');
+            }
+        } catch (error) {
+            setMessage('El campo "Libros JSON" debe ser un array JSON válido con la estructura: [{"bookId": 1, "week": 1, "note": "Nota"}].');
+            setLoading(false);
+            return;
+        }
+
+        const planToSubmit = {
+            ...formData,
+            durationWeeks: parseInt(formData.durationWeeks),
+            books: booksArray,
+            documentUrl: formData.documentUrl || null
+        };
+
+        onPublish(planToSubmit)
+            .then(() => {
+                setMessage('Plan de Lectura publicado exitosamente!');
+                setFormData({ title: '', description: '', level: '', durationWeeks: '', books: '', documentUrl: '' });
+                setTimeout(onClose, 1500);
+            })
+            .catch((error) => {
+                setMessage(`Error: ${error.message}`);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    return (
+        <ModalWrapper title="Publicar Plan Lector" onClose={onClose}>
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                <p className='text-xs text-gray-500 dark:text-gray-400'>
+                    * Campos obligatorios. La URL del Documento es opcional.
+                </p>
+                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="* Título del Plan (Ej: Novelas para el Verano)" required className="input-field" />
+                <input type="text" name="level" value={formData.level} onChange={handleChange} placeholder="* Nivel (Ej: Básico, Intermedio, Adultos)" required className="input-field" />
+                <input type="number" name="durationWeeks" value={formData.durationWeeks} onChange={handleChange} placeholder="* Duración (Semanas)" required className="input-field" min="1" />
+                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="* Descripción breve del Plan" required className="input-field h-16"></textarea>
+                
+                {/* CAMPO DE URL DE DOCUMENTO */}
+                <input type="url" name="documentUrl" value={formData.documentUrl} onChange={handleChange} placeholder="URL de Documento/PDF del Plan (Opcional)" className="input-field" /> 
+                
+                <textarea name="books" value={formData.books} onChange={handleChange} placeholder='* Libros JSON. Ejemplo: [{"bookId": 1, "week": 1, "note": "Nota"}]' required className="input-field h-24 font-mono text-xs"></textarea>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" /> : <NotebookText className="mr-2 w-5 h-5" />}
+                    {loading ? 'Publicando Plan...' : 'Publicar Plan'}
+                </button>
+                {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+            </form>
+        </ModalWrapper>
     );
 };
 
 
-// --- COMPONENTE PRINCIPAL DE LA APLICACIÓN ---
-export default function BiblioSuenosApp() {
-    const [isLoading, setIsLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState('inicio');
+// ----------------------------------------------------------------------
+// --- COMPONENTE PRINCIPAL DE LA APLICACIÓN (App) ---
+// ----------------------------------------------------------------------
+
+const pages = {
+    HOME: 'Inicio',
+    LIBRARY: 'Biblioteca',
+    EVENTS: 'Eventos',
+    PLANS: 'Planes Lectores',
+    PROFILE: 'Mi Perfil',
+};
+
+export default function App() {
+    const [books, setBooks] = useState(DEMO_BOOKS);
+    const [events, setEvents] = useState(DEMO_EVENTS);
+    const [profile, setProfile] = useState(DEMO_PROFILE);
+    const [readingPlans, setReadingPlans] = useState(DEMO_READING_PLANS);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(pages.HOME);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedBook, setSelectedBook] = useState(null);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [notification, setNotification] = useState(null);
+    const menuRef = useRef(null);
+    const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
+    const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+    const [adminKey, setAdminKey] = useState(null);
+    const [isPublishBookModalOpen, setIsPublishBookModalOpen] = useState(false);
+    const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+    const [isPublishPlanModalOpen, setIsPublishPlanModalOpen] = useState(false);
 
-    const [books, setBooks] = useState(masterBookList);
-    const [favorites, setFavorites] = useState(() => {
-        try {
-            const saved = localStorage.getItem('biblioFavorites');
-            return saved ? JSON.parse(saved) : [];
-        } catch (error) {
-            return [];
-        }
-    });
-    const [isChatOpen, setIsChatOpen] = useState(false);
 
-    // NUEVO: Estado del usuario con XP, nivel y avatar
-    const [user, setUser] = useState(() => {
-        try {
-            const savedUser = localStorage.getItem('biblioUser');
-            return savedUser ? JSON.parse(savedUser) : {
-                name: 'Lector Entusiasta',
-                xp: 0,
-                booksRead: 0,
-                gamesCompleted: 0,
-                avatar: avatars[0].id // Default avatar
-            };
-        } catch (error) {
-            return {
-                name: 'Lector Entusiasta',
-                xp: 0,
-                booksRead: 0,
-                gamesCompleted: 0,
-                avatar: avatars[0].id
-            };
-        }
-    });
+    // --- HOOKS DE EFECTO ---
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 3000);
-        return () => clearTimeout(timer);
-    }, []);
-
-    // Guardar los datos del usuario en localStorage
-    useEffect(() => {
-        try {
-            localStorage.setItem('biblioUser', JSON.stringify(user));
-        } catch (error) {
-            console.error("Error saving user data to localStorage:", error);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        if (isDarkMode) {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'dark') {
+            setIsDarkMode(true);
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-        localStorage.setItem('darkMode', isDarkMode);
-    }, [isDarkMode]);
-
-    useEffect(() => {
-        const savedMode = localStorage.getItem('darkMode') === 'true';
-        setIsDarkMode(savedMode);
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('biblioFavorites', JSON.stringify(favorites));
-    }, [favorites]);
-
-    const handleVote = (bookId, type) => {
-        setBooks(prevBooks => prevBooks.map(b => {
-            if (b.id === bookId) {
-                const newRating = type === 'up' ? Math.min(5, b.rating + 0.1) : Math.max(0.1, b.rating - 0.1);
-                return { ...b, reviews: b.reviews + 1, rating: parseFloat(newRating.toFixed(2)) };
+        // Cierra el menú si se hace clic fuera de él
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
             }
-            return b;
-        }));
-    };
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [menuRef]);
+    
+    // --- LÓGICA DE DATOS Y ESTADO ---
 
-    const toggleFavorite = (bookId) => {
-        setFavorites(prev =>
-            prev.includes(bookId) ? prev.filter(id => id !== bookId) : [...prev, bookId]
-        );
-    };
+    const showNotification = useCallback((message, type = 'info') => {
+        setNotification({ message, type });
+    }, []);
 
-    const navigateTo = (page) => {
+    const navigate = useCallback((page) => {
         setCurrentPage(page);
         setIsMenuOpen(false);
-        window.scrollTo(0, 0);
-    };
+        setSelectedBook(null);
+    }, []);
+    
+    const isFavorite = useCallback((bookId) => {
+        return profile?.favorites?.includes(bookId) || false;
+    }, [profile]);
+    
+    // --- FUNCIÓN DE CARGA DE DATOS ---
+    const loadInitialData = useCallback(async () => {
+        setLoading(true);
+        try {
+            // Intentar cargar datos del backend
+            const [booksData, eventsData, profileData, plansData] = await Promise.all([
+                fetchWithRetry(`${API_BASE_URL}/books`),
+                fetchWithRetry(`${API_BASE_URL}/events`),
+                fetchWithRetry(`${API_BASE_URL}/profile/${DEMO_USER_ID}`),
+                fetchWithRetry(`${API_BASE_URL}/reading-plan`),
+            ]);
 
-    // NUEVO: Función para añadir XP
-    const addXp = (amount) => {
-        setUser(prevUser => ({
-            ...prevUser,
-            xp: prevUser.xp + amount,
-            // Opcional: Si el XP es para un libro leído
-            booksRead: currentPage === 'catalogo' || currentPage === 'inicio' ? prevUser.booksRead + 1 : prevUser.booksRead,
-            // Opcional: Si el XP es por completar un juego
-            gamesCompleted: currentPage === 'jueguitos' ? prevUser.gamesCompleted + 1 : prevUser.gamesCompleted
-        }));
-    };
+            // Usar datos del backend si existen, si no, usar fallbacks
+            setBooks(booksData || DEMO_BOOKS);
+            setEvents(eventsData || DEMO_EVENTS);
+            setProfile(profileData || DEMO_PROFILE);
+            setReadingPlans(plansData || DEMO_READING_PLANS);
 
-    // Función para manejar la finalización de la lectura de un libro
-    const handleBookReadComplete = (bookId) => {
-        // Asegúrate de que no se agregue XP por el mismo libro múltiples veces si se abre y cierra
-        // Aquí simplificamos, asumiendo que al abrir el modal y luego cerrarlo, se "lee"
-        // En una app real, podrías tener un botón "Marcar como leído"
-        if (!user.readBookIds || !user.readBookIds.includes(bookId)) {
-            setUser(prevUser => ({
-                ...prevUser,
-                xp: prevUser.xp + 20, // Ejemplo: 20 XP por libro leído
-                booksRead: prevUser.booksRead + 1,
-                readBookIds: [...(prevUser.readBookIds || []), bookId] // Track IDs of read books
-            }));
+        } catch (error) {
+            console.error("Error al cargar datos iniciales:", error);
+            showNotification('Error al conectar con el servidor. Usando datos de demostración.', 'error');
+            // Ya se están usando fallbacks si fetchWithRetry devuelve null.
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [showNotification]);
+
+    useEffect(() => {
+        loadInitialData();
+    }, [loadInitialData]);
 
 
-    const renderPage = () => {
-        switch (currentPage) {
-            case 'inicio': return <HomePage onNavigate={navigateTo} onBookClick={setSelectedBook} />;
-            case 'catalogo': return <CatalogPage onBookClick={setSelectedBook} />;
-            case 'autores': return <AuthorsPage onBookClick={setSelectedBook} />;
-            case 'crear-cuento': return <AiStoryGeneratorPage />;
-            case 'comunidad': return <CommunityPage />;
-            case 'perfil': return <ProfilePage />;
-            case 'jueguitos': return <GuessTheWordGame />; // NUEVO: Página de juegos
-            default: return <HomePage onNavigate={navigateTo} onBookClick={setSelectedBook} />;
+    // --- FUNCIONES DE ACCIÓN DE USUARIO ---
+
+    const toggleFavorite = useCallback(async (bookId) => {
+        const isCurrentlyFavorite = isFavorite(bookId);
+        const newFavorites = isCurrentlyFavorite
+            ? profile.favorites.filter(id => id !== bookId)
+            : [...profile.favorites, bookId];
+            
+        try {
+            const updatedProfile = await fetchWithRetry(`${API_BASE_URL}/profile/${DEMO_USER_ID}/favorites`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ favorites: newFavorites }),
+            });
+
+            if (updatedProfile) {
+                setProfile(updatedProfile.profile);
+                showNotification(isCurrentlyFavorite ? 'Eliminado de favoritos.' : 'Añadido a favoritos!', 'success');
+            }
+        } catch (error) {
+            showNotification(`Error al actualizar favoritos: ${error.message}`, 'error');
         }
-    };
+    }, [profile, isFavorite, showNotification]);
 
-    const navLinks = [
-        { id: 'inicio', text: 'Inicio', icon: Home },
-        { id: 'catalogo', text: 'Catálogo', icon: Book },
-        { id: 'autores', text: 'Autores', icon: Feather },
-        { id: 'crear-cuento', text: 'Crear Cuento', icon: Wand2 },
-        { id: 'jueguitos', text: 'Jueguitos', icon: Gamepad2 }, // NUEVO: Enlace a juegos
-        { id: 'comunidad', text: 'Comunidad', icon: Users },
-        { id: 'perfil', text: 'Mi Perfil', icon: User },
-    ];
+    const handleBookReadComplete = useCallback(async (bookId) => {
+        const isCurrentlyRead = profile.read.some(r => r.bookId === bookId);
+        let newRead;
 
-    const appContextValue = { books, user, setUser, favorites, toggleFavorite, onBookClick: setSelectedBook, addXp };
+        if (isCurrentlyRead) {
+            newRead = profile.read.filter(r => r.bookId !== bookId);
+        } else {
+            newRead = [...profile.read, { bookId, date: new Date().toISOString() }];
+        }
+            
+        try {
+            const updatedProfile = await fetchWithRetry(`${API_BASE_URL}/profile/${DEMO_USER_ID}/read`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ read: newRead }),
+            });
 
-    if (isLoading) {
-        return <SplashScreen />;
-    }
+            if (updatedProfile) {
+                setProfile(updatedProfile.profile);
+                showNotification(isCurrentlyRead ? 'Libro marcado como no leído.' : '¡Felicidades, libro completado!', 'success');
+            }
+        } catch (error) {
+            showNotification(`Error al actualizar libros leídos: ${error.message}`, 'error');
+        }
+    }, [profile, showNotification]);
 
-    return (
-        <AppContext.Provider value={appContextValue}>
-            <div className="bg-gray-100 dark:bg-gray-950 min-h-screen text-gray-800 dark:text-gray-200 font-sans transition-colors duration-500">
-                <style jsx global>{`
-                    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap');
-                    :root { --font-sans: 'Nunito Sans', sans-serif; --font-display: 'Poppins', sans-serif; }
-                    body { font-family: var(--font-sans); }
-                    .dark body { background-color: #030712; }
-                    h1, h2, h3, h4, .font-poppins { font-family: var(--font-display); }
-                    /* Estilos para el modal del avatar */
-                    .modal {
-                        display: none; /* Hidden by default */
-                        position: fixed; /* Stay in place */
-                        z-index: 200; /* Sit on top */
-                        left: 0;
-                        top: 0;
-                        width: 100%; /* Full width */
-                        height: 100%; /* Full height */
-                        overflow: auto; /* Enable scroll if needed */
-                        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .modal[open] {
-                        display: flex;
-                    }
-                    .modal-box {
-                        position: relative;
-                        margin: auto;
-                        padding: 1.5rem;
-                        border-radius: 0.75rem;
-                        background-color: #fff; /* Default light mode */
-                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                    }
-                    .dark .modal-box {
-                        background-color: #1f2937; /* Dark mode background */
-                    }
-                    .modal-action {
-                        display: flex;
-                        justify-content: flex-end;
-                        margin-top: 1.5rem;
-                    }
-                `}</style>
+    const handleVote = useCallback(async (bookId, type) => {
+        try {
+            const response = await fetchWithRetry(`${API_BASE_URL}/books/${bookId}/vote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type }),
+            });
 
-                <header className="sticky top-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg shadow-sm z-50 border-b border-gray-200 dark:border-gray-800">
-                    <div className="container mx-auto px-4">
-                        <div className="flex justify-between items-center py-4">
-                            <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigateTo('inicio')}>
-                                <BookHeart size={28} className="text-indigo-500" />
-                                <span className="text-xl font-bold text-gray-800 dark:text-white font-poppins">BiblioSueños</span>
-                            </div>
+            if (response && response.book) {
+                setBooks(prev => prev.map(b => b.id === bookId ? response.book : b));
+                setSelectedBook(prev => prev?.id === bookId ? response.book : prev);
+                showNotification(`Voto registrado. Nuevo rating: ${response.book.rating}`, 'success');
+            }
+        } catch (error) {
+            showNotification(`Error al votar: ${error.message}`, 'error');
+        }
+    }, [showNotification]);
 
-                            <nav className="hidden lg:flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-full">
-                                {navLinks.map(link => (
-                                    <button key={link.id} onClick={() => navigateTo(link.id)} className={`relative flex items-center space-x-2 px-4 py-2 rounded-full font-semibold transition-colors text-sm ${currentPage === link.id ? 'text-indigo-600 dark:text-white' : 'hover:text-black dark:hover:text-white'}`}>
-                                        {currentPage === link.id && (
-                                            <motion.div layoutId="active-nav-pill" className="absolute inset-0 bg-white dark:bg-indigo-600 rounded-full shadow-md"
-                                                transition={{ type: 'spring', stiffness: 300, damping: 30 }} />
-                                        )}
-                                        <link.icon size={18} className="relative z-10" />
-                                        <span className="relative z-10">{link.text}</span>
-                                    </button>
-                                ))}
-                            </nav>
+    const toggleDarkMode = useCallback(() => {
+        setIsDarkMode(prev => {
+            const newMode = !prev;
+            if (newMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+            return newMode;
+        });
+    }, []);
 
-                            <div className="flex items-center space-x-2">
-                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                                </button>
-                                <button onClick={() => setIsMenuOpen(true)} className="lg:hidden p-2"> <Menu size={24} /> </button>
+    // --- FUNCIONES DE ADMINISTRACIÓN ---
+
+    const handleAdminLogin = useCallback((key) => {
+        setAdminKey(key);
+        setIsAdminLoggedIn(true);
+        showNotification('Acceso de administrador concedido.', 'success');
+    }, [showNotification]);
+
+    const handleLogoutAdmin = useCallback(() => {
+        setAdminKey(null);
+        setIsAdminLoggedIn(false);
+        showNotification('Sesión de administrador cerrada.', 'info');
+    }, [showNotification]);
+
+    const postAdminData = useCallback(async (endpoint, data) => {
+        if (!adminKey) throw new Error("Clave de administrador no disponible.");
+
+        const response = await fetchWithRetry(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': adminKey,
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response || response.message.startsWith('Error')) {
+            throw new Error(response?.message || 'Fallo desconocido en la publicación.');
+        }
+        return response;
+    }, [adminKey]);
+
+    const handlePublishBook = useCallback(async (bookData) => {
+        const response = await postAdminData('/books', bookData);
+        setBooks(prev => [...prev, response.book]);
+        return response;
+    }, [postAdminData]);
+
+    const handleCreateEvent = useCallback(async (eventData) => {
+        const response = await postAdminData('/events', eventData);
+        setEvents(prev => [...prev, response.event]);
+        return response;
+    }, [postAdminData]);
+
+    const handlePublishPlan = useCallback(async (planData) => {
+        const response = await postAdminData('/reading-plan', planData);
+        setReadingPlans(prev => [...prev, response.plan]);
+        return response;
+    }, [postAdminData]);
+
+    // FUNCIONES ADMINISTRATIVAS (DELETE)
+
+    const deleteAdminData = useCallback(async (endpoint, id) => {
+        if (!adminKey) throw new Error("Clave de administrador no disponible.");
+
+        const shouldDelete = window.confirm(`⚠️ ¿Estás seguro de que deseas eliminar el elemento con ID ${id} en ${endpoint}? Esta acción es irreversible.`);
+        if (!shouldDelete) return;
+
+        try {
+            const response = await fetchWithRetry(`${API_BASE_URL}${endpoint}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-admin-key': adminKey,
+                },
+            });
+
+            if (!response || response.message.startsWith('Error')) {
+                throw new Error(response?.message || 'Fallo desconocido en la eliminación.');
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+        
+    }, [adminKey]);
+
+    const handleDeleteBook = useCallback(async (bookId) => {
+        try {
+            await deleteAdminData('/books', bookId);
+            setBooks(prev => prev.filter(b => b.id !== bookId));
+            setSelectedBook(null); // Cerrar modal después de eliminar
+            showNotification('Libro eliminado exitosamente.', 'success');
+        } catch (error) {
+            showNotification(`Error al eliminar libro: ${error.message}`, 'error');
+        }
+    }, [deleteAdminData, showNotification]);
+
+    const handleDeleteEvent = useCallback(async (eventId) => {
+        try {
+            await deleteAdminData('/events', eventId);
+            setEvents(prev => prev.filter(e => e.id !== eventId));
+            showNotification('Evento eliminado exitosamente.', 'success');
+        } catch (error) {
+            showNotification(`Error al eliminar evento: ${error.message}`, 'error');
+        }
+    }, [deleteAdminData, showNotification]);
+
+    const handleDeletePlan = useCallback(async (planId) => {
+        try {
+            await deleteAdminData('/reading-plan', planId);
+            setReadingPlans(prev => prev.filter(p => p.id !== planId));
+            showNotification('Plan de lectura eliminado exitosamente.', 'success');
+        } catch (error) {
+            showNotification(`Error al eliminar plan: ${error.message}`, 'error');
+        }
+    }, [deleteAdminData, showNotification]);
+
+
+    // --- COMPONENTES DE PÁGINA MEMORIZADOS ---
+
+    const LibraryPage = useMemo(() => () => (
+        <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+        >
+            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">📚 Biblioteca General ({books.length})</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Explora nuestro catálogo completo de tesoros literarios.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <AnimatePresence>
+                    {books.map(book => (
+                        <BookCard
+                            key={book.id}
+                            book={book}
+                            onClick={() => setSelectedBook(book)}
+                        />
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {isAdminLoggedIn && (
+                <div className="flex justify-center pt-8">
+                    <button
+                        onClick={() => setIsPublishBookModalOpen(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center"
+                    >
+                        <Plus className="w-5 h-5 mr-2" /> Publicar Nuevo Libro
+                    </button>
+                </div>
+            )}
+        </motion.div>
+    ), [books, isAdminLoggedIn]);
+
+    const EventsPage = useMemo(() => () => (
+        <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+        >
+            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">📣 Próximos Eventos ({events.length})</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Participa en nuestros clubes de lectura, talleres y cuentacuentos.</p>
+
+            <div className="grid grid-cols-1 gap-6">
+                {events.map(event => (
+                    <motion.div
+                        key={event.id}
+                        className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col md:flex-row items-start transition-shadow hover:shadow-xl relative"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        {/* BOTÓN DE ELIMINAR (ADMIN) */}
+                        {isAdminLoggedIn && (
+                            <button
+                                onClick={() => handleDeleteEvent(event.id)}
+                                className="absolute top-3 right-3 p-1.5 rounded-full bg-red-100 dark:bg-red-900 text-red-500 hover:bg-red-200 dark:hover:bg-red-800 transition z-10"
+                                title="Eliminar Evento"
+                            >
+                                <Trash2 className="w-5 h-5" />
+                            </button>
+                        )}
+
+                        <Calendar className="w-10 h-10 text-purple-500 flex-shrink-0 mr-4 mt-1" />
+                        <div className="flex-grow">
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
+                            <p className="text-purple-600 dark:text-purple-400 font-medium mb-2">{event.date}</p>
+                            <p className="text-gray-600 dark:text-gray-300">{event.description}</p>
+                            <div className="mt-3">
+                                <Pill text={event.type} icon={event.type === 'Club de Lectura' ? BookOpenCheck : Mic} color="bg-purple-100 dark:bg-purple-700/50" textColor="text-purple-600 dark:text-purple-300" />
                             </div>
                         </div>
-                    </div>
-                </header>
+                    </motion.div>
+                ))}
+            </div>
 
-                <AnimatePresence>
-                    {isMenuOpen && (
+            {isAdminLoggedIn && (
+                <div className="flex justify-center pt-8">
+                    <button
+                        onClick={() => setIsCreateEventModalOpen(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center"
+                    >
+                        <Plus className="w-5 h-5 mr-2" /> Crear Nuevo Evento
+                    </button>
+                </div>
+            )}
+        </motion.div>
+    ), [events, isAdminLoggedIn, handleDeleteEvent]);
+
+    const ReadingPlansPage = useMemo(() => () => (
+        <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+        >
+            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">📚 Planes de Lectura</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Guías de lectura estructurada para alcanzar tus metas literarias.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {readingPlans.length > 0 ? (
+                    readingPlans.map(plan => (
                         <motion.div
-                            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="fixed inset-y-0 right-0 w-full max-w-xs bg-white dark:bg-gray-800 shadow-xl z-[60] p-6"
+                            key={plan.id}
+                            className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-t-4 border-pink-500 hover:shadow-xl transition-shadow relative"
+                            whileHover={{ y: -3 }}
                         >
-                            <nav className="flex flex-col space-y-2">
-                                {navLinks.map(link => (
-                                    <button key={link.id} onClick={() => navigateTo(link.id)} className={`flex items-center space-x-3 p-3 rounded-lg font-semibold text-lg transition-colors ${currentPage === link.id ? 'bg-indigo-100 dark:bg-indigo-500/30 text-indigo-600 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                                        <link.icon size={22} />
-                                        <span>{link.text}</span>
-                                        {currentPage === link.id && <ChevronRight size={20} className="ml-auto" />}
-                                    </button>
-                                ))}
-                            </nav>
+                            {/* BOTÓN DE ELIMINAR (ADMIN) */}
+                            {isAdminLoggedIn && (
+                                <button
+                                    onClick={() => handleDeletePlan(plan.id)}
+                                    className="absolute top-3 right-3 p-1.5 rounded-full bg-red-100 dark:bg-red-900 text-red-500 hover:bg-red-200 dark:hover:bg-red-800 transition z-10"
+                                    title="Eliminar Plan"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            )}
+
+                            <NotebookText className="w-8 h-8 text-pink-500 mb-3" />
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.title}</h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">{plan.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                <Pill text={`Nivel: ${plan.level}`} color="bg-pink-100 dark:bg-pink-700/50" textColor="text-pink-600 dark:text-pink-300" />
+                                <Pill text={`${plan.durationWeeks} Semanas`} color="bg-indigo-100 dark:bg-indigo-700/50" textColor="text-indigo-600 dark:text-indigo-300" />
+                                <Pill text={`${plan.books.length} Libros`} icon={Book} color="bg-emerald-100 dark:bg-emerald-700/50" textColor="text-emerald-600 dark:text-emerald-300" />
+                            </div>
+
+                            <div className="mt-4">
+                                {/* Link al Documento del Plan (si existe) */}
+                                {plan.documentUrl && (
+                                     <a href={plan.documentUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center mb-4">
+                                        <Globe className="w-4 h-4 mr-1" />
+                                        Ver Documento del Plan
+                                    </a>
+                                )}
+                                
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Libros Destacados:</h4>
+                                <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {plan.books.slice(0, 3).map((bookItem, index) => {
+                                        // Usamos `books` del estado para obtener el detalle
+                                        const bookDetail = books.find(b => b.id === bookItem.bookId);
+                                        return (
+                                            <li key={index} className="flex items-center">
+                                                <ChevronRight className="w-4 h-4 mr-1 text-pink-500" />
+                                                {bookDetail ? bookDetail.title : `Libro ID ${bookItem.bookId} (No encontrado)`} (Semana {bookItem.week})
+                                            </li>
+                                        );
+                                    })}
+                                    {plan.books.length > 3 && (
+                                        <li className="text-xs italic text-gray-500">...y {plan.books.length - 3} más.</li>
+                                    )}
+                                </ul>
+                            </div>
                         </motion.div>
+                    ))
+                ) : (
+                    <div className="md:col-span-3 text-center p-12 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                        <Wind className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">No hay planes de lectura activos en este momento. ¡Vuelve pronto!</p>
+                    </div>
+                )}
+            </div>
+
+            {isAdminLoggedIn && (
+                <div className="flex justify-center pt-8">
+                    <button
+                        onClick={() => setIsPublishPlanModalOpen(true)}
+                        className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center"
+                    >
+                        <Plus className="w-5 h-5 mr-2" /> Publicar Nuevo Plan Lector
+                    </button>
+                </div>
+            )}
+        </motion.div>
+    ), [readingPlans, books, isAdminLoggedIn, handleDeletePlan]);
+
+
+    const ProfilePage = useMemo(() => () => {
+        const favoriteBooks = books.filter(b => profile.favorites.includes(b.id));
+        const readBooks = books.filter(b => profile.read.some(r => r.bookId === b.id));
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-10"
+            >
+                {/* Cabecera del Perfil */}
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center gap-6">
+                    <img
+                        src={profile.avatar}
+                        alt={`Avatar de ${profile.name}`}
+                        className="w-32 h-32 rounded-full border-4 border-indigo-500 p-1 bg-white dark:bg-gray-700 flex-shrink-0"
+                    />
+                    <div className="text-center md:text-left">
+                        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-1">{profile.name}</h2>
+                        <p className="text-xl text-indigo-600 dark:text-indigo-400 font-semibold mb-3">Lector Activo</p>
+                        <p className="text-gray-600 dark:text-gray-300 italic">"{profile.bio}"</p>
+                        <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4">
+                            <Pill icon={Heart} text={`${favoriteBooks.length} Favoritos`} color="bg-red-100 dark:bg-red-900/50" textColor="text-red-600 dark:text-red-300" />
+                            <Pill icon={BookOpenCheck} text={`${readBooks.length} Leídos`} color="bg-blue-100 dark:bg-blue-900/50" textColor="text-blue-600 dark:text-blue-300" />
+                            <Pill icon={Calendar} text={`Miembro desde: ${new Date(profile.joinedAt).toLocaleDateString()}`} color="bg-gray-100 dark:bg-gray-700/50" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sección Favoritos */}
+                <section className="space-y-4">
+                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+                        <Heart className="w-7 h-7 mr-2 text-red-500 fill-red-500" />
+                        Mis Libros Favoritos
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {favoriteBooks.length > 0 ? (
+                            favoriteBooks.map(book => (
+                                <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} />
+                            ))
+                        ) : (
+                            <p className="text-gray-500 dark:text-gray-400 col-span-full italic">Aún no has añadido ningún libro a tus favoritos.</p>
+                        )}
+                    </div>
+                </section>
+
+                {/* Sección Leídos */}
+                <section className="space-y-4">
+                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+                        <BookOpenCheck className="w-7 h-7 mr-2 text-blue-500" />
+                        Libros Leídos ({readBooks.length})
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {readBooks.length > 0 ? (
+                            readBooks.map(book => (
+                                <div key={book.id} className="relative">
+                                    <BookCard book={book} onClick={() => setSelectedBook(book)} />
+                                    <div className="absolute top-0 left-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-br-lg shadow-lg">LEÍDO</div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 dark:text-gray-400 col-span-full italic">¡Es hora de empezar a leer! Marca tus libros completados.</p>
+                        )}
+                    </div>
+                </section>
+            </motion.div>
+        );
+    }, [profile, books]);
+
+    const HomePage = useMemo(() => () => (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-12"
+        >
+            <header className="text-center py-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl shadow-xl text-white">
+                <h1 className="text-6xl font-extrabold mb-4 animate-pulse">BiblioSueños</h1>
+                <p className="text-2xl font-light">Donde las palabras se encuentran con la imaginación.</p>
+                <button
+                    onClick={() => navigate(pages.LIBRARY)}
+                    className="mt-8 px-8 py-3 bg-white text-indigo-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105 flex items-center mx-auto"
+                >
+                    <Book className="w-5 h-5 mr-2" /> Explorar la Biblioteca
+                </button>
+            </header>
+
+            {/* Sección de Selección del Staff */}
+            <section className="space-y-6">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <Sparkles className="w-7 h-7 mr-2 text-yellow-500 fill-yellow-500" />
+                    Selección del Staff
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {books.filter(b => b.isStaffPick).slice(0, 4).map(book => (
+                        <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} />
+                    ))}
+                </div>
+            </section>
+
+            {/* Sección de Eventos Recientes */}
+            <section className="space-y-6">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <Calendar className="w-7 h-7 mr-2 text-purple-500" />
+                    Próximos Eventos
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {events.slice(0, 2).map(event => (
+                        <motion.div key={event.id} className="p-5 bg-white dark:bg-gray-800 rounded-xl shadow-md border-l-4 border-purple-500 flex items-start space-x-3">
+                            <Megaphone className="w-6 h-6 text-purple-500 flex-shrink-0 mt-1" />
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
+                                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">{event.date}</p>
+                                <p className="text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{event.description}</p>
+                                <button
+                                    onClick={() => navigate(pages.EVENTS)}
+                                    className="mt-3 text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center"
+                                >
+                                    Ver Detalles <ChevronRight className="w-4 h-4 ml-1" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Área de Administración (Visible solo para Admin) */}
+            {isAdminLoggedIn && (
+                <div className="p-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-xl shadow-md">
+                    <h3 className="text-2xl font-bold text-red-700 dark:text-red-300 flex items-center mb-4">
+                        <ShieldCheck className="w-6 h-6 mr-2 fill-red-500" /> PANEL DE ADMINISTRADOR
+                    </h3>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">Acceso total a gestión de contenido y eliminación.</p>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <button onClick={() => setIsPublishBookModalOpen(true)} className="admin-btn bg-green-500 hover:bg-green-600"><Plus className="w-4 h-4 mr-1" /> Libro</button>
+                        <button onClick={() => setIsCreateEventModalOpen(true)} className="admin-btn bg-purple-500 hover:bg-purple-600"><Plus className="w-4 h-4 mr-1" /> Evento</button>
+                        <button onClick={() => setIsPublishPlanModalOpen(true)} className="admin-btn bg-pink-500 hover:bg-pink-600"><Plus className="w-4 h-4 mr-1" /> Plan Lector</button>
+                        <button onClick={handleLogoutAdmin} className="admin-btn bg-gray-500 hover:bg-gray-600"><XCircle className="w-4 h-4 mr-1" /> Salir</button>
+                    </div>
+                </div>
+            )}
+        </motion.div>
+    ), [books, events, isAdminLoggedIn, handleLogoutAdmin, navigate]);
+
+    const renderPage = useCallback(() => {
+        switch (currentPage) {
+            case pages.LIBRARY:
+                return <LibraryPage />;
+            case pages.EVENTS:
+                return <EventsPage />;
+            case pages.PLANS:
+                return <ReadingPlansPage />;
+            case pages.PROFILE:
+                return <ProfilePage />;
+            case pages.HOME:
+            default:
+                return <HomePage />;
+        }
+    }, [currentPage, LibraryPage, EventsPage, ReadingPlansPage, ProfilePage, HomePage]);
+
+    const contextValue = useMemo(() => ({
+        books,
+        events,
+        profile,
+        readingPlans,
+        isDarkMode,
+        toggleFavorite,
+        isFavorite,
+        navigate,
+        showNotification,
+    }), [books, events, profile, readingPlans, isDarkMode, toggleFavorite, isFavorite, navigate, showNotification]);
+
+
+    // --- RENDERIZADO PRINCIPAL ---
+    if (loading) return <LoadingScreen />;
+
+    return (
+        <AppContext.Provider value={contextValue}>
+            <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+
+                {/* Estilos CSS para inputs */}
+                <style dangerouslySetInnerHTML={{__html: `
+                    .input-field {
+                        @apply w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white transition duration-150;
+                    }
+                    .admin-btn {
+                         @apply text-white font-semibold py-2 rounded-lg text-sm transition duration-150 flex items-center justify-center;
+                    }
+                `}} />
+
+                {/* --- NOTIFICACIÓN --- */}
+                <AnimatePresence>
+                    {notification && (
+                        <Notification
+                            message={notification.message}
+                            type={notification.type}
+                            onClose={() => setNotification(null)}
+                        />
                     )}
                 </AnimatePresence>
 
-                <main className="container mx-auto px-4 py-8 md:py-12 relative z-10 main-content">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentPage}
-                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
-                        >
-                            {renderPage()}
-                        </motion.div>
+
+                {/* --- Contenedor principal de la aplicación --- */}
+                <div className="min-h-screen flex flex-col">
+                    
+                    {/* --- HEADER/NAVBAR --- */}
+                    <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg">
+                        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                            {/* Logo/Título */}
+                            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate(pages.HOME)}>
+                                <BookOpenCheck className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-2xl font-extrabold text-gray-900 dark:text-white hidden sm:block">BiblioSueños</span>
+                            </div>
+
+                            {/* Navegación (Escritorio) */}
+                            <nav className="hidden lg:flex space-x-6">
+                                {Object.values(pages).map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => navigate(page)}
+                                        className={`font-semibold text-lg transition duration-150 p-2 rounded-lg ${
+                                            currentPage === page
+                                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-gray-700/50'
+                                                : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            </nav>
+
+                            {/* Controles de Usuario/Admin */}
+                            <div className="flex items-center space-x-3">
+                                <IconButton
+                                    icon={isDarkMode ? Sun : Moon}
+                                    onClick={toggleDarkMode}
+                                    className="text-yellow-500 dark:text-yellow-400 bg-gray-100 dark:bg-gray-700"
+                                    title={isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
+                                />
+                                
+                                {/* Botón de Admin */}
+                                {!isAdminLoggedIn ? (
+                                    <IconButton
+                                        icon={ShieldCheck}
+                                        onClick={() => setIsAdminLoginModalOpen(true)}
+                                        className="text-red-600 bg-red-100 dark:bg-red-900/50 hover:bg-red-200"
+                                        title="Acceso Admin"
+                                    />
+                                ) : (
+                                     <Pill text="ADMIN" icon={ShieldCheck} color="bg-red-500" textColor="text-white" />
+                                )}
+
+                                {/* Menú Hamburguesa (Móvil) */}
+                                <IconButton
+                                    icon={Menu}
+                                    onClick={() => setIsMenuOpen(true)}
+                                    className="lg:hidden text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50"
+                                    title="Abrir Menú"
+                                />
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Menú Móvil */}
+                    <AnimatePresence>
+                        {isMenuOpen && (
+                            <motion.div
+                                ref={menuRef}
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: "tween", duration: 0.3 }}
+                                className="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 z-[100] shadow-2xl p-6 lg:hidden"
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Navegación</h3>
+                                    <IconButton
+                                        icon={X}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-gray-500 bg-gray-100 dark:bg-gray-700"
+                                        title="Cerrar Menú"
+                                    />
+                                </div>
+                                <nav className="flex flex-col space-y-4">
+                                    {Object.values(pages).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => navigate(page)}
+                                            className={`font-semibold text-xl text-left p-3 rounded-lg transition duration-150 ${
+                                                currentPage === page
+                                                    ? 'text-white bg-indigo-600 dark:bg-indigo-500'
+                                                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    {isAdminLoggedIn && (
+                                         <button
+                                            onClick={handleLogoutAdmin}
+                                            className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-red-600 hover:bg-red-50 dark:hover:bg-red-900"
+                                        >
+                                            <XCircle className="w-5 h-5 mr-2 inline" /> Salir Admin
+                                        </button>
+                                    )}
+                                </nav>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
-                </main>
+                    
+                    {/* --- CONTENIDO PRINCIPAL --- */}
+                    <main className="container mx-auto px-4 py-8 flex-grow">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentPage}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {renderPage()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </main>
 
-                <footer className="container mx-auto px-4 py-6 mt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 relative z-10">
-                    <p>© {new Date().getFullYear()} BiblioSueños. Un proyecto con ❤️ para la comunidad de Colombia.</p>
-                </footer>
-
-                <AnimatePresence>
-                    {selectedBook && <BookModal book={books.find(b => b.id === selectedBook.id)} onClose={() => setSelectedBook(null)} onVote={handleVote} onToggleFavorite={toggleFavorite} isFavorite={favorites.includes(selectedBook.id)} onBookReadComplete={handleBookReadComplete} />}
-                </AnimatePresence>
-
-                <div className="fixed bottom-5 right-5 z-[100]">
-                    <motion.button
-                        onClick={() => setIsChatOpen(!isChatOpen)}
-                        className="bg-indigo-600 text-white rounded-full p-4 shadow-lg hover:bg-indigo-700 transition-transform hover:scale-110"
-                        whileHover={{ rotate: 15 }}
-                        title="Abrir Asistente"
-                    >
-                        {isChatOpen ? <X size={28} /> : <MessageCircleQuestion size={28} />}
-                    </motion.button>
+                    {/* --- FOOTER --- */}
+                    <footer className="container mx-auto px-4 py-6 mt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 relative z-10">
+                        <p>© {new Date().getFullYear()} BiblioSueños. Un proyecto con ❤️ para la comunidad de Colombia.</p>
+                    </footer>
                 </div>
-                <ChatbotWindow isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-
+                
+                {/* --- MODALES --- */}
+                {/* Modal del Libro - Se pasan las props de Admin */}
+                <AnimatePresence>
+                    {selectedBook && <BookModal
+                        book={books.find(b => b.id === selectedBook.id) || selectedBook}
+                        onClose={() => setSelectedBook(null)}
+                        onVote={handleVote}
+                        onToggleFavorite={toggleFavorite}
+                        isFavorite={isFavorite(selectedBook.id)}
+                        onBookReadComplete={handleBookReadComplete}
+                        isAdminLoggedIn={isAdminLoggedIn}
+                        onDelete={handleDeleteBook}
+                    />}
+                </AnimatePresence>
+                
+                {/* Modales Administrativos */}
+                <AnimatePresence>
+                    {isAdminLoginModalOpen && !isAdminLoggedIn && <AdminLoginModal
+                        onClose={() => setIsAdminLoginModalOpen(false)}
+                        onLogin={handleAdminLogin}
+                    />}
+                    {isPublishBookModalOpen && isAdminLoggedIn && <PublishBookModal
+                        onClose={() => setIsPublishBookModalOpen(false)}
+                        onPublish={handlePublishBook}
+                    />}
+                    {isCreateEventModalOpen && isAdminLoggedIn && <CreateEventModal
+                        onClose={() => setIsCreateEventModalOpen(false)}
+                        onCreate={handleCreateEvent}
+                    />}
+                    {isPublishPlanModalOpen && isAdminLoggedIn && <PublishReadingPlanModal
+                        onClose={() => setIsPublishPlanModalOpen(false)}
+                        onPublish={handlePublishPlan}
+                    />}
+                </AnimatePresence>
+                    
             </div>
         </AppContext.Provider>
     );
