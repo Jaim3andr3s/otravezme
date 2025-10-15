@@ -1,0 +1,14 @@
+[build]
+  # Este es el comando de compilación de tu proyecto Vite
+  command = "npm run build"
+  # Esta es la carpeta de salida que genera Vite
+  publish = "dist" 
+  # Esta es la carpeta donde está tu API Serverless
+  functions = "netlify/functions"
+
+[[redirects]]
+  # Redirige el frontend /api/* a la función Serverless
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200 
+  
