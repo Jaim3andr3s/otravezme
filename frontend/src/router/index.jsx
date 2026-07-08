@@ -30,14 +30,13 @@ import PublicationPage from '../pages/PublicationPage.jsx';
 // Fase D
 import ReadingChallengesPage from '../pages/ReadingChallengesPage.jsx';
 
-// Fase E - Diploma
+// Fase E
 import DiplomaPage from '../pages/DiplomaPage.jsx';
 
 const withUser = (element) => <RequireUser>{element}</RequireUser>;
 
 export const router = createBrowserRouter(
   [
-    // Rutas con layout principal (Navbar)
     {
       path: '/',
       element: <AppShell />,
@@ -47,7 +46,7 @@ export const router = createBrowserRouter(
         { path: 'eventos', element: <EventsPage /> },
         { path: 'planes-lectores', element: <PlansPage /> },
         { path: 'perfil', element: withUser(<ProfilePage />) },
-        { path: 'perfil/diplomas', element: withUser(<DiplomaPage />) }, // NUEVO
+        { path: 'perfil/diplomas', element: withUser(<DiplomaPage />) },
         { path: 'juegos', element: withUser(<GamesHubPage />) },
         { path: 'juegos/trivia', element: withUser(<TriviaGamePage />) },
         { path: 'juegos/memorama', element: withUser(<MemoryGamePage />) },
@@ -61,9 +60,9 @@ export const router = createBrowserRouter(
         { path: 'libro-del-mes', element: <BookOfMonthPage /> },
         { path: 'insignias', element: <BadgesPage /> },
 
-        // Fase B
-        { path: 'periodico', element: <PublicationPage /> },
-        { path: 'revista-digital', element: <PublicationPage /> },
+        // Fase B - con prop type
+        { path: 'periodico', element: <PublicationPage type="PERIODICO" /> },
+        { path: 'revista-digital', element: <PublicationPage type="REVISTA" /> },
 
         // Fase D
         { path: 'club-de-lectura/retos', element: <ReadingChallengesPage /> },
@@ -78,14 +77,10 @@ export const router = createBrowserRouter(
         },
       ],
     },
-
-    // Rutas sin Navbar (login)
     {
       path: '/ingresar',
       element: <LoginPage />,
     },
-
-    // 404
     {
       path: '*',
       element: <NotFoundPage />,

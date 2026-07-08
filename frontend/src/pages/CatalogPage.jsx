@@ -20,7 +20,6 @@ export default function CatalogPage() {
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      {/* Encabezado con botón de admin en la parte superior */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-4xl font-serif font-semibold text-ink">📚 Biblioteca General ({books.length})</h2>

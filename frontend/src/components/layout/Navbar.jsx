@@ -80,7 +80,6 @@ export function Navbar() {
             </NavLink>
           ))}
           
-          {/* Dropdown "Club de Lectura" con nuevas secciones */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -162,7 +161,7 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 lg:hidden border-l border-edge overflow-y-auto"
+            className="fixed inset-y-0 right-0 w-64 h-screen bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 lg:hidden border-l border-edge overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-serif font-semibold text-ink">Navegación</h3>

@@ -4,11 +4,14 @@ import { requireAdmin } from '../middleware/requireAdmin.js';
 
 const router = Router();
 
+// Rutas públicas (no requieren autenticación)
 router.get('/', listBooks);
 router.get('/:id', getBook);
+router.post('/:id/vote', voteBook);
+
+// Rutas protegidas (solo admin)
 router.post('/', requireAdmin, createBook);
 router.put('/:id', requireAdmin, updateBook);
 router.delete('/:id', requireAdmin, deleteBook);
-router.post('/:id/vote', voteBook);
 
 export default router;

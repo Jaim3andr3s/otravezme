@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Plus, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useNotification } from '../context/NotificationContext.jsx';
 import { useBooks } from '../context/BooksContext.jsx';
 import { useEvents } from '../context/EventsContext.jsx';
@@ -14,7 +14,7 @@ import { Button } from '../components/ui/Button.jsx';
 import { IconTile } from '../components/ui/IconTile.jsx';
 
 export default function AdminDashboardPage() {
-  const { logout } = useAuth();
+  const { logout } = useUserAuth();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { create: createBook } = useBooks();

@@ -2,12 +2,10 @@ import { BookOpenCheck, Heart, Eraser, Check, ThumbsUp, ThumbsDown, Trash2, Penc
 import { Modal } from '../ui/Modal.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
 import { useProfile } from '../../context/ProfileContext.jsx';
-import { useAuth } from '../../context/AuthContext.jsx';
 import { BOOK_STATUS_LABEL } from '../../constants/labels.js';
 
-export function BookModal({ book, onClose, onVote, onDelete, onEdit }) {
+export function BookModal({ book, onClose, onVote, onDelete, onEdit, isAdmin }) {
   const { isFavorite, isRead, toggleFavorite, toggleRead } = useProfile();
-  const { isAdmin } = useAuth();
   const favorite = isFavorite(book.id);
   const read = isRead(book.id);
   const buttonClass =

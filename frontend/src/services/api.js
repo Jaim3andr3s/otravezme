@@ -1,20 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
-let adminToken = null;
-let userToken = null;
-
-export function setAdminToken(token) {
-  adminToken = token;
-}
-
-export function setUserToken(token) {
-  userToken = token;
-}
-
-// Función para notificar que el token es inválido (se usa desde fuera)
-let onUnauthorizedCallback = null;
-export function setOnUnauthorized(callback) {
-  onUnauthorizedCallback = callback;
+function getToken() {
+  return localStorage.getItem('bibliosuenos_user_token');
 }
 
 async function request(path, options = {}) {
@@ -22,15 +9,13 @@ async function request(path, options = {}) {
   const headers = { ...(rest.headers || {}) };
   if (rest.body) headers['Content-Type'] = 'application/json';
 
-  const token = auth === 'admin' ? adminToken : auth === 'user' ? userToken : null;
-  if (token) headers.Authorization = `Bearer ${token}`;
+  // Ahora todos los tokens son de usuario (unificados)
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...rest, headers });
-
-  // Si es 401 y hay un callback, ejecutarlo
-  if (response.status === 401 && onUnauthorizedCallback) {
-    onUnauthorizedCallback();
-  }
 
   if (response.status === 204) return null;
 
@@ -38,10 +23,10 @@ async function request(path, options = {}) {
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
-    // Añadir el status al error para manejarlo mejor
-    const error = new Error(data?.message || `Error HTTP ${response.status}`);
-    error.status = response.status;
-    throw error;
+    if (response.status === 401) {
+      localStorage.removeItem('bibliosuenos_user_token');
+    }
+    throw new Error(data?.message || `Error HTTP ${response.status}`);
   }
 
   return data;
@@ -53,3 +38,11 @@ export const api = {
   put: (path, body, opts = {}) => request(path, { method: 'PUT', body: JSON.stringify(body), ...opts }),
   delete: (path, opts = {}) => request(path, { method: 'DELETE', ...opts }),
 };
+
+export function setUserToken(token) {
+  if (token) {
+    localStorage.setItem('bibliosuenos_user_token', token);
+  } else {
+    localStorage.removeItem('bibliosuenos_user_token');
+  }
+}
