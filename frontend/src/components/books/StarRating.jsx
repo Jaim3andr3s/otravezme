@@ -8,14 +8,14 @@ export function StarRating({ rating, reviews }) {
   return (
     <div className="flex items-center">
       {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+        <Star key={`full-${i}`} className="w-4 h-4 text-gold fill-gold" />
       ))}
-      {hasHalfStar && <StarHalf className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
+      {hasHalfStar && <StarHalf className="w-4 h-4 text-gold fill-gold" />}
       {[...Array(emptyStars)].map((_, i) => (
-        <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+        <Star key={`empty-${i}`} className="w-4 h-4 text-edge" />
       ))}
       {reviews !== undefined && (
-        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({reviews} opiniones)</span>
+        <span className="ml-2 text-sm text-ink-muted">({reviews} opiniones)</span>
       )}
     </div>
   );

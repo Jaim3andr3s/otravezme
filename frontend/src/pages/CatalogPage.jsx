@@ -14,12 +14,12 @@ export default function CatalogPage() {
   const [showPublish, setShowPublish] = useState(false);
 
   if (loading) return <FullPageLoader label="Cargando catálogo..." />;
-  if (error) return <p className="text-red-500 text-center py-12">Error al cargar el catálogo: {error}</p>;
+  if (error) return <p className="text-danger text-center py-12">Error al cargar el catálogo: {error}</p>;
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">📚 Biblioteca General ({books.length})</h2>
-      <p className="text-lg text-gray-600 dark:text-gray-400">Explora nuestro catálogo completo de tesoros literarios.</p>
+      <h2 className="text-4xl font-serif font-semibold text-ink">📚 Biblioteca General ({books.length})</h2>
+      <p className="text-lg text-ink-muted">Explora nuestro catálogo completo de tesoros literarios.</p>
 
       <BookGrid books={books} onSelect={setSelectedBook} />
 

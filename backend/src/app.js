@@ -6,6 +6,7 @@ import booksRoutes from './routes/books.routes.js';
 import eventsRoutes from './routes/events.routes.js';
 import readingPlansRoutes from './routes/readingPlans.routes.js';
 import profileRoutes from './routes/profile.routes.js';
+import achievementsRoutes from './routes/achievements.routes.js';
 
 const allowedOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
@@ -30,6 +31,7 @@ app.use('/api/books', booksRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/reading-plans', readingPlansRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/achievements', achievementsRoutes);
 
 app.use((req, res) => res.status(404).json({ message: 'Ruta de API no encontrada.' }));
 app.use(errorHandler);

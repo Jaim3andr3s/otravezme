@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { ACHIEVEMENT_DEFINITIONS } from '../src/lib/achievements.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient();
@@ -145,12 +146,30 @@ async function seedAdmin() {
   console.log(`Admin inicial creado: usuario "${username}".`);
 }
 
+async function seedAchievements() {
+  for (const def of ACHIEVEMENT_DEFINITIONS) {
+    await prisma.achievement.upsert({
+      where: { code: def.code },
+      update: { title: def.title, description: def.description, icon: def.icon, category: def.category },
+      create: {
+        code: def.code,
+        title: def.title,
+        description: def.description,
+        icon: def.icon,
+        category: def.category,
+      },
+    });
+  }
+  console.log(`Sincronizadas ${ACHIEVEMENT_DEFINITIONS.length} definiciones de insignias.`);
+}
+
 async function main() {
   const legacyBooks = await seedBooks();
   await seedProfile();
   await seedExampleEvents();
   await seedExamplePlan(legacyBooks);
   await seedAdmin();
+  await seedAchievements();
   console.log('Seed completado.');
 }
 

@@ -33,11 +33,11 @@ export default function AdminDashboardPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div className="p-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-xl shadow-md">
-        <h2 className="text-3xl font-bold text-red-700 dark:text-red-300 flex items-center mb-2">
-          <ShieldCheck className="w-7 h-7 mr-2 fill-red-500" /> Panel de Administrador
+      <div className="p-6 bg-surface border-l-4 border-accent rounded-xl shadow-sm">
+        <h2 className="text-3xl font-serif font-semibold text-accent flex items-center mb-2">
+          <ShieldCheck className="w-7 h-7 mr-2 fill-accent-soft" /> Panel de Administrador
         </h2>
-        <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">Publica contenido nuevo o cierra tu sesión de administrador.</p>
+        <p className="text-sm text-ink-muted mb-6">Publica contenido nuevo o cierra tu sesión de administrador.</p>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Button variant="success" onClick={() => setModal('book')}>

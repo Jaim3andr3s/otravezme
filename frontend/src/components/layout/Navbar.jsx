@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { to: '/biblioteca', label: 'Biblioteca' },
   { to: '/eventos', label: 'Eventos' },
   { to: '/planes-lectores', label: 'Planes Lectores' },
+  { to: '/juegos', label: 'Juegos' },
   { to: '/perfil', label: 'Mi Perfil' },
 ];
 
@@ -39,22 +40,20 @@ export function Navbar() {
 
   const desktopLinkClass = ({ isActive }) =>
     `font-semibold text-lg transition duration-150 p-2 rounded-lg ${
-      isActive
-        ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-gray-700/50'
-        : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+      isActive ? 'text-accent bg-accent-soft' : 'text-ink-muted hover:text-accent'
     }`;
 
   const mobileLinkClass = ({ isActive }) =>
     `font-semibold text-xl text-left p-3 rounded-lg transition duration-150 ${
-      isActive ? 'text-white bg-indigo-600 dark:bg-indigo-500' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+      isActive ? 'text-accent-ink bg-accent' : 'text-ink hover:bg-surface-alt'
     }`;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg">
+    <header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-md shadow-sm border-b border-edge">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <NavLink to="/" className="flex items-center space-x-3">
-          <BookOpenCheck className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-2xl font-extrabold text-gray-900 dark:text-white hidden sm:block">BiblioSueños</span>
+          <BookOpenCheck className="w-8 h-8 text-accent" />
+          <span className="text-2xl font-serif font-semibold text-ink hidden sm:block">BiblioSueños</span>
         </NavLink>
 
         <nav className="hidden lg:flex space-x-6">
@@ -72,19 +71,19 @@ export function Navbar() {
             <IconButton
               icon={ShieldCheck}
               onClick={() => navigate('/admin/login')}
-              className="text-red-600 bg-red-100 dark:bg-red-900/50 hover:bg-red-200"
+              className="text-ink-muted bg-surface-alt hover:text-accent"
               title="Acceso Admin"
             />
           ) : (
             <button onClick={() => navigate('/admin')} title="Panel de administrador">
-              <Badge text="ADMIN" icon={ShieldCheck} color="bg-red-500" textColor="text-white" />
+              <Badge text="ADMIN" icon={ShieldCheck} color="bg-accent" textColor="text-accent-ink" />
             </button>
           )}
 
           <IconButton
             icon={Menu}
             onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50"
+            className="lg:hidden text-accent bg-accent-soft"
             title="Abrir Menú"
           />
         </div>
@@ -98,11 +97,11 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 z-[100] shadow-2xl p-6 lg:hidden"
+            className="fixed inset-y-0 right-0 w-64 bg-surface z-[100] shadow-2xl p-6 lg:hidden"
           >
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Navegación</h3>
-              <IconButton icon={X} onClick={() => setIsMenuOpen(false)} className="text-gray-500 bg-gray-100 dark:bg-gray-700" title="Cerrar Menú" />
+              <h3 className="text-xl font-serif font-semibold text-accent">Navegación</h3>
+              <IconButton icon={X} onClick={() => setIsMenuOpen(false)} className="text-ink-muted bg-surface-alt" title="Cerrar Menú" />
             </div>
             <nav className="flex flex-col space-y-4">
               {NAV_LINKS.map((link) => (
@@ -111,7 +110,7 @@ export function Navbar() {
                 </NavLink>
               ))}
               {isAdmin && (
-                <button onClick={handleLogout} className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-red-600 hover:bg-red-50 dark:hover:bg-red-900">
+                <button onClick={handleLogout} className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-danger hover:bg-danger-soft">
                   <X className="w-5 h-5 mr-2 inline" /> Salir Admin
                 </button>
               )}

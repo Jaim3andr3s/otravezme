@@ -8,7 +8,7 @@ export function DarkModeToggle() {
     <IconButton
       icon={isDarkMode ? Sun : Moon}
       onClick={toggleDarkMode}
-      className="text-yellow-500 dark:text-yellow-400 bg-gray-100 dark:bg-gray-700"
+      className="text-gold bg-surface-alt"
       title={isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
     />
   );

@@ -11,7 +11,7 @@ export function BookCard({ book, onClick }) {
 
   return (
     <motion.div
-      className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden transform hover:scale-[1.02]"
+      className="flex flex-col h-full bg-surface border border-edge rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
       onClick={() => onClick(book)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -30,7 +30,7 @@ export function BookCard({ book, onClick }) {
         />
         {favorite && (
           <motion.div
-            className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full shadow-lg"
+            className="absolute top-2 right-2 p-1.5 bg-danger rounded-full shadow-lg"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
           >
@@ -39,23 +39,23 @@ export function BookCard({ book, onClick }) {
         )}
         {book.isStaffPick && (
           <div className="absolute top-2 left-2">
-            <Badge icon={Sparkles} text="Selección Staff" color="bg-yellow-400/90" textColor="text-yellow-900" />
+            <Badge icon={Sparkles} text="Selección Staff" color="bg-gold" textColor="text-accent-ink" />
           </div>
         )}
       </div>
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">{book.title}</h3>
-        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-3">{book.author}</p>
+        <h3 className="text-xl font-serif font-semibold text-ink mb-1 leading-tight">{book.title}</h3>
+        <p className="text-sm text-accent font-medium mb-3">{book.author}</p>
         <div className="mt-auto">
           <StarRating rating={book.rating} />
           <div className="mt-3 flex flex-wrap gap-2">
-            <Badge text={book.category} color="bg-indigo-100 dark:bg-indigo-700/50" textColor="text-indigo-600 dark:text-indigo-300" />
-            <Badge text={book.ageRange} color="bg-teal-100 dark:bg-teal-700/50" textColor="text-teal-600 dark:text-teal-300" />
+            <Badge text={book.category} color="bg-surface-alt" textColor="text-ink-muted" />
+            <Badge text={book.ageRange} color="bg-surface-alt" textColor="text-ink-muted" />
             <Badge
               icon={book.status === 'DISPONIBLE' ? Check : XOctagon}
               text={BOOK_STATUS_LABEL[book.status] ?? book.status}
-              color={book.status === 'DISPONIBLE' ? 'bg-emerald-100 dark:bg-emerald-700/50' : 'bg-red-100 dark:bg-red-700/50'}
-              textColor={book.status === 'DISPONIBLE' ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-600 dark:text-red-300'}
+              color={book.status === 'DISPONIBLE' ? 'bg-success-soft' : 'bg-danger-soft'}
+              textColor={book.status === 'DISPONIBLE' ? 'text-success' : 'text-danger'}
             />
           </div>
         </div>

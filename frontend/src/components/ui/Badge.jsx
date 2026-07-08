@@ -1,8 +1,8 @@
 export function Badge({
   icon: Icon,
   text,
-  color = 'bg-gray-100 dark:bg-gray-700',
-  textColor = 'text-gray-600 dark:text-gray-200',
+  color = 'bg-surface-alt',
+  textColor = 'text-ink-muted',
 }) {
   return (
     <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${color} ${textColor}`}>

@@ -35,38 +35,38 @@ export default function PlansPage() {
   };
 
   if (plansLoading || booksLoading) return <FullPageLoader label="Cargando planes de lectura..." />;
-  if (error) return <p className="text-red-500 text-center py-12">Error al cargar los planes: {error}</p>;
+  if (error) return <p className="text-danger text-center py-12">Error al cargar los planes: {error}</p>;
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">📚 Planes de Lectura</h2>
-      <p className="text-lg text-gray-600 dark:text-gray-400">Guías de lectura estructurada para alcanzar tus metas literarias.</p>
+      <h2 className="text-4xl font-serif font-semibold text-ink">📚 Planes de Lectura</h2>
+      <p className="text-lg text-ink-muted">Guías de lectura estructurada para alcanzar tus metas literarias.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.length > 0 ? (
           plans.map((plan) => (
             <motion.div
               key={plan.id}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-t-4 border-pink-500 hover:shadow-xl transition-shadow relative"
+              className="p-6 bg-surface rounded-xl shadow-sm border-t-4 border-accent hover:shadow-lg transition-shadow relative"
               whileHover={{ y: -3 }}
             >
               {isAdmin && (
                 <button
                   onClick={() => handleDelete(plan.id)}
-                  className="absolute top-3 right-3 p-1.5 rounded-full bg-red-100 dark:bg-red-900 text-red-500 hover:bg-red-200 dark:hover:bg-red-800 transition z-10"
+                  className="absolute top-3 right-3 p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition z-10"
                   title="Eliminar Plan"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
               )}
 
-              <NotebookText className="w-8 h-8 text-pink-500 mb-3" />
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">{plan.description}</p>
+              <NotebookText className="w-8 h-8 text-accent mb-3" />
+              <h3 className="text-2xl font-serif font-semibold text-ink mb-2">{plan.title}</h3>
+              <p className="text-ink-muted mb-4">{plan.description}</p>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge text={`Nivel: ${plan.level}`} color="bg-pink-100 dark:bg-pink-700/50" textColor="text-pink-600 dark:text-pink-300" />
-                <Badge text={`${plan.durationWeeks} Semanas`} color="bg-indigo-100 dark:bg-indigo-700/50" textColor="text-indigo-600 dark:text-indigo-300" />
-                <Badge text={`${plan.books.length} Libros`} icon={Book} color="bg-emerald-100 dark:bg-emerald-700/50" textColor="text-emerald-600 dark:text-emerald-300" />
+                <Badge text={`Nivel: ${plan.level}`} color="bg-accent-soft" textColor="text-accent" />
+                <Badge text={`${plan.durationWeeks} Semanas`} color="bg-surface-alt" textColor="text-ink-muted" />
+                <Badge text={`${plan.books.length} Libros`} icon={Book} color="bg-success-soft" textColor="text-success" />
               </div>
 
               <div className="mt-4">
@@ -75,32 +75,32 @@ export default function PlansPage() {
                     href={plan.documentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center mb-4"
+                    className="text-sm font-semibold text-accent hover:underline flex items-center mb-4"
                   >
                     <Globe className="w-4 h-4 mr-1" /> Ver Documento del Plan
                   </a>
                 )}
 
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Libros Destacados:</h4>
-                <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <h4 className="text-sm font-semibold text-ink mb-2">Libros Destacados:</h4>
+                <ul className="space-y-1 text-sm text-ink-muted">
                   {plan.books.slice(0, 3).map((item, index) => {
                     const bookDetail = books.find((b) => b.id === item.bookId);
                     return (
                       <li key={index} className="flex items-center">
-                        <ChevronRight className="w-4 h-4 mr-1 text-pink-500" />
+                        <ChevronRight className="w-4 h-4 mr-1 text-accent" />
                         {bookDetail ? bookDetail.title : `Libro ID ${item.bookId} (No encontrado)`} (Semana {item.week})
                       </li>
                     );
                   })}
-                  {plan.books.length > 3 && <li className="text-xs italic text-gray-500">...y {plan.books.length - 3} más.</li>}
+                  {plan.books.length > 3 && <li className="text-xs italic text-ink-muted">...y {plan.books.length - 3} más.</li>}
                 </ul>
               </div>
             </motion.div>
           ))
         ) : (
-          <div className="md:col-span-3 text-center p-12 bg-gray-100 dark:bg-gray-800 rounded-xl">
-            <Wind className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">No hay planes de lectura activos en este momento. ¡Vuelve pronto!</p>
+          <div className="md:col-span-3 text-center p-12 bg-surface-alt rounded-xl">
+            <Wind className="w-12 h-12 text-ink-muted mx-auto mb-4" />
+            <p className="text-ink-muted">No hay planes de lectura activos en este momento. ¡Vuelve pronto!</p>
           </div>
         )}
       </div>

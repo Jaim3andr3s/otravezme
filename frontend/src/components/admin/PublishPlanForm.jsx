@@ -48,7 +48,7 @@ export function PublishPlanForm({ onClose, onPublish }) {
   return (
     <Modal title="Publicar Plan Lector" onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <p className="text-xs text-gray-500 dark:text-gray-400">* Campos obligatorios. La URL del Documento es opcional.</p>
+        <p className="text-xs text-ink-muted">* Campos obligatorios. La URL del Documento es opcional.</p>
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="* Título del Plan (Ej: Novelas para el Verano)" required />
         <Input name="level" value={formData.level} onChange={handleChange} placeholder="* Nivel (Ej: Básico, Intermedio, Adultos)" required />
         <Input type="number" name="durationWeeks" value={formData.durationWeeks} onChange={handleChange} placeholder="* Duración (Semanas)" required min="1" />
@@ -67,12 +67,12 @@ export function PublishPlanForm({ onClose, onPublish }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+          className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin mr-2" /> : <NotebookText className="mr-2 w-5 h-5" />}
           {loading ? 'Publicando Plan...' : 'Publicar Plan'}
         </button>
-        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>
     </Modal>
   );

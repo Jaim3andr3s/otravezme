@@ -20,6 +20,18 @@ enum EventType {
   GENERAL
 }
 
+enum AchievementCategory {
+  LECTURA
+  JUEGO
+}
+
+enum GameType {
+  TRIVIA
+  MEMORY
+  HANGMAN
+  PUZZLE
+}
+
 model Book {
   id            Int        @id @default(autoincrement())
   title         String
@@ -83,8 +95,10 @@ model Profile {
   avatar   String?
   joinedAt DateTime @default(now())
 
-  favorites Favorite[]
-  read      ReadBook[]
+  favorites    Favorite[]
+  read         ReadBook[]
+  achievements ProfileAchievement[]
+  gameScores   GameScore[]
 }
 
 model Favorite {
@@ -114,4 +128,38 @@ model Admin {
   username     String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+}
+
+model Achievement {
+  id          Int                 @id @default(autoincrement())
+  code        String              @unique
+  title       String
+  description String
+  icon        String
+  category    AchievementCategory
+  createdAt   DateTime            @default(now())
+
+  profiles ProfileAchievement[]
+}
+
+model ProfileAchievement {
+  id            Int         @id @default(autoincrement())
+  profile       Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId     Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  achievementId Int
+  earnedAt      DateTime    @default(now())
+
+  @@unique([profileId, achievementId])
+}
+
+model GameScore {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  game      GameType
+  score     Int
+  won       Boolean  @default(true)
+  metadata  Json?
+  playedAt  DateTime @default(now())
 }

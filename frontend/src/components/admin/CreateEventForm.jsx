@@ -56,12 +56,12 @@ export function CreateEventForm({ onClose, onCreate }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+          className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin mr-2" /> : <Megaphone className="mr-2 w-5 h-5" />}
           {loading ? 'Creando Evento...' : 'Crear Evento'}
         </button>
-        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>
     </Modal>
   );

@@ -10,7 +10,9 @@
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
     "build:frontend": "npm run build --workspace frontend",
-    "lint:frontend": "npm run lint --workspace frontend"
+    "lint:frontend": "npm run lint --workspace frontend",
+    "cap:sync": "npm run cap:sync --workspace frontend",
+    "cap:open": "npm run cap:open --workspace frontend"
   },
   "allowScripts": {
     "@prisma/client@6.19.3": true,

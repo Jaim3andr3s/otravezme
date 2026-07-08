@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BiblioSueños</string>
+    <string name="title_activity_main">BiblioSueños</string>
+    <string name="package_name">com.bibliosuenos.app</string>
+    <string name="custom_url_scheme">com.bibliosuenos.app</string>
+</resources>

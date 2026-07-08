@@ -1,9 +1,10 @@
 import prisma from '../lib/prisma.js';
+import { evaluateAndAwardAchievements } from '../lib/achievements.js';
 
 async function serializeProfile(id) {
   const profile = await prisma.profile.findUnique({
     where: { id },
-    include: { favorites: true, read: true },
+    include: { favorites: true, read: true, achievements: { include: { achievement: true } } },
   });
   if (!profile) return null;
 
@@ -16,6 +17,14 @@ async function serializeProfile(id) {
     joinedAt: profile.joinedAt,
     favorites: profile.favorites.map((f) => f.bookId),
     read: profile.read.map((r) => ({ bookId: r.bookId, date: r.readAt })),
+    achievements: profile.achievements.map((pa) => ({
+      code: pa.achievement.code,
+      title: pa.achievement.title,
+      description: pa.achievement.description,
+      icon: pa.achievement.icon,
+      category: pa.achievement.category,
+      earnedAt: pa.earnedAt,
+    })),
   };
 }
 
@@ -68,9 +77,10 @@ export async function setFavorites(req, res, next) {
       }),
     ]);
 
+    const newAchievements = await evaluateAndAwardAchievements(id);
     const profile = await serializeProfile(id);
     if (!profile) return res.status(404).json({ message: 'Perfil no encontrado para actualizar favoritos.' });
-    res.json({ message: 'Lista de favoritos actualizada.', profile });
+    res.json({ message: 'Lista de favoritos actualizada.', profile, newAchievements });
   } catch (err) {
     next(err);
   }
@@ -96,10 +106,32 @@ export async function setRead(req, res, next) {
       }),
     ]);
 
+    const newAchievements = await evaluateAndAwardAchievements(id);
     const profile = await serializeProfile(id);
     if (!profile) return res.status(404).json({ message: 'Perfil no encontrado para actualizar libros leídos.' });
-    res.json({ message: 'Lista de libros leídos actualizada.', profile });
+    res.json({ message: 'Lista de libros leídos actualizada.', profile, newAchievements });
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function recordGameScore(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const game = req.params.game.toUpperCase();
+    if (!['TRIVIA', 'MEMORY', 'HANGMAN', 'PUZZLE'].includes(game)) {
+      return res.status(400).json({ message: 'Juego inválido.' });
+    }
+
+    const { score, won, metadata } = req.body;
+    await prisma.gameScore.create({
+      data: { profileId: id, game, score: Number(score) || 0, won: won !== false, metadata: metadata ?? undefined },
+    });
+
+    const newAchievements = await evaluateAndAwardAchievements(id);
+    res.status(201).json({ message: 'Puntaje registrado.', newAchievements });
+  } catch (err) {
+    if (err.code === 'P2003') return res.status(404).json({ message: 'Perfil no encontrado.' });
     next(err);
   }
 }

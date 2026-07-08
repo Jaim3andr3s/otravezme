@@ -27,33 +27,31 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
             }}
           />
           <div className="flex-grow">
-            <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">{book.title}</h3>
-            <p className="text-xl text-indigo-600 dark:text-indigo-400 font-semibold mb-3">{book.author}</p>
+            <h3 className="text-3xl font-serif font-semibold text-ink mb-2">{book.title}</h3>
+            <p className="text-xl text-accent font-medium mb-3">{book.author}</p>
 
             <div className="flex flex-wrap gap-4 mb-4 text-sm">
               <div className="flex items-center space-x-2">
-                <BadgeIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                <span className="bg-indigo-100 dark:bg-indigo-700/50 px-3 py-1 rounded-full text-xs font-medium text-indigo-600 dark:text-indigo-300">
+                <BadgeIcon className="w-5 h-5 text-ink-muted" />
+                <span className="bg-surface-alt px-3 py-1 rounded-full text-xs font-medium text-ink-muted">
                   {book.category}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Landmark className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                <span className="bg-teal-100 dark:bg-teal-700/50 px-3 py-1 rounded-full text-xs font-medium text-teal-600 dark:text-teal-300">
+                <Landmark className="w-5 h-5 text-ink-muted" />
+                <span className="bg-surface-alt px-3 py-1 rounded-full text-xs font-medium text-ink-muted">
                   {book.ageRange}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Star className="w-5 h-5 text-yellow-500" />
-                <span className="font-bold text-gray-700 dark:text-gray-200">{book.rating}</span>
+                <Star className="w-5 h-5 text-gold" />
+                <span className="font-semibold text-ink">{book.rating}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Zap className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <Zap className="w-5 h-5 text-ink-muted" />
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    book.status === 'DISPONIBLE'
-                      ? 'bg-emerald-100 dark:bg-emerald-700/50 text-emerald-600 dark:text-emerald-300'
-                      : 'bg-red-100 dark:bg-red-700/50 text-red-600 dark:text-red-300'
+                    book.status === 'DISPONIBLE' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'
                   }`}
                 >
                   {BOOK_STATUS_LABEL[book.status] ?? book.status}
@@ -61,7 +59,7 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
               </div>
             </div>
 
-            <p className="text-gray-700 dark:text-gray-300 mb-4">{book.description}</p>
+            <p className="text-ink-muted mb-4">{book.description}</p>
           </div>
         </div>
 
@@ -70,7 +68,7 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
             href={book.readOnlineUrl || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${buttonClass} bg-emerald-600 hover:bg-emerald-700 ${!book.readOnlineUrl ? 'opacity-50 cursor-not-allowed' : ''} flex-grow`}
+            className={`${buttonClass} bg-success hover:opacity-90 ${!book.readOnlineUrl ? 'opacity-50 cursor-not-allowed' : ''} flex-grow`}
             onClick={(e) => {
               if (!book.readOnlineUrl) e.preventDefault();
             }}
@@ -80,13 +78,13 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
           </a>
           <button
             onClick={() => toggleFavorite(book.id)}
-            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${favorite ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-500 hover:bg-gray-600'}`}
+            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${favorite ? 'bg-danger hover:opacity-90' : 'bg-surface-alt !text-ink hover:opacity-80'}`}
           >
             <Heart className={`w-5 h-5 ${favorite ? 'fill-white' : ''}`} />
           </button>
           <button
             onClick={() => toggleRead(book.id)}
-            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${read ? 'bg-sky-500 hover:bg-sky-600' : 'bg-blue-500 hover:bg-blue-600'}`}
+            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${read ? 'bg-accent-hover' : 'bg-accent'} hover:opacity-90`}
             title={read ? 'Marcar como No Leído' : 'Marcar como Leído'}
           >
             {read ? <Eraser className="w-5 h-5" /> : <Check className="w-5 h-5" />}
@@ -95,7 +93,7 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
           {isAdmin && (
             <button
               onClick={() => onDelete(book.id)}
-              className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-red-600 hover:bg-red-700`}
+              className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-danger hover:opacity-90`}
               title="Eliminar Libro (Admin)"
             >
               <Trash2 className="w-5 h-5" />
@@ -103,12 +101,12 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
           )}
         </div>
 
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">¿Te gustó el libro?</h4>
+        <div className="pt-4 border-t border-edge">
+          <h4 className="text-lg font-serif font-semibold text-ink mb-2">¿Te gustó el libro?</h4>
           <div className="flex items-center space-x-4">
-            <IconButton icon={ThumbsUp} onClick={() => onVote(book.id, 'up')} className="bg-emerald-500 text-white hover:bg-emerald-600" title="Votar Positivo" />
-            <IconButton icon={ThumbsDown} onClick={() => onVote(book.id, 'down')} className="bg-red-500 text-white hover:bg-red-600" title="Votar Negativo" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Ayuda a otros lectores a descubrir.</span>
+            <IconButton icon={ThumbsUp} onClick={() => onVote(book.id, 'up')} className="bg-success text-white hover:opacity-90" title="Votar Positivo" />
+            <IconButton icon={ThumbsDown} onClick={() => onVote(book.id, 'down')} className="bg-danger text-white hover:opacity-90" title="Votar Negativo" />
+            <span className="text-sm text-ink-muted">Ayuda a otros lectores a descubrir.</span>
           </div>
         </div>
       </div>

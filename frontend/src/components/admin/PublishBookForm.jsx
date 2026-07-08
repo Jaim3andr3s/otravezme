@@ -42,12 +42,12 @@ export function PublishBookForm({ onClose, onPublish }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 flex items-center justify-center disabled:opacity-50"
+          className="w-full px-4 py-2 bg-success text-white font-semibold rounded-lg shadow-sm hover:opacity-90 transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin mr-2" /> : <Rocket className="mr-2 w-5 h-5" />}
           {loading ? 'Publicando...' : 'Publicar Libro'}
         </button>
-        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+        {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>
     </Modal>
   );
