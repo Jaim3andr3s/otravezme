@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 function getToken() {
   return localStorage.getItem('bibliosuenos_user_token');
@@ -9,13 +9,16 @@ async function request(path, options = {}) {
   const headers = { ...(rest.headers || {}) };
   if (rest.body) headers['Content-Type'] = 'application/json';
 
-  // Ahora todos los tokens son de usuario (unificados)
   const token = getToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...rest, headers });
+  // Construir URL completa
+  const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  console.log(`🌐 ${rest.method || 'GET'} ${url}`);
+
+  const response = await fetch(url, { ...rest, headers });
 
   if (response.status === 204) return null;
 

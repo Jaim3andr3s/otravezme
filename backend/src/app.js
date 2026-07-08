@@ -8,7 +8,7 @@ import readingPlansRoutes from './routes/readingPlans.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import achievementsRoutes from './routes/achievements.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
-import publicationsRoutes from './routes/publications.routes.js'; // NUEVO FASE B
+import publicationsRoutes from './routes/publications.routes.js';
 import challengesRoutes from './routes/challenges.routes.js';
 
 const allowedOrigins = (process.env.CORS_ORIGINS || '')
@@ -36,8 +36,9 @@ app.use('/api/reading-plans', readingPlansRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/achievements', achievementsRoutes);
 app.use('/api/gallery', galleryRoutes);
-app.use('/api/publications', publicationsRoutes); // NUEVO FASE B
+app.use('/api/publications', publicationsRoutes);
 app.use('/api/challenges', challengesRoutes);
+
 app.use((req, res) => res.status(404).json({ message: 'Ruta de API no encontrada.' }));
 app.use(errorHandler);
 

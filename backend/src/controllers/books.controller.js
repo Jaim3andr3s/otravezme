@@ -39,6 +39,22 @@ export async function updateBook(req, res, next) {
     const data = bookUpdateSchema.parse(req.body);
     if (data.readOnlineUrl !== undefined) data.readOnlineUrl = data.readOnlineUrl || null;
 
+    // Si se marca como libro del mes, desmarcar cualquier otro
+    if (data.isBookOfMonth === true) {
+      await prisma.$transaction([
+        prisma.book.updateMany({
+          where: { isBookOfMonth: true, NOT: { id } },
+          data: { isBookOfMonth: false },
+        }),
+        prisma.book.update({
+          where: { id },
+          data,
+        }),
+      ]);
+      const updatedBook = await prisma.book.findUnique({ where: { id } });
+      return res.json({ message: 'Libro actualizado exitosamente.', book: updatedBook });
+    }
+
     const book = await prisma.book.update({ where: { id }, data });
     res.json({ message: 'Libro actualizado exitosamente.', book });
   } catch (err) {

@@ -6,6 +6,9 @@ import { AchievementsProvider } from './context/AchievementsContext.jsx';
 import { BooksProvider } from './context/BooksContext.jsx';
 import { EventsProvider } from './context/EventsContext.jsx';
 import { ProfileProvider } from './context/ProfileContext.jsx';
+import { GalleryProvider } from './context/GalleryContext.jsx';
+import { ArticlesProvider } from './context/ArticlesContext.jsx';
+import { ChallengesProvider } from './context/ChallengesContext.jsx';
 import { router } from './router/index.jsx';
 
 export default function App() {
@@ -16,9 +19,15 @@ export default function App() {
           <AchievementsProvider>
             <BooksProvider>
               <EventsProvider>
-                <ProfileProvider>
-                  <RouterProvider router={router} />
-                </ProfileProvider>
+                <GalleryProvider>
+                  <ArticlesProvider>
+                    <ChallengesProvider>
+                      <ProfileProvider>
+                        <RouterProvider router={router} />
+                      </ProfileProvider>
+                    </ChallengesProvider>
+                  </ArticlesProvider>
+                </GalleryProvider>
               </EventsProvider>
             </BooksProvider>
           </AchievementsProvider>

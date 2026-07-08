@@ -6,7 +6,6 @@ import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { IconTile } from '../../components/ui/IconTile.jsx';
 
-// Crucigrama simple (5x5)
 const GRID_SIZE = 5;
 
 const CLUES = {
@@ -22,26 +21,37 @@ const CLUES = {
   ]
 };
 
+// ✅ buildGrid: inicializa y coloca palabras con seguridad
 function buildGrid() {
-  const grid = Array(GRID_SIZE).fill(null).map(() => 
-    Array(GRID_SIZE).fill({ letter: '', isBlack: false })
-  );
-  
-  // Colocar palabras horizontales
-  CLUES.horizontal.forEach(({ row, col, word }) => {
-    for (let i = 0; i < word.length; i++) {
-      grid[row][col + i] = { letter: word[i], isBlack: false };
+  // Crear una matriz 5x5 con objetos independientes
+  const grid = [];
+  for (let r = 0; r < GRID_SIZE; r++) {
+    grid[r] = [];
+    for (let c = 0; c < GRID_SIZE; c++) {
+      grid[r][c] = { letter: '', isBlack: false };
     }
-  });
+  }
   
-  // Colocar palabras verticales
-  CLUES.vertical.forEach(({ row, col, word }) => {
-    for (let i = 0; i < word.length; i++) {
-      grid[row + i][col] = { letter: word[i], isBlack: false };
+  // Colocar horizontales
+  for (const { row, col, word } of CLUES.horizontal) {
+    // Asegurar que la fila existe y la palabra cabe
+    if (row >= 0 && row < GRID_SIZE && col + word.length <= GRID_SIZE) {
+      for (let i = 0; i < word.length; i++) {
+        grid[row][col + i] = { letter: word[i], isBlack: false };
+      }
     }
-  });
+  }
   
-  // Marcar celdas vacías como negras
+  // Colocar verticales
+  for (const { row, col, word } of CLUES.vertical) {
+    if (col >= 0 && col < GRID_SIZE && row + word.length <= GRID_SIZE) {
+      for (let i = 0; i < word.length; i++) {
+        grid[row + i][col] = { letter: word[i], isBlack: false };
+      }
+    }
+  }
+  
+  // Marcar vacías como negras
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
       if (grid[r][c].letter === '') {
@@ -65,7 +75,11 @@ export default function CrosswordGamePage() {
   const startGame = useCallback(() => {
     const newGrid = buildGrid();
     setGrid(newGrid);
-    setUserGrid(newGrid.map(row => row.map(cell => ({ ...cell, letter: '' }))));
+    // Copia profunda de la grilla con letras vacías
+    const emptyUserGrid = newGrid.map(row =>
+      row.map(cell => ({ ...cell, letter: '' }))
+    );
+    setUserGrid(emptyUserGrid);
     setSelectedCell(null);
     setStatus('playing');
     setMoves(0);
@@ -76,7 +90,6 @@ export default function CrosswordGamePage() {
   }, [startGame]);
   
   useEffect(() => {
-    // Enfocar input cuando se selecciona una celda
     if (selectedCell && inputRef.current) {
       inputRef.current.focus();
     }
@@ -84,7 +97,7 @@ export default function CrosswordGamePage() {
   
   const handleCellClick = (row, col) => {
     if (status !== 'playing') return;
-    if (grid[row][col].isBlack) return;
+    if (grid[row]?.[col]?.isBlack) return;
     setSelectedCell({ row, col });
   };
   
@@ -95,87 +108,74 @@ export default function CrosswordGamePage() {
     const key = e.key.toUpperCase();
     
     if (key >= 'A' && key <= 'Z' && key.length === 1) {
-      // Ingresar letra
-      const newUserGrid = [...userGrid];
+      const newUserGrid = userGrid.map(r => r.map(c => ({ ...c })));
       newUserGrid[row][col] = { ...newUserGrid[row][col], letter: key };
       setUserGrid(newUserGrid);
       setMoves(prev => prev + 1);
       
-      // Verificar si está correcta
-      const isCorrect = grid[row][col].letter === key;
-      if (!isCorrect) {
-        // Mostrar feedback (opcional)
-      }
-      
-      // Mover a la siguiente celda (horizontal)
-      const nextCol = col + 1;
-      if (nextCol < GRID_SIZE && !grid[row][nextCol].isBlack) {
+      // Mover a la siguiente celda horizontal
+      let nextCol = col + 1;
+      let moved = false;
+      while (nextCol < GRID_SIZE && grid[row][nextCol]?.isBlack) nextCol++;
+      if (nextCol < GRID_SIZE && !grid[row][nextCol]?.isBlack) {
         setSelectedCell({ row, col: nextCol });
-      } else {
-        // Buscar siguiente celda en la fila
-        let found = false;
-        for (let c = 0; c < GRID_SIZE; c++) {
-          if (!grid[row][c].isBlack) {
-            setSelectedCell({ row, col: c });
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          // Si no hay más, buscar en filas siguientes
-          for (let r = row + 1; r < GRID_SIZE; r++) {
-            for (let c = 0; c < GRID_SIZE; c++) {
-              if (!grid[r][c].isBlack) {
-                setSelectedCell({ row: r, col: c });
-                found = true;
-                break;
-              }
+        moved = true;
+      }
+      if (!moved) {
+        // Buscar en filas siguientes
+        for (let r = row + 1; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (!grid[r][c]?.isBlack) {
+              setSelectedCell({ row: r, col: c });
+              moved = true;
+              break;
             }
-            if (found) break;
           }
+          if (moved) break;
         }
       }
     } else if (e.key === 'Backspace') {
-      // Borrar letra
-      const newUserGrid = [...userGrid];
+      const newUserGrid = userGrid.map(r => r.map(c => ({ ...c })));
       newUserGrid[row][col] = { ...newUserGrid[row][col], letter: '' };
       setUserGrid(newUserGrid);
     } else if (e.key === 'ArrowRight') {
-      // Mover a la derecha
-      const nextCol = col + 1;
-      if (nextCol < GRID_SIZE && !grid[row][nextCol].isBlack) {
+      let nextCol = col + 1;
+      while (nextCol < GRID_SIZE && grid[row][nextCol]?.isBlack) nextCol++;
+      if (nextCol < GRID_SIZE && !grid[row][nextCol]?.isBlack) {
         setSelectedCell({ row, col: nextCol });
       }
     } else if (e.key === 'ArrowLeft') {
-      const prevCol = col - 1;
-      if (prevCol >= 0 && !grid[row][prevCol].isBlack) {
+      let prevCol = col - 1;
+      while (prevCol >= 0 && grid[row][prevCol]?.isBlack) prevCol--;
+      if (prevCol >= 0 && !grid[row][prevCol]?.isBlack) {
         setSelectedCell({ row, col: prevCol });
       }
     } else if (e.key === 'ArrowDown') {
-      const nextRow = row + 1;
-      if (nextRow < GRID_SIZE && !grid[nextRow][col].isBlack) {
+      let nextRow = row + 1;
+      while (nextRow < GRID_SIZE && grid[nextRow]?.[col]?.isBlack) nextRow++;
+      if (nextRow < GRID_SIZE && !grid[nextRow]?.[col]?.isBlack) {
         setSelectedCell({ row: nextRow, col });
       }
     } else if (e.key === 'ArrowUp') {
-      const prevRow = row - 1;
-      if (prevRow >= 0 && !grid[prevRow][col].isBlack) {
+      let prevRow = row - 1;
+      while (prevRow >= 0 && grid[prevRow]?.[col]?.isBlack) prevRow--;
+      if (prevRow >= 0 && !grid[prevRow]?.[col]?.isBlack) {
         setSelectedCell({ row: prevRow, col });
       }
     }
   };
   
   const checkCompletion = useCallback(() => {
-    // Verificar si todas las celdas no negras tienen letra correcta
     let allCorrect = true;
     let totalCells = 0;
     let filledCells = 0;
     
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
-        if (grid[r][c].isBlack) continue;
+        if (grid[r]?.[c]?.isBlack) continue;
         totalCells++;
-        const userLetter = userGrid[r][c]?.letter || '';
-        if (userLetter === grid[r][c].letter) {
+        const userLetter = userGrid[r]?.[c]?.letter || '';
+        if (userLetter === grid[r]?.[c]?.letter) {
           filledCells++;
         } else {
           allCorrect = false;
@@ -237,12 +237,11 @@ export default function CrosswordGamePage() {
       
       <div className="bg-surface border border-edge rounded-xl p-4 shadow-sm">
         <div className="grid grid-cols-5 gap-1 max-w-xs mx-auto">
-          {grid.map((row, r) => (
+          {grid.map((row, r) =>
             row.map((cell, c) => {
               const isSelected = selectedCell?.row === r && selectedCell?.col === c;
               const userLetter = userGrid[r]?.[c]?.letter || '';
               const isCorrect = userLetter === cell.letter && userLetter !== '';
-              
               return (
                 <div
                   key={`${r}-${c}`}
@@ -270,7 +269,7 @@ export default function CrosswordGamePage() {
                 </div>
               );
             })
-          ))}
+          )}
         </div>
       </div>
       

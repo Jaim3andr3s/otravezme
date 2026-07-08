@@ -1,16 +1,14 @@
 import { motion } from 'framer-motion';
-import { Heart, Sparkles, Check, XOctagon, Pencil, Trash2 } from 'lucide-react';
+import { Heart, Sparkles, Check, XOctagon, Pencil, Trash2, Star } from 'lucide-react';
 import { Badge } from '../ui/Badge.jsx';
 import { StarRating } from './StarRating.jsx';
 import { useProfile } from '../../context/ProfileContext.jsx';
-import { useUserAuth } from '../../context/UserAuthContext.jsx';
 import { BOOK_STATUS_LABEL } from '../../constants/labels.js';
 
-export function BookCard({ book, onClick, onEdit, onDelete }) {
+export function BookCard({ book, onClick, onEdit, onDelete, onSetBookOfMonth, isAdmin }) {
   const { isFavorite } = useProfile();
-  const { role } = useUserAuth();
-  const isAdmin = role === 'admin';
   const favorite = isFavorite(book.id);
+  const isBookOfMonth = book.isBookOfMonth === true;
 
   return (
     <motion.div
@@ -43,6 +41,16 @@ export function BookCard({ book, onClick, onEdit, onDelete }) {
           >
             <Trash2 className="w-4 h-4" />
           </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSetBookOfMonth(book.id);
+            }}
+            className={`p-1.5 rounded-full shadow-md transition ${isBookOfMonth ? 'bg-gold text-white' : 'bg-gold-soft text-gold hover:opacity-80'}`}
+            title={isBookOfMonth ? 'Libro del mes' : 'Marcar como libro del mes'}
+          >
+            <Star className={`w-4 h-4 ${isBookOfMonth ? 'fill-white' : ''}`} />
+          </button>
         </div>
       )}
 
@@ -65,7 +73,12 @@ export function BookCard({ book, onClick, onEdit, onDelete }) {
             <Heart className="w-4 h-4 text-white fill-white" />
           </motion.div>
         )}
-        {book.isStaffPick && (
+        {isBookOfMonth && (
+          <div className="absolute top-2 left-2">
+            <Badge icon={Star} text="📖 Libro del Mes" color="bg-gold" textColor="text-accent-ink" />
+          </div>
+        )}
+        {book.isStaffPick && !isBookOfMonth && (
           <div className="absolute top-2 left-2">
             <Badge icon={Sparkles} text="Selección Staff" color="bg-gold" textColor="text-accent-ink" />
           </div>

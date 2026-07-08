@@ -1,147 +1,164 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, BookOpen, Loader2, Target, Trophy } from 'lucide-react';
-import { challengesService } from '../services/challenges.service.js';
+import { Target, Calendar, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { useChallenges } from '../context/ChallengesContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
-import { useNotification } from '../context/NotificationContext.jsx';
+import { ManageChallengeForm } from '../components/admin/ManageChallengeForm.jsx';
+import { Button } from '../components/ui/Button.jsx';
 
 export default function ReadingChallengesPage() {
-  const { isAuthenticated } = useUserAuth();
-  const { showNotification } = useNotification();
-  const [challenges, setChallenges] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { challenges, loading, error, create, update, remove } = useChallenges();
+  const { isAuthenticated, role } = useUserAuth();
+  const isAdmin = role === 'admin';
+  const [showForm, setShowForm] = useState(false);
+  const [editingChallenge, setEditingChallenge] = useState(null);
 
-  useEffect(() => {
-    challengesService.list()
-      .then(data => setChallenges(data))
-      .catch(err => {
-        console.error('Error al cargar retos:', err);
-        showNotification('Error al cargar los retos de lectura.', 'error');
-      })
-      .finally(() => setLoading(false));
-  }, [showNotification]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-accent animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-accent animate-spin" /></div>;
+  if (error) return <div className="text-center py-20"><p className="text-danger">Error: {error}</p></div>;
 
   if (challenges.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center py-20 space-y-4"
-      >
+      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="text-center py-20 space-y-4">
         <Target className="w-16 h-16 text-ink-muted mx-auto" />
-        <h2 className="text-4xl font-serif font-semibold text-ink">📚 Retos de Lectura</h2>
-        <p className="text-ink-muted">No hay retos activos en este momento. ¡Vuelve pronto!</p>
+        <h2 className="text-3xl font-serif font-semibold text-ink">No hay retos activos</h2>
+        <p className="text-ink-muted">Pronto publicaremos nuevos retos de lectura.</p>
+        {isAdmin && (
+          <Button variant="success" onClick={() => setShowForm(true)}>
+            <Plus className="w-5 h-5" /> Crear Reto
+          </Button>
+        )}
+        {showForm && (
+          <ManageChallengeForm
+            onClose={() => setShowForm(false)}
+            onSave={create}
+          />
+        )}
       </motion.div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8"
-    >
-      <div>
-        <h2 className="text-4xl font-serif font-semibold text-ink flex items-center gap-3">
-          <Target className="w-8 h-8 text-accent" />
-          Retos de Lectura
-        </h2>
-        <p className="text-lg text-ink-muted">
-          Acepta el desafío y lee la cantidad de libros propuesta antes de que termine el plazo.
-        </p>
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-4xl font-serif font-semibold text-ink flex items-center gap-3">
+            <Target className="w-8 h-8 text-accent" />
+            Retos de Lectura
+          </h2>
+          <p className="text-lg text-ink-muted">
+            {isAuthenticated
+              ? 'Completa los retos y gana diplomas.'
+              : 'Inicia sesión para ver tu progreso en los retos.'}
+          </p>
+        </div>
+        {isAdmin && (
+          <Button variant="success" onClick={() => setShowForm(true)}>
+            <Plus className="w-5 h-5" /> Nuevo Reto
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {challenges.map((challenge) => {
-          const progress = challenge.progress;
-          const isActive = new Date() >= new Date(challenge.startDate) && new Date() <= new Date(challenge.endDate);
-          const isUpcoming = new Date() < new Date(challenge.startDate);
-          const isCompleted = progress && progress.readCount >= challenge.goalBooks;
+          const progress = challenge.progress !== null ? challenge.progress : 0;
+          const goal = challenge.goal || challenge.goalBooks;
+          const percentage = goal > 0 ? Math.min((progress / goal) * 100, 100) : 0;
+          const isCompleted = challenge.completed || progress >= goal;
 
           return (
             <motion.div
               key={challenge.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-surface border border-edge rounded-xl shadow-sm hover:shadow-lg transition-shadow p-6 space-y-4"
+              className="bg-surface border border-edge rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow relative"
             >
-              <div className="flex items-start justify-between">
-                <h3 className="text-2xl font-serif font-semibold text-ink">{challenge.title}</h3>
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                  isActive ? 'bg-success-soft text-success' :
-                  isUpcoming ? 'bg-accent-soft text-accent' :
-                  'bg-surface-alt text-ink-muted'
-                }`}>
-                  {isActive ? 'Activo' : isUpcoming ? 'Próximo' : 'Finalizado'}
+              {isAdmin && (
+                <div className="absolute top-2 right-2 flex gap-1.5 z-10">
+                  <button
+                    onClick={() => setEditingChallenge(challenge)}
+                    className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition shadow-md"
+                    title="Editar reto"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => remove(challenge.id)}
+                    className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition shadow-md"
+                    title="Eliminar reto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-2xl font-serif font-semibold text-ink">{challenge.title}</h3>
+                  <p className="text-ink-muted mt-1">{challenge.description}</p>
+                </div>
+                {isCompleted && (
+                  <span className="px-3 py-1 bg-success-soft text-success rounded-full text-xs font-semibold">
+                    ✅ Completado
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-ink-muted mb-4">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(challenge.startDate).toLocaleDateString()} - {new Date(challenge.endDate).toLocaleDateString()}
+                </span>
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-4 h-4" />
+                  Meta: {goal} libros
                 </span>
               </div>
 
-              <p className="text-ink-muted text-sm">{challenge.description}</p>
-
-              <div className="flex items-center gap-4 text-sm text-ink-muted">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(challenge.startDate).toLocaleDateString('es-CO', { dateStyle: 'medium' })}</span>
-                </div>
-                <span>→</span>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(challenge.endDate).toLocaleDateString('es-CO', { dateStyle: 'medium' })}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <BookOpen className="w-4 h-4 text-ink-muted" />
-                <span className="font-semibold">{challenge.goalBooks} libros</span>
-              </div>
-
-              {isAuthenticated && progress ? (
+              {isAuthenticated && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-ink-muted">Progreso</span>
-                    <span className="font-semibold text-ink">{progress.readCount} / {challenge.goalBooks}</span>
+                    <span className="font-semibold text-ink">
+                      {progress} / {goal} libros
+                    </span>
                   </div>
-                  <div className="w-full bg-surface-alt rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full h-3 bg-surface-alt rounded-full overflow-hidden border border-edge">
                     <motion.div
+                      className="h-full bg-accent rounded-full"
                       initial={{ width: 0 }}
-                      animate={{ width: `${progress.percentage}%` }}
-                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                      className={`h-full rounded-full ${
-                        isCompleted ? 'bg-gold' : 'bg-accent'
-                      }`}
+                      animate={{ width: `${percentage}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
                     />
                   </div>
-                  <div className="flex justify-end text-xs text-ink-muted">
-                    {isCompleted && (
-                      <span className="flex items-center gap-1 text-gold font-semibold">
-                        <Trophy className="w-3 h-3" /> ¡Completado!
-                      </span>
-                    )}
-                    {!isCompleted && isActive && (
-                      <span>{progress.percentage}% completado</span>
-                    )}
-                    {isUpcoming && <span>Próximamente</span>}
-                  </div>
+                  <p className="text-xs text-ink-muted text-right">
+                    {percentage.toFixed(0)}% completado
+                  </p>
                 </div>
-              ) : (
-                <p className="text-xs text-ink-muted italic">
-                  {isAuthenticated ? 'No hay progreso disponible.' : 'Inicia sesión para ver tu progreso.'}
+              )}
+
+              {!isAuthenticated && (
+                <p className="text-sm text-ink-muted italic">
+                  Inicia sesión para ver tu progreso.
                 </p>
               )}
             </motion.div>
           );
         })}
       </div>
+
+      {showForm && (
+        <ManageChallengeForm
+          onClose={() => setShowForm(false)}
+          onSave={create}
+        />
+      )}
+      {editingChallenge && (
+        <ManageChallengeForm
+          challenge={editingChallenge}
+          onClose={() => setEditingChallenge(null)}
+          onSave={(data) => update(editingChallenge.id, data)}
+        />
+      )}
     </motion.div>
   );
 }

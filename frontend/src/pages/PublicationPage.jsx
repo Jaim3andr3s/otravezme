@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Newspaper, BookOpen, Loader2 } from 'lucide-react';
+import { Newspaper, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
 import { api } from '../services/api.js';
+import { useArticles } from '../context/ArticlesContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
+import { Button } from '../components/ui/Button.jsx';
 
 const SECTIONS = {
   PERIODICO: ['Editorial', 'Informativa', 'Literatura', 'Opinión', 'Entretenimiento'],
@@ -23,13 +27,14 @@ export default function PublicationPage({ type: propType }) {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Determinar el tipo: primero de la prop, luego de la URL (fallback)
   const type = propType || (location.pathname.includes('/periodico') ? 'PERIODICO' : 
                             location.pathname.includes('/revista-digital') ? 'REVISTA' : null);
 
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { articles, loading, error, create, update, remove, reload } = useArticles();
+  const { role } = useUserAuth();
+  const isAdmin = role === 'admin';
+  const [showForm, setShowForm] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
 
   const validTypes = Object.keys(TYPE_LABELS);
   const normalizedType = type?.toUpperCase();
@@ -38,22 +43,11 @@ export default function PublicationPage({ type: propType }) {
   const currentSection = searchParams.get('section') || sections[0];
   const Icon = TYPE_ICONS[normalizedType];
 
-  // ✅ useEffect de carga ANTES del return condicional
   useEffect(() => {
     if (!normalizedType || !validTypes.includes(normalizedType) || !currentSection) return;
-    setLoading(true);
-    setError(null);
-    api
-      .get(`/publications?type=${normalizedType}&section=${encodeURIComponent(currentSection)}`)
-      .then(setArticles)
-      .catch((err) => {
-        console.error('Error al cargar publicaciones:', err);
-        setError(err.message || 'Error al cargar las publicaciones.');
-      })
-      .finally(() => setLoading(false));
-  }, [normalizedType, currentSection]);
+    reload(normalizedType, currentSection);
+  }, [normalizedType, currentSection, reload]);
 
-  // ✅ Validación de tipo (después de hooks)
   if (!normalizedType || !validTypes.includes(normalizedType)) {
     return (
       <div className="text-center py-20">
@@ -71,12 +65,19 @@ export default function PublicationPage({ type: propType }) {
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <Icon className="w-8 h-8 text-accent" />
-          <h2 className="text-4xl font-serif font-semibold text-ink">{TYPE_LABELS[normalizedType]}</h2>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Icon className="w-8 h-8 text-accent" />
+            <h2 className="text-4xl font-serif font-semibold text-ink">{TYPE_LABELS[normalizedType]}</h2>
+          </div>
+          <p className="text-lg text-ink-muted">Explora las secciones de nuestro {TYPE_LABELS[normalizedType].toLowerCase()}.</p>
         </div>
-        <p className="text-lg text-ink-muted">Explora las secciones de nuestro {TYPE_LABELS[normalizedType].toLowerCase()}.</p>
+        {isAdmin && (
+          <Button variant="success" onClick={() => setShowForm(true)}>
+            <Plus className="w-5 h-5" /> Nuevo Artículo
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 border-b border-edge pb-2">
@@ -103,7 +104,25 @@ export default function PublicationPage({ type: propType }) {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {articles.map((article) => (
-            <motion.article key={article.id} className="bg-surface border border-edge rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+            <motion.article key={article.id} className="bg-surface border border-edge rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow relative group">
+              {isAdmin && (
+                <div className="absolute top-2 right-2 flex gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setEditingArticle(article)}
+                    className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition shadow-md"
+                    title="Editar artículo"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => remove(article.id)}
+                    className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition shadow-md"
+                    title="Eliminar artículo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               {article.coverImage && (
                 <div className="w-full h-48 overflow-hidden">
                   <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
@@ -127,6 +146,21 @@ export default function PublicationPage({ type: propType }) {
             </motion.article>
           ))}
         </div>
+      )}
+
+      {showForm && (
+        <ManageArticleForm
+          fixedType={normalizedType}
+          onClose={() => setShowForm(false)}
+          onSave={create}
+        />
+      )}
+      {editingArticle && (
+        <ManageArticleForm
+          article={editingArticle}
+          onClose={() => setEditingArticle(null)}
+          onSave={(data) => update(editingArticle.id, data)}
+        />
       )}
     </motion.div>
   );

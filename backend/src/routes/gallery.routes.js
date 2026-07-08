@@ -1,8 +1,12 @@
 import { Router } from 'express';
-import { listGallery } from '../controllers/gallery.controller.js';
+import { getChallenges, createChallenge, updateChallenge, deleteChallenge } from '../controllers/challenges.controller.js';
+import { requireAdmin } from '../middleware/requireAdmin.js';
 
 const router = Router();
 
-router.get('/', listGallery);
+router.get('/', getChallenges);
+router.post('/', requireAdmin, createChallenge);
+router.put('/:id', requireAdmin, updateChallenge);
+router.delete('/:id', requireAdmin, deleteChallenge);
 
 export default router;

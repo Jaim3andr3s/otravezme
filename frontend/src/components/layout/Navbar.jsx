@@ -3,20 +3,18 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenCheck, X, LogOut, ShieldCheck, 
-  Image, Star, Trophy, Newspaper, BookOpen, Target, Award 
+  Image, Star, BookOpen, Target, Newspaper 
 } from 'lucide-react';
 import { useUserAuth } from '../../context/UserAuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import { DarkModeToggle } from '../ui/DarkModeToggle.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
 import { MenuToggle } from '../ui/MenuToggle.jsx';
-import { Badge } from '../ui/Badge.jsx';
 
 const NAV_LINKS = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/biblioteca', label: 'Biblioteca' },
   { to: '/eventos', label: 'Eventos' },
-  { to: '/planes-lectores', label: 'Planes Lectores' },
   { to: '/juegos', label: 'Juegos' },
   { to: '/perfil', label: 'Mi Perfil' },
 ];
@@ -24,10 +22,10 @@ const NAV_LINKS = [
 const DROPDOWN_LINKS = [
   { to: '/galeria', label: 'Galería', icon: Image },
   { to: '/libro-del-mes', label: 'Libro del Mes', icon: Star },
-  { to: '/insignias', label: 'Insignias', icon: Trophy },
+  { to: '/planes-lectores', label: 'Planes Lectores', icon: BookOpen },
+  { to: '/club-de-lectura/retos', label: 'Retos de Lectura', icon: Target },
   { to: '/periodico', label: 'Periódico', icon: Newspaper },
   { to: '/revista-digital', label: 'Revista Digital', icon: BookOpen },
-  { to: '/club-de-lectura/retos', label: 'Retos de Lectura', icon: Target },
 ];
 
 export function Navbar() {
@@ -161,13 +159,18 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed inset-y-0 right-0 w-64 h-screen bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 lg:hidden border-l border-edge overflow-y-auto"
+            className="fixed top-0 right-0 h-screen w-80 max-w-[85vw] bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 lg:hidden border-l border-edge overflow-y-auto overscroll-contain"
+            style={{
+              height: '100dvh', // Ocupa toda la altura visible
+              paddingTop: 'clamp(60px, 10vh, 80px)', // Espacio para el header
+              WebkitOverflowScrolling: 'touch',
+            }}
           >
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-serif font-semibold text-ink">Navegación</h3>
               <IconButton icon={X} onClick={() => setIsMenuOpen(false)} className="text-ink-muted bg-surface-alt" title="Cerrar Menú" />
             </div>
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-3 pb-32">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
@@ -219,7 +222,7 @@ export function Navbar() {
                     setIsMenuOpen(false);
                     handleLogout();
                   }}
-                  className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-danger hover:bg-danger-soft flex items-center gap-2"
+                  className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-danger hover:bg-danger-soft flex items-center gap-2 mt-2"
                 >
                   <LogOut className="w-5 h-5" /> Cerrar Sesión
                 </button>

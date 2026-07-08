@@ -18,6 +18,14 @@ export default function CatalogPage() {
   if (loading) return <FullPageLoader label="Cargando catálogo..." />;
   if (error) return <p className="text-danger text-center py-12">Error al cargar el catálogo: {error}</p>;
 
+  const handleSetBookOfMonth = async (bookId) => {
+    try {
+      await update(bookId, { isBookOfMonth: true });
+    } catch (err) {
+      console.error('Error al marcar libro del mes:', err);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -37,6 +45,8 @@ export default function CatalogPage() {
         onSelect={setSelectedBook}
         onEdit={setEditingBook}
         onDelete={remove}
+        onSetBookOfMonth={handleSetBookOfMonth}
+        isAdmin={isAdmin}
       />
 
       {showPublish && <PublishBookForm onClose={() => setShowPublish(false)} onPublish={create} />}
