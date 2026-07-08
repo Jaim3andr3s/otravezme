@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookStatus {
+  DISPONIBLE
+  PRESTADO
+}
+
+enum EventType {
+  CLUB_LECTURA
+  TALLER
+  CUENTACUENTOS
+  CONFERENCIA
+  GENERAL
+}
+
+model Book {
+  id            Int        @id @default(autoincrement())
+  title         String
+  author        String
+  category      String
+  cover         String
+  description   String
+  status        BookStatus @default(DISPONIBLE)
+  ageRange      String
+  isStaffPick   Boolean    @default(false)
+  readOnlineUrl String?
+  rating        Float      @default(0)
+  reviews       Int        @default(0)
+  dateAdded     DateTime   @default(now())
+
+  favorites   Favorite[]
+  readBy      ReadBook[]
+  planEntries ReadingPlanBook[]
+}
+
+model Event {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  type        EventType @default(GENERAL)
+  date        DateTime
+  location    String?
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+}
+
+model ReadingPlan {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String
+  level         String
+  durationWeeks Int
+  documentUrl   String?
+  createdAt     DateTime @default(now())
+
+  books ReadingPlanBook[]
+}
+
+model ReadingPlanBook {
+  id         Int         @id @default(autoincrement())
+  plan       ReadingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId     Int
+  book       Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId     Int
+  weekNumber Int
+  note       String?
+
+  @@unique([planId, bookId])
+}
+
+model Profile {
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String?  @unique
+  bio      String?
+  avatar   String?
+  joinedAt DateTime @default(now())
+
+  favorites Favorite[]
+  read      ReadBook[]
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([profileId, bookId])
+}
+
+model ReadBook {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int
+  readAt    DateTime @default(now())
+
+  @@unique([profileId, bookId])
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

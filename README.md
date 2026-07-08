@@ -1,12 +1,28 @@
-# React + Vite
+# BiblioSueños
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma comunitaria de biblioteca digital (catálogo de libros, eventos, planes de lectura y perfil de lector), con app web y app móvil (Android, vía Capacitor).
 
-Currently, two official plugins are available:
+## Estructura del repositorio
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```
+frontend/   App React + Vite (web) empaquetada también como app Android con Capacitor
+backend/    API REST en Node/Express + Prisma + PostgreSQL (Neon)
+```
 
-## Expanding the ESLint configuration
+Monorepo con `npm workspaces`. Ver el plan de arquitectura completo en `docs/` (próximamente).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Desarrollo local
+
+```bash
+npm install              # instala frontend y backend
+npm run dev:backend      # levanta la API en http://localhost:4000
+npm run dev:frontend     # levanta la web en http://localhost:5173
+```
+
+Cada workspace tiene su propio `.env` (ver `backend/.env.example`). Nunca commitear archivos `.env` reales.
+
+## Stack
+
+- **Frontend**: React 19, Vite, Tailwind CSS, react-router-dom, framer-motion, Capacitor (Android).
+- **Backend**: Express, Prisma, PostgreSQL (Neon), JWT + bcrypt para auth de administrador.
+- **Hosting gratuito**: Netlify (frontend), Render (backend), Neon (base de datos).

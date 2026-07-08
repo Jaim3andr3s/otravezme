@@ -12,6 +12,22 @@ dist
 dist-ssr
 *.local
 
+# Env files (never commit secrets)
+.env
+.env.local
+backend/.env
+frontend/.env.production.local
+
+# Prisma
+backend/prisma/dev.db
+
+# Capacitor / native builds (android/ project itself is committed, only build output is ignored)
+frontend/android/app/build
+frontend/android/.gradle
+frontend/android/local.properties
+frontend/android/app/release
+frontend/android/app/debug
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

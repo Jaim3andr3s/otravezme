@@ -1,56 +1,22 @@
 {
-  "name": "bibliocomunidad-app",
+  "name": "bibliosuenos",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.1.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "build:frontend": "npm run build --workspace frontend",
+    "lint:frontend": "npm run lint --workspace frontend"
   },
-  "dependencies": {
-    "@netlify/functions": "^5.0.0",
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "firebase": "^11.9.1",
-    "framer-motion": "^12.19.2",
-    "i18next": "^25.2.1",
-    "jspdf": "^3.0.1",
-    "lottie-react": "^2.4.1",
-    "lucide-react": "^0.525.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-i18next": "^15.5.3",
-    "react-lottie": "^1.2.10",
-    "serverless-http": "^4.0.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.29.0",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react-swc": "^3.10.2",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.29.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.2.0",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.1",
-    "vite": "^7.0.0"
-  },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "eslint.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Jaim3andr3s/bibliotecaYene.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Jaim3andr3s/bibliotecaYene/issues"
-  },
-  "homepage": "https://github.com/Jaim3andr3s/bibliotecaYene#readme"
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "@swc/core@1.12.7": true,
+    "prisma@6.19.3": true,
+    "esbuild@0.28.1": true
+  }
 }
