@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { NotebookText, ChevronRight, Book, Globe, Trash2, Plus, Wind } from 'lucide-react';
+import { NotebookText, ChevronRight, Book, Globe, Pencil, Trash2, Plus, Wind } from 'lucide-react';
 import { useReadingPlans } from '../hooks/useReadingPlans.js';
 import { useBooks } from '../context/BooksContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -17,10 +17,16 @@ export default function PlansPage() {
   const { isAdmin } = useAuth();
   const { showNotification } = useNotification();
   const [showPublish, setShowPublish] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
 
   const handlePublish = async (formData) => {
     const plan = await plansService.create(formData);
     setPlans((prev) => [plan, ...prev]);
+  };
+
+  const handleUpdate = async (formData) => {
+    const { plan } = await plansService.update(editingPlan.id, formData);
+    setPlans((prev) => prev.map((p) => (p.id === editingPlan.id ? plan : p)));
   };
 
   const handleDelete = async (planId) => {
@@ -51,13 +57,22 @@ export default function PlansPage() {
               whileHover={{ y: -3 }}
             >
               {isAdmin && (
-                <button
-                  onClick={() => handleDelete(plan.id)}
-                  className="absolute top-3 right-3 p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition z-10"
-                  title="Eliminar Plan"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="absolute top-3 right-3 flex gap-1.5 z-10">
+                  <button
+                    onClick={() => setEditingPlan(plan)}
+                    className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition"
+                    title="Editar Plan"
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(plan.id)}
+                    className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition"
+                    title="Eliminar Plan"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               )}
 
               <NotebookText className="w-8 h-8 text-accent mb-3" />
@@ -114,6 +129,7 @@ export default function PlansPage() {
       )}
 
       {showPublish && <PublishPlanForm onClose={() => setShowPublish(false)} onPublish={handlePublish} />}
+      {editingPlan && <PublishPlanForm plan={editingPlan} onClose={() => setEditingPlan(null)} onPublish={handleUpdate} />}
     </motion.div>
   );
 }

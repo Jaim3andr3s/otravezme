@@ -18,6 +18,21 @@ enum EventType {
   CUENTACUENTOS
   CONFERENCIA
   GENERAL
+  CONCURSO
+  FECHA_IMPORTANTE
+}
+
+enum BookGenre {
+  NARRATIVO
+  LIRICO
+  DRAMATICO
+  INFORMATIVO
+  OPINION
+}
+
+enum Publication {
+  PERIODICO
+  REVISTA
 }
 
 enum AchievementCategory {
@@ -30,6 +45,14 @@ enum GameType {
   MEMORY
   HANGMAN
   PUZZLE
+  WORDSEARCH
+  CROSSWORD
+}
+
+enum AuthProvider {
+  GOOGLE
+  GUEST
+  EMAIL
 }
 
 model Book {
@@ -37,11 +60,13 @@ model Book {
   title         String
   author        String
   category      String
+  genre         BookGenre  @default(NARRATIVO)
   cover         String
   description   String
   status        BookStatus @default(DISPONIBLE)
   ageRange      String
   isStaffPick   Boolean    @default(false)
+  isBookOfMonth Boolean    @default(false)
   readOnlineUrl String?
   rating        Float      @default(0)
   reviews       Int        @default(0)
@@ -88,17 +113,41 @@ model ReadingPlanBook {
 }
 
 model Profile {
-  id       Int      @id @default(autoincrement())
-  name     String
-  email    String?  @unique
-  bio      String?
-  avatar   String?
-  joinedAt DateTime @default(now())
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String?      @unique
+  bio          String?
+  avatar       String?
+  joinedAt     DateTime     @default(now())
+  authProvider AuthProvider @default(GUEST)
+  googleId     String?      @unique
+  guestToken   String?      @unique
+  passwordHash String?
 
   favorites    Favorite[]
   read         ReadBook[]
   achievements ProfileAchievement[]
   gameScores   GameScore[]
+}
+
+model GalleryImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  caption   String?
+  createdAt DateTime @default(now())
+}
+
+model PublicationArticle {
+  id          Int         @id @default(autoincrement())
+  publication Publication
+  section     String
+  edition     String
+  title       String
+  author      String
+  content     String
+  coverImage  String?
+  publishedAt DateTime    @default(now())
+  createdAt   DateTime    @default(now())
 }
 
 model Favorite {

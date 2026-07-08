@@ -1,12 +1,24 @@
 import { useState } from 'react';
-import { Loader2, NotebookText } from 'lucide-react';
+import { Loader2, NotebookText, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
 
-const initialState = { title: '', description: '', level: '', durationWeeks: '', books: '', documentUrl: '' };
+const emptyState = { title: '', description: '', level: '', durationWeeks: '', books: '', documentUrl: '' };
 
-export function PublishPlanForm({ onClose, onPublish }) {
-  const [formData, setFormData] = useState(initialState);
+export function PublishPlanForm({ onClose, onPublish, plan = null }) {
+  const isEdit = Boolean(plan);
+  const [formData, setFormData] = useState(() =>
+    plan
+      ? {
+          title: plan.title,
+          description: plan.description,
+          level: plan.level,
+          durationWeeks: String(plan.durationWeeks),
+          books: JSON.stringify(plan.books, null, 2),
+          documentUrl: plan.documentUrl || '',
+        }
+      : emptyState
+  );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -35,8 +47,8 @@ export function PublishPlanForm({ onClose, onPublish }) {
         books: booksArray,
         documentUrl: formData.documentUrl || undefined,
       });
-      setMessage('¡Plan de Lectura publicado exitosamente!');
-      setFormData(initialState);
+      setMessage(isEdit ? '¡Plan de Lectura actualizado exitosamente!' : '¡Plan de Lectura publicado exitosamente!');
+      if (!isEdit) setFormData(emptyState);
       setTimeout(onClose, 1200);
     } catch (err) {
       setMessage(`Error: ${err.message}`);
@@ -46,7 +58,7 @@ export function PublishPlanForm({ onClose, onPublish }) {
   };
 
   return (
-    <Modal title="Publicar Plan Lector" onClose={onClose}>
+    <Modal title={isEdit ? 'Editar Plan Lector' : 'Publicar Plan Lector'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         <p className="text-xs text-ink-muted">* Campos obligatorios. La URL del Documento es opcional.</p>
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="* Título del Plan (Ej: Novelas para el Verano)" required />
@@ -69,8 +81,14 @@ export function PublishPlanForm({ onClose, onPublish }) {
           disabled={loading}
           className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
-          {loading ? <Loader2 className="animate-spin mr-2" /> : <NotebookText className="mr-2 w-5 h-5" />}
-          {loading ? 'Publicando Plan...' : 'Publicar Plan'}
+          {loading ? (
+            <Loader2 className="animate-spin mr-2" />
+          ) : isEdit ? (
+            <Save className="mr-2 w-5 h-5" />
+          ) : (
+            <NotebookText className="mr-2 w-5 h-5" />
+          )}
+          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Publicar Plan'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

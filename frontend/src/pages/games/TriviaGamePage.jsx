@@ -6,6 +6,7 @@ import { useBooks } from '../../context/BooksContext.jsx';
 import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { FullPageLoader } from '../../components/ui/Spinner.jsx';
+import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const QUESTION_COUNT = 8;
 
@@ -97,9 +98,7 @@ export default function TriviaGamePage() {
       </Link>
 
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-accent-soft text-accent flex items-center justify-center flex-shrink-0">
-          <Brain className="w-6 h-6" />
-        </div>
+        <IconTile icon={Brain} size="sm" className="bg-accent-soft text-accent" />
         <div>
           <h2 className="text-2xl font-serif font-semibold text-ink">Trivia de Libros</h2>
           <p className="text-sm text-ink-muted">Pregunta {Math.min(index + 1, questions.length)} de {questions.length}</p>

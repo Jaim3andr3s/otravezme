@@ -4,11 +4,11 @@ export function IconButton({ icon: Icon, onClick, className = '', title = '', di
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className={`p-2 rounded-full transition duration-200 ease-in-out shadow-lg transform hover:scale-105 ${className} ${
+      className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-all duration-200 ease-out hover:scale-105 active:scale-95 ${className} ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      <Icon className="w-6 h-6" />
+      <Icon className="w-5 h-5" />
     </button>
   );
 }

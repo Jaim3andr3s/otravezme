@@ -37,6 +37,12 @@ export function EventsProvider({ children }) {
     return event;
   }, []);
 
+  const update = useCallback(async (eventId, formData) => {
+    const { event } = await eventsService.update(eventId, formData);
+    setEvents((prev) => prev.map((e) => (e.id === eventId ? event : e)).sort(byDateAsc));
+    return event;
+  }, []);
+
   const remove = useCallback(
     async (eventId) => {
       if (!window.confirm('¿Eliminar este evento? Esta acción es irreversible.')) return;
@@ -52,7 +58,7 @@ export function EventsProvider({ children }) {
   );
 
   return (
-    <EventsContext.Provider value={{ events, loading, error, create, remove, reload }}>
+    <EventsContext.Provider value={{ events, loading, error, create, update, remove, reload }}>
       {children}
     </EventsContext.Provider>
   );

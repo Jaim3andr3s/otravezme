@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { profileService, DEMO_PROFILE_ID } from '../services/profile.service.js';
+import { profileService } from '../services/profile.service.js';
 import { useNotification } from './NotificationContext.jsx';
 import { useAchievements } from './AchievementsContext.jsx';
+import { useUserAuth } from './UserAuthContext.jsx';
 
 const ProfileContext = createContext(null);
 
@@ -10,18 +11,24 @@ export function ProfileProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
   const { announce } = useAchievements();
+  const { isAuthenticated } = useUserAuth();
 
   const loadProfile = useCallback(async () => {
+    if (!isAuthenticated) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const data = await profileService.get(DEMO_PROFILE_ID);
+      const data = await profileService.getMe();
       setProfile(data);
     } catch (err) {
       showNotification(`No se pudo cargar el perfil: ${err.message}`, 'error');
     } finally {
       setLoading(false);
     }
-  }, [showNotification]);
+  }, [isAuthenticated, showNotification]);
 
   useEffect(() => {
     loadProfile();
@@ -32,13 +39,16 @@ export function ProfileProvider({ children }) {
 
   const toggleFavorite = useCallback(
     async (bookId) => {
-      if (!profile) return;
+      if (!profile) {
+        showNotification('Inicia sesión para guardar tus favoritos.', 'info');
+        return;
+      }
       const already = isFavorite(bookId);
       const nextFavorites = already
         ? profile.favorites.filter((id) => id !== bookId)
         : [...profile.favorites, bookId];
       try {
-        const { profile: updated, newAchievements } = await profileService.setFavorites(profile.id, nextFavorites);
+        const { profile: updated, newAchievements } = await profileService.setFavorites(nextFavorites);
         setProfile(updated);
         showNotification(already ? 'Eliminado de favoritos.' : 'Añadido a favoritos.', 'success');
         announce(newAchievements);
@@ -51,13 +61,16 @@ export function ProfileProvider({ children }) {
 
   const toggleRead = useCallback(
     async (bookId) => {
-      if (!profile) return;
+      if (!profile) {
+        showNotification('Inicia sesión para guardar tu progreso de lectura.', 'info');
+        return;
+      }
       const already = isRead(bookId);
       const nextRead = already
         ? profile.read.filter((r) => r.bookId !== bookId)
         : [...profile.read, { bookId, date: new Date().toISOString() }];
       try {
-        const { profile: updated, newAchievements } = await profileService.setRead(profile.id, nextRead);
+        const { profile: updated, newAchievements } = await profileService.setRead(nextRead);
         setProfile(updated);
         showNotification(already ? 'Libro marcado como no leído.' : '¡Felicidades, libro completado!', 'success');
         announce(newAchievements);

@@ -11,6 +11,7 @@ import { PublishBookForm } from '../components/admin/PublishBookForm.jsx';
 import { CreateEventForm } from '../components/admin/CreateEventForm.jsx';
 import { PublishPlanForm } from '../components/admin/PublishPlanForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import { IconTile } from '../components/ui/IconTile.jsx';
 
 export default function AdminDashboardPage() {
   const { logout } = useAuth();
@@ -26,17 +27,31 @@ export default function AdminDashboardPage() {
     navigate('/');
   };
 
+  const handlePublishBook = async (data) => {
+    const book = await createBook(data);
+    navigate('/biblioteca');
+    return book;
+  };
+
+  const handleCreateEvent = async (data) => {
+    const event = await createEvent(data);
+    navigate('/eventos');
+    return event;
+  };
+
   const handlePublishPlan = async (data) => {
-    await plansService.create(data);
-    showNotification('Plan de lectura publicado. Visítalo en "Planes Lectores".', 'success');
+    const plan = await plansService.create(data);
+    navigate('/planes-lectores');
+    return plan;
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="p-6 bg-surface border-l-4 border-accent rounded-xl shadow-sm">
-        <h2 className="text-3xl font-serif font-semibold text-accent flex items-center mb-2">
-          <ShieldCheck className="w-7 h-7 mr-2 fill-accent-soft" /> Panel de Administrador
-        </h2>
+        <div className="flex items-center gap-3 mb-2">
+          <IconTile icon={ShieldCheck} className="bg-accent-soft text-accent" />
+          <h2 className="text-3xl font-serif font-semibold text-accent">Panel de Administrador</h2>
+        </div>
         <p className="text-sm text-ink-muted mb-6">Publica contenido nuevo o cierra tu sesión de administrador.</p>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -55,8 +70,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {modal === 'book' && <PublishBookForm onClose={() => setModal(null)} onPublish={createBook} />}
-      {modal === 'event' && <CreateEventForm onClose={() => setModal(null)} onCreate={createEvent} />}
+      {modal === 'book' && <PublishBookForm onClose={() => setModal(null)} onPublish={handlePublishBook} />}
+      {modal === 'event' && <CreateEventForm onClose={() => setModal(null)} onCreate={handleCreateEvent} />}
       {modal === 'plan' && <PublishPlanForm onClose={() => setModal(null)} onPublish={handlePublishPlan} />}
     </motion.div>
   );

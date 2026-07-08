@@ -6,6 +6,7 @@ import { useBooks } from '../../context/BooksContext.jsx';
 import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { FullPageLoader } from '../../components/ui/Spinner.jsx';
+import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const MAX_WRONG = 6;
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -87,9 +88,7 @@ export default function HangmanGamePage() {
       </Link>
 
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-danger-soft text-danger flex items-center justify-center flex-shrink-0">
-          <Type className="w-6 h-6" />
-        </div>
+        <IconTile icon={Type} size="sm" className="bg-danger-soft text-danger" />
         <div>
           <h2 className="text-2xl font-serif font-semibold text-ink">Ahorcado Literario</h2>
           <p className="text-sm text-ink-muted">Adivina el título o autor secreto.</p>

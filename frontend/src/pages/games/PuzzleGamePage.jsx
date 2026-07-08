@@ -6,6 +6,7 @@ import { useBooks } from '../../context/BooksContext.jsx';
 import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { FullPageLoader } from '../../components/ui/Spinner.jsx';
+import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const GRID = 3;
 const EMPTY = GRID * GRID - 1;
@@ -95,9 +96,7 @@ export default function PuzzleGamePage() {
       </Link>
 
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-gold-soft text-gold flex items-center justify-center flex-shrink-0">
-          <Puzzle className="w-6 h-6" />
-        </div>
+        <IconTile icon={Puzzle} size="sm" className="bg-gold-soft text-gold" />
         <div>
           <h2 className="text-2xl font-serif font-semibold text-ink">Rompecabezas de Portada</h2>
           <p className="text-sm text-ink-muted">Movimientos: {moves}</p>

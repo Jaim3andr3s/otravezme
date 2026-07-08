@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Grid3x3, RotateCcw, ArrowLeft, Trophy, BookOpen } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useBooks } from '../../context/BooksContext.jsx';
 import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { FullPageLoader } from '../../components/ui/Spinner.jsx';
+import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const PAIR_COUNT = 6;
 
@@ -32,6 +33,7 @@ export default function MemoryGamePage() {
   const [moves, setMoves] = useState(0);
   const [locked, setLocked] = useState(false);
   const [finished, setFinished] = useState(false);
+  const submittedRef = useRef(false);
 
   const canPlay = books.length >= PAIR_COUNT;
 
@@ -42,19 +44,20 @@ export default function MemoryGamePage() {
     setMoves(0);
     setLocked(false);
     setFinished(false);
+    submittedRef.current = false;
   }, [books]);
 
   useEffect(() => {
     if (canPlay) startGame();
   }, [canPlay, startGame]);
 
-  const submitResult = useCallback(
-    async (finalMoves) => {
-      const score = Math.max(0, PAIR_COUNT * 10 - finalMoves);
-      await submitScore({ score, won: true, metadata: { moves: finalMoves, pairs: PAIR_COUNT } });
-    },
-    [submitScore]
-  );
+  useEffect(() => {
+    if (matched.size !== PAIR_COUNT || submittedRef.current) return;
+    submittedRef.current = true;
+    setFinished(true);
+    const score = Math.max(0, PAIR_COUNT * 10 - moves);
+    submitScore({ score, won: true, metadata: { moves, pairs: PAIR_COUNT } });
+  }, [matched.size, moves, submitScore]);
 
   const handleFlip = (card) => {
     if (locked || flipped.some((f) => f.key === card.key) || matched.has(card.bookId)) return;
@@ -68,15 +71,7 @@ export default function MemoryGamePage() {
       const [a, b] = nextFlipped;
       if (a.bookId === b.bookId) {
         setTimeout(() => {
-          setMatched((prev) => {
-            const next = new Set(prev);
-            next.add(a.bookId);
-            if (next.size === PAIR_COUNT) {
-              setFinished(true);
-              submitResult(moves + 1);
-            }
-            return next;
-          });
+          setMatched((prev) => new Set(prev).add(a.bookId));
           setFlipped([]);
           setLocked(false);
         }, 500);
@@ -110,9 +105,7 @@ export default function MemoryGamePage() {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-success-soft text-success flex items-center justify-center flex-shrink-0">
-            <Grid3x3 className="w-6 h-6" />
-          </div>
+          <IconTile icon={Grid3x3} size="sm" className="bg-success-soft text-success" />
           <div>
             <h2 className="text-2xl font-serif font-semibold text-ink">Memorama de Portadas</h2>
             <p className="text-sm text-ink-muted">

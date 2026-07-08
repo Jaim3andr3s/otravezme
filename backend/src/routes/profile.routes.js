@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import { getProfile, updateProfile, setFavorites, setRead, recordGameScore } from '../controllers/profile.controller.js';
+import { requireUser } from '../middleware/requireUser.js';
 
 const router = Router();
 
-router.get('/:id', getProfile);
-router.put('/:id', updateProfile);
-router.put('/:id/favorites', setFavorites);
-router.put('/:id/read', setRead);
-router.post('/:id/games/:game/score', recordGameScore);
+router.use(requireUser);
+
+router.get('/me', getProfile);
+router.put('/me', updateProfile);
+router.put('/me/favorites', setFavorites);
+router.put('/me/read', setRead);
+router.post('/me/games/:game/score', recordGameScore);
 
 export default router;

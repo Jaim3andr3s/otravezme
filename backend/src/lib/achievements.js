@@ -127,10 +127,15 @@ export async function evaluateAndAwardAchievements(profileId) {
     });
     if (alreadyHas) continue;
 
-    await prisma.profileAchievement.create({
-      data: { profileId, achievementId: achievement.id },
-    });
-    newlyAwarded.push({ code: achievement.code, title: achievement.title, icon: achievement.icon });
+    try {
+      await prisma.profileAchievement.create({
+        data: { profileId, achievementId: achievement.id },
+      });
+      newlyAwarded.push({ code: achievement.code, title: achievement.title, icon: achievement.icon });
+    } catch (err) {
+      // P2002: another concurrent request already awarded this achievement first.
+      if (err.code !== 'P2002') throw err;
+    }
   }
 
   return newlyAwarded;

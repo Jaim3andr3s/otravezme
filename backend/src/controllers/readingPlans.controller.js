@@ -47,6 +47,36 @@ export async function createReadingPlan(req, res, next) {
   }
 }
 
+export async function updateReadingPlan(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const data = readingPlanCreateSchema.parse(req.body);
+
+    await prisma.$transaction([
+      prisma.readingPlanBook.deleteMany({ where: { planId: id } }),
+      prisma.readingPlan.update({
+        where: { id },
+        data: {
+          title: data.title,
+          description: data.description,
+          level: data.level,
+          durationWeeks: data.durationWeeks,
+          documentUrl: data.documentUrl || null,
+          books: {
+            create: data.books.map((b) => ({ bookId: b.bookId, weekNumber: b.week, note: b.note })),
+          },
+        },
+      }),
+    ]);
+
+    const plan = await prisma.readingPlan.findUnique({ where: { id }, include: { books: true } });
+    res.json({ message: 'Plan de lectura actualizado exitosamente.', plan: serializePlan(plan) });
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ message: 'Plan de lectura no encontrado para actualizar.' });
+    next(err);
+  }
+}
+
 export async function deleteReadingPlan(req, res, next) {
   try {
     const id = Number(req.params.id);

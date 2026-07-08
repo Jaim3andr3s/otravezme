@@ -11,3 +11,5 @@ export const bookCreateSchema = z.object({
   isStaffPick: z.boolean().optional(),
   readOnlineUrl: z.string().url().optional().or(z.literal('')),
 });
+
+export const bookUpdateSchema = bookCreateSchema.partial();

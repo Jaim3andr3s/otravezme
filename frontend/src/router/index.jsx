@@ -10,10 +10,14 @@ import TriviaGamePage from '../pages/games/TriviaGamePage.jsx';
 import MemoryGamePage from '../pages/games/MemoryGamePage.jsx';
 import HangmanGamePage from '../pages/games/HangmanGamePage.jsx';
 import PuzzleGamePage from '../pages/games/PuzzleGamePage.jsx';
+import LoginPage from '../pages/LoginPage.jsx';
 import AdminLoginPage from '../pages/AdminLoginPage.jsx';
 import AdminDashboardPage from '../pages/AdminDashboardPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import { RequireAdmin } from './RequireAdmin.jsx';
+import { RequireUser } from './RequireUser.jsx';
+
+const withUser = (element) => <RequireUser>{element}</RequireUser>;
 
 export const router = createBrowserRouter(
   [
@@ -25,12 +29,13 @@ export const router = createBrowserRouter(
         { path: 'biblioteca', element: <CatalogPage /> },
         { path: 'eventos', element: <EventsPage /> },
         { path: 'planes-lectores', element: <PlansPage /> },
-        { path: 'perfil', element: <ProfilePage /> },
-        { path: 'juegos', element: <GamesHubPage /> },
-        { path: 'juegos/trivia', element: <TriviaGamePage /> },
-        { path: 'juegos/memorama', element: <MemoryGamePage /> },
-        { path: 'juegos/ahorcado', element: <HangmanGamePage /> },
-        { path: 'juegos/rompecabezas', element: <PuzzleGamePage /> },
+        { path: 'ingresar', element: <LoginPage /> },
+        { path: 'perfil', element: withUser(<ProfilePage />) },
+        { path: 'juegos', element: withUser(<GamesHubPage />) },
+        { path: 'juegos/trivia', element: withUser(<TriviaGamePage />) },
+        { path: 'juegos/memorama', element: withUser(<MemoryGamePage />) },
+        { path: 'juegos/ahorcado', element: withUser(<HangmanGamePage />) },
+        { path: 'juegos/rompecabezas', element: withUser(<PuzzleGamePage />) },
         { path: 'admin/login', element: <AdminLoginPage /> },
         {
           path: 'admin',

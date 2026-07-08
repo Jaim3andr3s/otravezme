@@ -9,6 +9,7 @@ export function BooksProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [editingBook, setEditingBook] = useState(null);
   const { showNotification } = useNotification();
 
   const reload = useCallback(async () => {
@@ -63,9 +64,32 @@ export function BooksProvider({ children }) {
     return book;
   }, []);
 
+  const update = useCallback(
+    async (bookId, formData) => {
+      const { book } = await booksService.update(bookId, formData);
+      setBooks((prev) => prev.map((b) => (b.id === bookId ? book : b)));
+      setSelectedBook((prev) => (prev?.id === bookId ? book : prev));
+      return book;
+    },
+    []
+  );
+
   return (
     <BooksContext.Provider
-      value={{ books, loading, error, selectedBook, setSelectedBook, vote, remove, create, reload }}
+      value={{
+        books,
+        loading,
+        error,
+        selectedBook,
+        setSelectedBook,
+        editingBook,
+        setEditingBook,
+        vote,
+        remove,
+        create,
+        update,
+        reload,
+      }}
     >
       {children}
     </BooksContext.Provider>

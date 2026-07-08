@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Mic, BookOpenCheck, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Mic, BookOpenCheck, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useEvents } from '../context/EventsContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { CreateEventForm } from '../components/admin/CreateEventForm.jsx';
@@ -10,9 +10,10 @@ import { FullPageLoader } from '../components/ui/Spinner.jsx';
 import { EVENT_TYPE_LABEL } from '../constants/labels.js';
 
 export default function EventsPage() {
-  const { events, loading, error, create, remove } = useEvents();
+  const { events, loading, error, create, update, remove } = useEvents();
   const { isAdmin } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   if (loading) return <FullPageLoader label="Cargando eventos..." />;
   if (error) return <p className="text-danger text-center py-12">Error al cargar eventos: {error}</p>;
@@ -31,13 +32,22 @@ export default function EventsPage() {
             animate={{ opacity: 1, y: 0 }}
           >
             {isAdmin && (
-              <button
-                onClick={() => remove(event.id)}
-                className="absolute top-3 right-3 p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition z-10"
-                title="Eliminar Evento"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              <div className="absolute top-3 right-3 flex gap-1.5 z-10">
+                <button
+                  onClick={() => setEditingEvent(event)}
+                  className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition"
+                  title="Editar Evento"
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => remove(event.id)}
+                  className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition"
+                  title="Eliminar Evento"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
             )}
             <Calendar className="w-10 h-10 text-accent flex-shrink-0 mr-4 mt-1" />
             <div className="flex-grow">
@@ -68,6 +78,13 @@ export default function EventsPage() {
       )}
 
       {showCreate && <CreateEventForm onClose={() => setShowCreate(false)} onCreate={create} />}
+      {editingEvent && (
+        <CreateEventForm
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onCreate={(data) => update(editingEvent.id, data)}
+        />
+      )}
     </motion.div>
   );
 }

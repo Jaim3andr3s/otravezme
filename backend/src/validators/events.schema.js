@@ -8,3 +8,5 @@ export const eventCreateSchema = z.object({
   location: z.string().optional(),
   imageUrl: z.string().url().optional().or(z.literal('')),
 });
+
+export const eventUpdateSchema = eventCreateSchema.partial();

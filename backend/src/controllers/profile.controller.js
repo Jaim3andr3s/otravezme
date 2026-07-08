@@ -15,6 +15,7 @@ async function serializeProfile(id) {
     bio: profile.bio,
     avatar: profile.avatar,
     joinedAt: profile.joinedAt,
+    authProvider: profile.authProvider,
     favorites: profile.favorites.map((f) => f.bookId),
     read: profile.read.map((r) => ({ bookId: r.bookId, date: r.readAt })),
     achievements: profile.achievements.map((pa) => ({
@@ -30,8 +31,7 @@ async function serializeProfile(id) {
 
 export async function getProfile(req, res, next) {
   try {
-    const id = Number(req.params.id);
-    const profile = await serializeProfile(id);
+    const profile = await serializeProfile(req.profileId);
     if (!profile) return res.status(404).json({ message: 'Perfil no encontrado.' });
     res.json(profile);
   } catch (err) {
@@ -41,7 +41,7 @@ export async function getProfile(req, res, next) {
 
 export async function updateProfile(req, res, next) {
   try {
-    const id = Number(req.params.id);
+    const id = req.profileId;
     const { name, bio, avatar } = req.body;
 
     await prisma.profile.update({
@@ -63,7 +63,7 @@ export async function updateProfile(req, res, next) {
 
 export async function setFavorites(req, res, next) {
   try {
-    const id = Number(req.params.id);
+    const id = req.profileId;
     const { favorites } = req.body;
     if (!Array.isArray(favorites)) {
       return res.status(400).json({ message: 'La lista de favoritos debe ser un array.' });
@@ -79,7 +79,6 @@ export async function setFavorites(req, res, next) {
 
     const newAchievements = await evaluateAndAwardAchievements(id);
     const profile = await serializeProfile(id);
-    if (!profile) return res.status(404).json({ message: 'Perfil no encontrado para actualizar favoritos.' });
     res.json({ message: 'Lista de favoritos actualizada.', profile, newAchievements });
   } catch (err) {
     next(err);
@@ -88,7 +87,7 @@ export async function setFavorites(req, res, next) {
 
 export async function setRead(req, res, next) {
   try {
-    const id = Number(req.params.id);
+    const id = req.profileId;
     const { read } = req.body;
     if (!Array.isArray(read)) {
       return res.status(400).json({ message: 'La lista de leídos debe ser un array.' });
@@ -108,7 +107,6 @@ export async function setRead(req, res, next) {
 
     const newAchievements = await evaluateAndAwardAchievements(id);
     const profile = await serializeProfile(id);
-    if (!profile) return res.status(404).json({ message: 'Perfil no encontrado para actualizar libros leídos.' });
     res.json({ message: 'Lista de libros leídos actualizada.', profile, newAchievements });
   } catch (err) {
     next(err);
@@ -117,7 +115,7 @@ export async function setRead(req, res, next) {
 
 export async function recordGameScore(req, res, next) {
   try {
-    const id = Number(req.params.id);
+    const id = req.profileId;
     const game = req.params.game.toUpperCase();
     if (!['TRIVIA', 'MEMORY', 'HANGMAN', 'PUZZLE'].includes(game)) {
       return res.status(400).json({ message: 'Juego inválido.' });

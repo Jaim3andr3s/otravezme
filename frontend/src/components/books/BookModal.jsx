@@ -1,11 +1,11 @@
-import { BookOpenCheck, Heart, Eraser, Check, ThumbsUp, ThumbsDown, Trash2, Badge as BadgeIcon, Landmark, Star, Zap } from 'lucide-react';
+import { BookOpenCheck, Heart, Eraser, Check, ThumbsUp, ThumbsDown, Trash2, Pencil, Badge as BadgeIcon, Landmark, Star, Zap } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
 import { useProfile } from '../../context/ProfileContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { BOOK_STATUS_LABEL } from '../../constants/labels.js';
 
-export function BookModal({ book, onClose, onVote, onDelete }) {
+export function BookModal({ book, onClose, onVote, onDelete, onEdit }) {
   const { isFavorite, isRead, toggleFavorite, toggleRead } = useProfile();
   const { isAdmin } = useAuth();
   const favorite = isFavorite(book.id);
@@ -91,13 +91,22 @@ export function BookModal({ book, onClose, onVote, onDelete }) {
           </button>
 
           {isAdmin && (
-            <button
-              onClick={() => onDelete(book.id)}
-              className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-danger hover:opacity-90`}
-              title="Eliminar Libro (Admin)"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
+            <>
+              <button
+                onClick={() => onEdit(book)}
+                className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-gold hover:opacity-90`}
+                title="Editar Libro (Admin)"
+              >
+                <Pencil className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => onDelete(book.id)}
+                className={`${buttonClass} flex-shrink-0 w-full sm:w-auto bg-danger hover:opacity-90`}
+                title="Eliminar Libro (Admin)"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </>
           )}
         </div>
 

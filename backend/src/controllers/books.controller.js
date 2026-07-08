@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma.js';
-import { bookCreateSchema } from '../validators/books.schema.js';
+import { bookCreateSchema, bookUpdateSchema } from '../validators/books.schema.js';
 
 export async function listBooks(req, res, next) {
   try {
@@ -29,6 +29,20 @@ export async function createBook(req, res, next) {
     });
     res.status(201).json(book);
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateBook(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const data = bookUpdateSchema.parse(req.body);
+    if (data.readOnlineUrl !== undefined) data.readOnlineUrl = data.readOnlineUrl || null;
+
+    const book = await prisma.book.update({ where: { id }, data });
+    res.json({ message: 'Libro actualizado exitosamente.', book });
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ message: 'Libro no encontrado para actualizar.' });
     next(err);
   }
 }

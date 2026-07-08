@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpenCheck, Menu, X, ShieldCheck } from 'lucide-react';
+import { BookOpenCheck, X, ShieldCheck, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useUserAuth } from '../../context/UserAuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import { DarkModeToggle } from '../ui/DarkModeToggle.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
+import { MenuToggle } from '../ui/MenuToggle.jsx';
 import { Badge } from '../ui/Badge.jsx';
 
 const NAV_LINKS = [
@@ -20,6 +22,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAdmin, logout } = useAuth();
+  const { isAuthenticated, logout: logoutUser } = useUserAuth();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const menuRef = useRef(null);
@@ -35,6 +38,12 @@ export function Navbar() {
   const handleLogout = () => {
     logout();
     showNotification('Sesión de administrador cerrada.', 'info');
+    navigate('/');
+  };
+
+  const handleUserLogout = () => {
+    logoutUser();
+    showNotification('Sesión cerrada.', 'info');
     navigate('/');
   };
 
@@ -80,12 +89,7 @@ export function Navbar() {
             </button>
           )}
 
-          <IconButton
-            icon={Menu}
-            onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden text-accent bg-accent-soft"
-            title="Abrir Menú"
-          />
+          <MenuToggle open={isMenuOpen} onClick={() => setIsMenuOpen((prev) => !prev)} />
         </div>
       </div>
 
@@ -109,6 +113,11 @@ export function Navbar() {
                   {link.label}
                 </NavLink>
               ))}
+              {isAuthenticated && (
+                <button onClick={handleUserLogout} className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-ink-muted hover:bg-surface-alt flex items-center gap-2">
+                  <LogOut className="w-5 h-5" /> Cerrar Sesión
+                </button>
+              )}
               {isAdmin && (
                 <button onClick={handleLogout} className="font-semibold text-xl text-left p-3 rounded-lg transition duration-150 text-danger hover:bg-danger-soft">
                   <X className="w-5 h-5 mr-2 inline" /> Salir Admin

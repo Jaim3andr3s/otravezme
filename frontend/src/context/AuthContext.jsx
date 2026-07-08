@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { authService } from '../services/auth.service.js';
-import { setAuthToken } from '../services/api.js';
+import { setAdminToken } from '../services/api.js';
 
 const AuthContext = createContext(null);
 const TOKEN_STORAGE_KEY = 'bibliosuenos_admin_token';
@@ -9,17 +9,19 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY));
 
   useEffect(() => {
-    setAuthToken(token);
+    setAdminToken(token);
   }, [token]);
 
   const login = useCallback(async (username, password) => {
     const { token: newToken } = await authService.login(username, password);
     sessionStorage.setItem(TOKEN_STORAGE_KEY, newToken);
+    setAdminToken(newToken);
     setToken(newToken);
   }, []);
 
   const logout = useCallback(() => {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    setAdminToken(null);
     setToken(null);
   }, []);
 
