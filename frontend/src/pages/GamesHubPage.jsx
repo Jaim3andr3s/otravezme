@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Brain, Grid3x3, Type, Puzzle, Trophy } from 'lucide-react';
+import { Brain, Grid3x3, Type, Puzzle, Search, Grid, Trophy } from 'lucide-react';
 import { GameCard } from '../components/games/GameCard.jsx';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
 import { useAchievements } from '../context/AchievementsContext.jsx';
@@ -34,6 +34,21 @@ const GAMES = [
     description: 'Ordena las piezas deslizantes para reconstruir la portada de un libro.',
     accentClass: 'bg-gold-soft text-gold',
   },
+  // NUEVOS JUEGOS (Fase C)
+  {
+    to: '/juegos/sopa-de-letras',
+    icon: Search,
+    title: 'Sopa de Letras',
+    description: 'Encuentra las palabras ocultas en la cuadrícula de letras.',
+    accentClass: 'bg-accent-soft text-accent',
+  },
+  {
+    to: '/juegos/crucigrama',
+    icon: Grid,
+    title: 'Crucigrama Literario',
+    description: 'Completa el crucigrama con las palabras que coinciden con las definiciones.',
+    accentClass: 'bg-purple-soft text-purple',
+  },
 ];
 
 export default function GamesHubPage() {
@@ -48,7 +63,7 @@ export default function GamesHubPage() {
         <p className="text-lg text-ink-muted">Diviértete con el catálogo y gana insignias por cada logro.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {GAMES.map((game) => (
           <GameCard key={game.to} {...game} />
         ))}

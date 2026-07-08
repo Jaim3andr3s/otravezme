@@ -1,8 +1,12 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
 
 export function RequireAdmin({ children }) {
-  const { isAdmin } = useAuth();
-  if (!isAdmin) return <Navigate to="/admin/login" replace />;
+  const { isAuthenticated, role, checkingSession } = useUserAuth();
+
+  if (checkingSession) return null; // o un spinner
+  if (!isAuthenticated || role !== 'admin') {
+    return <Navigate to="/ingresar" replace />;
+  }
   return children;
 }

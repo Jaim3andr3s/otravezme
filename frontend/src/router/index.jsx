@@ -10,33 +10,64 @@ import TriviaGamePage from '../pages/games/TriviaGamePage.jsx';
 import MemoryGamePage from '../pages/games/MemoryGamePage.jsx';
 import HangmanGamePage from '../pages/games/HangmanGamePage.jsx';
 import PuzzleGamePage from '../pages/games/PuzzleGamePage.jsx';
+import WordsearchGamePage from '../pages/games/WordsearchGamePage.jsx';
+import CrosswordGamePage from '../pages/games/CrosswordGamePage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
-import AdminLoginPage from '../pages/AdminLoginPage.jsx';
 import AdminDashboardPage from '../pages/AdminDashboardPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import { RequireAdmin } from './RequireAdmin.jsx';
 import { RequireUser } from './RequireUser.jsx';
+import { HomeOrLogin } from '../pages/HomeOrLogin.jsx';
+
+// Fase A
+import GalleryPage from '../pages/GalleryPage.jsx';
+import BookOfMonthPage from '../pages/BookOfMonthPage.jsx';
+import BadgesPage from '../pages/BadgesPage.jsx';
+
+// Fase B
+import PublicationPage from '../pages/PublicationPage.jsx';
+
+// Fase D
+import ReadingChallengesPage from '../pages/ReadingChallengesPage.jsx';
+
+// Fase E - Diploma
+import DiplomaPage from '../pages/DiplomaPage.jsx';
 
 const withUser = (element) => <RequireUser>{element}</RequireUser>;
 
 export const router = createBrowserRouter(
   [
+    // Rutas con layout principal (Navbar)
     {
       path: '/',
       element: <AppShell />,
       children: [
-        { index: true, element: <HomePage /> },
+        { index: true, element: <HomeOrLogin /> },
         { path: 'biblioteca', element: <CatalogPage /> },
         { path: 'eventos', element: <EventsPage /> },
         { path: 'planes-lectores', element: <PlansPage /> },
-        { path: 'ingresar', element: <LoginPage /> },
         { path: 'perfil', element: withUser(<ProfilePage />) },
+        { path: 'perfil/diplomas', element: withUser(<DiplomaPage />) }, // NUEVO
         { path: 'juegos', element: withUser(<GamesHubPage />) },
         { path: 'juegos/trivia', element: withUser(<TriviaGamePage />) },
         { path: 'juegos/memorama', element: withUser(<MemoryGamePage />) },
         { path: 'juegos/ahorcado', element: withUser(<HangmanGamePage />) },
         { path: 'juegos/rompecabezas', element: withUser(<PuzzleGamePage />) },
-        { path: 'admin/login', element: <AdminLoginPage /> },
+        { path: 'juegos/sopa-de-letras', element: withUser(<WordsearchGamePage />) },
+        { path: 'juegos/crucigrama', element: withUser(<CrosswordGamePage />) },
+
+        // Fase A
+        { path: 'galeria', element: <GalleryPage /> },
+        { path: 'libro-del-mes', element: <BookOfMonthPage /> },
+        { path: 'insignias', element: <BadgesPage /> },
+
+        // Fase B
+        { path: 'periodico', element: <PublicationPage /> },
+        { path: 'revista-digital', element: <PublicationPage /> },
+
+        // Fase D
+        { path: 'club-de-lectura/retos', element: <ReadingChallengesPage /> },
+
         {
           path: 'admin',
           element: (
@@ -45,8 +76,19 @@ export const router = createBrowserRouter(
             </RequireAdmin>
           ),
         },
-        { path: '*', element: <NotFoundPage /> },
       ],
+    },
+
+    // Rutas sin Navbar (login)
+    {
+      path: '/ingresar',
+      element: <LoginPage />,
+    },
+
+    // 404
+    {
+      path: '*',
+      element: <NotFoundPage />,
     },
   ],
   { future: { v7_startTransition: true } }

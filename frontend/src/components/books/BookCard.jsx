@@ -1,23 +1,51 @@
 import { motion } from 'framer-motion';
-import { Heart, Sparkles, Check, XOctagon } from 'lucide-react';
+import { Heart, Sparkles, Check, XOctagon, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '../ui/Badge.jsx';
 import { StarRating } from './StarRating.jsx';
 import { useProfile } from '../../context/ProfileContext.jsx';
+import { useUserAuth } from '../../context/UserAuthContext.jsx';
 import { BOOK_STATUS_LABEL } from '../../constants/labels.js';
 
-export function BookCard({ book, onClick }) {
+export function BookCard({ book, onClick, onEdit, onDelete }) {
   const { isFavorite } = useProfile();
+  const { role } = useUserAuth();
+  const isAdmin = role === 'admin';
   const favorite = isFavorite(book.id);
 
   return (
     <motion.div
-      className="flex flex-col h-full bg-surface border border-edge rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
+      className="flex flex-col h-full bg-surface border border-edge rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1 relative"
       onClick={() => onClick(book)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       layout
     >
+      {isAdmin && (
+        <div className="absolute top-2 right-2 flex gap-1.5 z-10">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(book);
+            }}
+            className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition shadow-md"
+            title="Editar libro"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(book.id);
+            }}
+            className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition shadow-md"
+            title="Eliminar libro"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="relative overflow-hidden w-full h-56 flex-shrink-0">
         <img
           src={book.cover}
@@ -30,7 +58,7 @@ export function BookCard({ book, onClick }) {
         />
         {favorite && (
           <motion.div
-            className="absolute top-2 right-2 p-1.5 bg-danger rounded-full shadow-lg"
+            className="absolute top-2 left-2 p-1.5 bg-danger rounded-full shadow-lg"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
           >

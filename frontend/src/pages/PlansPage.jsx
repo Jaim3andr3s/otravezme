@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { NotebookText, ChevronRight, Book, Globe, Pencil, Trash2, Plus, Wind } from 'lucide-react';
 import { useReadingPlans } from '../hooks/useReadingPlans.js';
 import { useBooks } from '../context/BooksContext.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useNotification } from '../context/NotificationContext.jsx';
 import { plansService } from '../services/plans.service.js';
 import { PublishPlanForm } from '../components/admin/PublishPlanForm.jsx';
@@ -14,7 +14,8 @@ import { FullPageLoader } from '../components/ui/Spinner.jsx';
 export default function PlansPage() {
   const { plans, setPlans, loading: plansLoading, error } = useReadingPlans();
   const { books, loading: booksLoading } = useBooks();
-  const { isAdmin } = useAuth();
+  const { role } = useUserAuth();
+  const isAdmin = role === 'admin';
   const { showNotification } = useNotification();
   const [showPublish, setShowPublish] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
@@ -45,8 +46,18 @@ export default function PlansPage() {
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      <h2 className="text-4xl font-serif font-semibold text-ink">📚 Planes de Lectura</h2>
-      <p className="text-lg text-ink-muted">Guías de lectura estructurada para alcanzar tus metas literarias.</p>
+      {/* Encabezado con botón de admin en la parte superior */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-serif font-semibold text-ink">📚 Planes de Lectura ({plans.length})</h2>
+          <p className="text-lg text-ink-muted">Guías de lectura estructurada para alcanzar tus metas literarias.</p>
+        </div>
+        {isAdmin && (
+          <Button variant="pink" onClick={() => setShowPublish(true)} className="flex-shrink-0">
+            <Plus className="w-5 h-5" /> Publicar Nuevo Plan Lector
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.length > 0 ? (
@@ -119,14 +130,6 @@ export default function PlansPage() {
           </div>
         )}
       </div>
-
-      {isAdmin && (
-        <div className="flex justify-center pt-8">
-          <Button variant="pink" onClick={() => setShowPublish(true)}>
-            <Plus className="w-5 h-5" /> Publicar Nuevo Plan Lector
-          </Button>
-        </div>
-      )}
 
       {showPublish && <PublishPlanForm onClose={() => setShowPublish(false)} onPublish={handlePublish} />}
       {editingPlan && <PublishPlanForm plan={editingPlan} onClose={() => setEditingPlan(null)} onPublish={handleUpdate} />}

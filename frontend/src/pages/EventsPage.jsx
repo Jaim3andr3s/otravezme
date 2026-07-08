@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Mic, BookOpenCheck, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useEvents } from '../context/EventsContext.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { CreateEventForm } from '../components/admin/CreateEventForm.jsx';
 import { Badge } from '../components/ui/Badge.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -11,7 +11,8 @@ import { EVENT_TYPE_LABEL } from '../constants/labels.js';
 
 export default function EventsPage() {
   const { events, loading, error, create, update, remove } = useEvents();
-  const { isAdmin } = useAuth();
+  const { role } = useUserAuth();
+  const isAdmin = role === 'admin';
   const [showCreate, setShowCreate] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
 
@@ -20,8 +21,18 @@ export default function EventsPage() {
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      <h2 className="text-4xl font-serif font-semibold text-ink">📣 Próximos Eventos ({events.length})</h2>
-      <p className="text-lg text-ink-muted">Participa en nuestros clubes de lectura, talleres y cuentacuentos.</p>
+      {/* Encabezado con botón de admin en la parte superior */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-serif font-semibold text-ink">📣 Próximos Eventos ({events.length})</h2>
+          <p className="text-lg text-ink-muted">Participa en nuestros clubes de lectura, talleres y cuentacuentos.</p>
+        </div>
+        {isAdmin && (
+          <Button variant="purple" onClick={() => setShowCreate(true)} className="flex-shrink-0">
+            <Plus className="w-5 h-5" /> Crear Nuevo Evento
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-6">
         {events.map((event) => (
@@ -68,14 +79,6 @@ export default function EventsPage() {
           </motion.div>
         ))}
       </div>
-
-      {isAdmin && (
-        <div className="flex justify-center pt-8">
-          <Button variant="purple" onClick={() => setShowCreate(true)}>
-            <Plus className="w-5 h-5" /> Crear Nuevo Evento
-          </Button>
-        </div>
-      )}
 
       {showCreate && <CreateEventForm onClose={() => setShowCreate(false)} onCreate={create} />}
       {editingEvent && (

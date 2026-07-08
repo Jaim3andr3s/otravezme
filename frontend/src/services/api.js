@@ -11,6 +11,12 @@ export function setUserToken(token) {
   userToken = token;
 }
 
+// Función para notificar que el token es inválido (se usa desde fuera)
+let onUnauthorizedCallback = null;
+export function setOnUnauthorized(callback) {
+  onUnauthorizedCallback = callback;
+}
+
 async function request(path, options = {}) {
   const { auth, ...rest } = options;
   const headers = { ...(rest.headers || {}) };
@@ -21,13 +27,21 @@ async function request(path, options = {}) {
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...rest, headers });
 
+  // Si es 401 y hay un callback, ejecutarlo
+  if (response.status === 401 && onUnauthorizedCallback) {
+    onUnauthorizedCallback();
+  }
+
   if (response.status === 204) return null;
 
   const text = await response.text();
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
-    throw new Error(data?.message || `Error HTTP ${response.status}`);
+    // Añadir el status al error para manejarlo mejor
+    const error = new Error(data?.message || `Error HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 
   return data;

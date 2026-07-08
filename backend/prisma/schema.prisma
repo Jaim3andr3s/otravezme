@@ -127,7 +127,8 @@ model Profile {
   favorites    Favorite[]
   read         ReadBook[]
   achievements ProfileAchievement[]
-  gameScores   GameScore[]
+  gameScores   GameScore[] 
+  diplomas   Diploma[] 
 }
 
 model GalleryImage {
@@ -212,3 +213,31 @@ model GameScore {
   metadata  Json?
   playedAt  DateTime @default(now())
 }
+
+model ReadingChallenge {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  goalBooks   Int
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+} 
+
+enum DiplomaType {
+  PLAN
+  CHALLENGE
+}
+
+model Diploma {
+  id        Int         @id @default(autoincrement())
+  profileId Int
+  title     String
+  type      DiplomaType
+  issuedAt  DateTime    @default(now())
+  profile   Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, title, type])
+}
+
+

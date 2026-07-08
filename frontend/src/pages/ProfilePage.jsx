@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Heart, BookOpenCheck, Calendar, Trophy, ArrowRight } from 'lucide-react';
+import { Heart, BookOpenCheck, Calendar, Trophy, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useBooks } from '../context/BooksContext.jsx';
 import { BookCard } from '../components/books/BookCard.jsx';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
@@ -10,7 +11,24 @@ import { FullPageLoader } from '../components/ui/Spinner.jsx';
 
 export default function ProfilePage() {
   const { profile, loading: profileLoading } = useProfile();
+  const { role } = useUserAuth();
   const { books, loading: booksLoading, setSelectedBook } = useBooks();
+
+  // Si es administrador, mostrar mensaje especial
+  if (role === 'admin') {
+    return (
+      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="max-w-xl mx-auto text-center py-16 space-y-4">
+        <ShieldCheck className="w-16 h-16 text-accent mx-auto" />
+        <h2 className="text-3xl font-serif font-semibold text-ink">Panel de Administrador</h2>
+        <p className="text-ink-muted">
+          Los administradores no tienen un perfil personal. Puedes gestionar el contenido desde el catálogo, eventos y planes de lectura.
+        </p>
+        <Link to="/" className="inline-block mt-4 px-6 py-3 bg-accent text-accent-ink font-semibold rounded-full shadow-sm hover:bg-accent-hover transition">
+          Volver al inicio
+        </Link>
+      </motion.div>
+    );
+  }
 
   if (profileLoading || booksLoading || !profile) return <FullPageLoader label="Cargando tu perfil..." />;
 

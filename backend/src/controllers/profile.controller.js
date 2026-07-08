@@ -1,10 +1,127 @@
 import prisma from '../lib/prisma.js';
 import { evaluateAndAwardAchievements } from '../lib/achievements.js';
 
+// Helper: otorgar diploma por completar un plan de lectura
+async function awardPlanDiploma(profileId, planId) {
+  // Obtener el plan con sus libros
+  const plan = await prisma.readingPlan.findUnique({
+    where: { id: planId },
+    include: { books: true },
+  });
+  if (!plan) return null;
+
+  // Verificar si ya tiene diploma para este plan
+  const existing = await prisma.diploma.findFirst({
+    where: {
+      profileId,
+      title: plan.title,
+      type: 'PLAN',
+    },
+  });
+  if (existing) return null;
+
+  // Verificar si ha leído todos los libros del plan
+  const bookIds = plan.books.map(b => b.bookId);
+  const readBooks = await prisma.readBook.findMany({
+    where: {
+      profileId,
+      bookId: { in: bookIds },
+    },
+  });
+  const readBookIds = readBooks.map(r => r.bookId);
+  const allRead = bookIds.every(id => readBookIds.includes(id));
+
+  if (!allRead) return null;
+
+  // Crear diploma
+  const diploma = await prisma.diploma.create({
+    data: {
+      profileId,
+      title: `Plan completado: ${plan.title}`,
+      type: 'PLAN',
+    },
+  });
+
+  return diploma;
+}
+
+// Helper: otorgar diploma por completar un reto de lectura
+async function awardChallengeDiploma(profileId, challengeId) {
+  const challenge = await prisma.readingChallenge.findUnique({
+    where: { id: challengeId },
+  });
+  if (!challenge) return null;
+
+  // Verificar si ya tiene diploma para este reto
+  const existing = await prisma.diploma.findFirst({
+    where: {
+      profileId,
+      title: challenge.title,
+      type: 'CHALLENGE',
+    },
+  });
+  if (existing) return null;
+
+  // Verificar si ha completado el reto
+  const readCount = await prisma.readBook.count({
+    where: {
+      profileId,
+      readAt: {
+        gte: challenge.startDate,
+        lte: challenge.endDate,
+      },
+    },
+  });
+
+  if (readCount < challenge.goalBooks) return null;
+
+  // Crear diploma
+  const diploma = await prisma.diploma.create({
+    data: {
+      profileId,
+      title: `Reto completado: ${challenge.title}`,
+      type: 'CHALLENGE',
+    },
+  });
+
+  return diploma;
+}
+
+// Función para verificar y otorgar diplomas después de marcar un libro como leído
+async function checkAndAwardDiplomas(profileId) {
+  const awarded = [];
+
+  // 1. Verificar planes de lectura
+  const plans = await prisma.readingPlan.findMany({
+    include: { books: true },
+  });
+
+  for (const plan of plans) {
+    const diploma = await awardPlanDiploma(profileId, plan.id);
+    if (diploma) awarded.push(diploma);
+  }
+
+  // 2. Verificar retos de lectura
+  const challenges = await prisma.readingChallenge.findMany();
+  for (const challenge of challenges) {
+    const diploma = await awardChallengeDiploma(profileId, challenge.id);
+    if (diploma) awarded.push(diploma);
+  }
+
+  return awarded;
+}
+
+// ========== FUNCIONES EXISTENTES (MODIFICADAS) ==========
+
 async function serializeProfile(id) {
   const profile = await prisma.profile.findUnique({
     where: { id },
-    include: { favorites: true, read: true, achievements: { include: { achievement: true } } },
+    include: { 
+      favorites: true, 
+      read: true, 
+      achievements: { include: { achievement: true } },
+      diplomas: { orderBy: { issuedAt: 'desc' } }, // Incluir diplomas
+    },
   });
   if (!profile) return null;
 
@@ -25,6 +142,12 @@ async function serializeProfile(id) {
       icon: pa.achievement.icon,
       category: pa.achievement.category,
       earnedAt: pa.earnedAt,
+    })),
+    diplomas: profile.diplomas.map((d) => ({
+      id: d.id,
+      title: d.title,
+      type: d.type,
+      issuedAt: d.issuedAt,
     })),
   };
 }
@@ -105,9 +228,19 @@ export async function setRead(req, res, next) {
       }),
     ]);
 
+    // ✅ Otorgar logros
     const newAchievements = await evaluateAndAwardAchievements(id);
+
+    // ✅ Otorgar diplomas (planes y retos completados)
+    const newDiplomas = await checkAndAwardDiplomas(id);
+
     const profile = await serializeProfile(id);
-    res.json({ message: 'Lista de libros leídos actualizada.', profile, newAchievements });
+    res.json({
+      message: 'Lista de libros leídos actualizada.',
+      profile,
+      newAchievements,
+      newDiplomas,
+    });
   } catch (err) {
     next(err);
   }
@@ -130,6 +263,22 @@ export async function recordGameScore(req, res, next) {
     res.status(201).json({ message: 'Puntaje registrado.', newAchievements });
   } catch (err) {
     if (err.code === 'P2003') return res.status(404).json({ message: 'Perfil no encontrado.' });
+    next(err);
+  }
+}
+
+// ========== NUEVO: listar diplomas del usuario autenticado ==========
+export async function getDiplomas(req, res, next) {
+  try {
+    const profileId = req.profileId;
+
+    const diplomas = await prisma.diploma.findMany({
+      where: { profileId },
+      orderBy: { issuedAt: 'desc' },
+    });
+
+    res.json(diplomas);
+  } catch (err) {
     next(err);
   }
 }

@@ -7,36 +7,54 @@ import { useUserAuth } from './UserAuthContext.jsx';
 const ProfileContext = createContext(null);
 
 export function ProfileProvider({ children }) {
+  const { isAuthenticated, role, logout } = useUserAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
   const { announce } = useAchievements();
-  const { isAuthenticated } = useUserAuth();
+
+  // Funciones para consultar estado sin cargar el perfil completo
+  const isFavorite = useCallback(
+    (bookId) => profile?.favorites?.includes(bookId) ?? false,
+    [profile]
+  );
+
+  const isRead = useCallback(
+    (bookId) => profile?.read?.some((r) => r.bookId === bookId) ?? false,
+    [profile]
+  );
 
   const loadProfile = useCallback(async () => {
-    if (!isAuthenticated) {
+    // Si no está autenticado o es administrador, no cargamos perfil (evita 401)
+    if (!isAuthenticated || role === 'admin') {
       setProfile(null);
       setLoading(false);
       return;
     }
+
     setLoading(true);
     try {
       const data = await profileService.getMe();
       setProfile(data);
     } catch (err) {
-      showNotification(`No se pudo cargar el perfil: ${err.message}`, 'error');
+      // Si el token es inválido, cerramos sesión
+      if (err.status === 401 || err.message?.includes('401')) {
+        setProfile(null);
+        logout(); // limpia token y estado
+      } else {
+        showNotification(`No se pudo cargar el perfil: ${err.message}`, 'error');
+      }
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, showNotification]);
+  }, [isAuthenticated, role, logout, showNotification]);
 
+  // Cargar perfil al montar y cuando cambien las dependencias
   useEffect(() => {
     loadProfile();
   }, [loadProfile]);
 
-  const isFavorite = useCallback((bookId) => profile?.favorites?.includes(bookId) ?? false, [profile]);
-  const isRead = useCallback((bookId) => profile?.read?.some((r) => r.bookId === bookId) ?? false, [profile]);
-
+  // Alternar favorito
   const toggleFavorite = useCallback(
     async (bookId) => {
       if (!profile) {
@@ -47,11 +65,14 @@ export function ProfileProvider({ children }) {
       const nextFavorites = already
         ? profile.favorites.filter((id) => id !== bookId)
         : [...profile.favorites, bookId];
+
       try {
         const { profile: updated, newAchievements } = await profileService.setFavorites(nextFavorites);
         setProfile(updated);
         showNotification(already ? 'Eliminado de favoritos.' : 'Añadido a favoritos.', 'success');
-        announce(newAchievements);
+        if (newAchievements && newAchievements.length > 0) {
+          announce(newAchievements);
+        }
       } catch (err) {
         showNotification(`Error al actualizar favoritos: ${err.message}`, 'error');
       }
@@ -59,6 +80,7 @@ export function ProfileProvider({ children }) {
     [profile, isFavorite, showNotification, announce]
   );
 
+  // Alternar libro leído
   const toggleRead = useCallback(
     async (bookId) => {
       if (!profile) {
@@ -69,11 +91,14 @@ export function ProfileProvider({ children }) {
       const nextRead = already
         ? profile.read.filter((r) => r.bookId !== bookId)
         : [...profile.read, { bookId, date: new Date().toISOString() }];
+
       try {
         const { profile: updated, newAchievements } = await profileService.setRead(nextRead);
         setProfile(updated);
         showNotification(already ? 'Libro marcado como no leído.' : '¡Felicidades, libro completado!', 'success');
-        announce(newAchievements);
+        if (newAchievements && newAchievements.length > 0) {
+          announce(newAchievements);
+        }
       } catch (err) {
         showNotification(`Error al actualizar libros leídos: ${err.message}`, 'error');
       }
@@ -83,7 +108,15 @@ export function ProfileProvider({ children }) {
 
   return (
     <ProfileContext.Provider
-      value={{ profile, loading, isFavorite, isRead, toggleFavorite, toggleRead, reloadProfile: loadProfile }}
+      value={{
+        profile,
+        loading,
+        isFavorite,
+        isRead,
+        toggleFavorite,
+        toggleRead,
+        reloadProfile: loadProfile,
+      }}
     >
       {children}
     </ProfileContext.Provider>
