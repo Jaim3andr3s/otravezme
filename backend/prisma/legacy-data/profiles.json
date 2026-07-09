@@ -1,0 +1,17 @@
+[
+  {
+    "id": 12345,
+    "name": "Lector Invitado",
+    "email": "demo12345@biblio.com",
+    "bio": "Lector de prueba para BiblioSueños. Puedes editar este perfil.",
+    "avatar": "https://api.dicebear.com/8.x/adventurer/svg?seed=Annie&flip=true",
+    "favorites": [],
+    "read": [
+      {
+        "bookId": 2,
+        "date": "2025-10-15T18:07:50.374Z"
+      }
+    ],
+    "joinedAt": "2025-10-15T15:38:30.875Z"
+  }
+]

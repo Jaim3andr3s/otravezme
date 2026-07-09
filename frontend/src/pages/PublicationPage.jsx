@@ -1,0 +1,193 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Newspaper, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { useArticles } from '../context/ArticlesContext.jsx';
+import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useMascot } from '../context/MascotContext.jsx';
+import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
+import { Button } from '../components/ui/Button.jsx';
+import { resolveFileUrl } from '../services/api.js';
+
+const ONBOARDING_KEY = 'sofi_onboarding_publicaciones';
+
+const SECTIONS = {
+  PERIODICO: ['Editorial', 'Informativa', 'Literatura', 'Opinión', 'Entretenimiento'],
+  REVISTA: ['Editorial', 'Autor destacado', 'Ficha de lectura', 'Producciones literarias', 'Pasatiempos literarios'],
+};
+
+const TYPE_LABELS = {
+  PERIODICO: 'Periódico',
+  REVISTA: 'Revista Digital',
+};
+
+const TYPE_ICONS = {
+  PERIODICO: Newspaper,
+  REVISTA: BookOpen,
+};
+
+// Constante fuera del componente: si estuviera dentro, Object.keys() crearía
+// un arreglo nuevo en cada render, y al estar en las dependencias del
+// useEffect de abajo, disparaba reload() en un ciclo infinito.
+const VALID_TYPES = Object.keys(TYPE_LABELS);
+
+export default function PublicationPage({ type: propType }) {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const type = propType || (location.pathname.includes('/periodico') ? 'PERIODICO' : 
+                            location.pathname.includes('/revista-digital') ? 'REVISTA' : null);
+
+  const { articles, loading, error, create, update, remove, reload } = useArticles();
+  const { role } = useUserAuth();
+  const { react } = useMascot();
+  const isAdmin = role === 'admin';
+  const [showForm, setShowForm] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
+
+  // Onboarding: primera visita a periódico/revista digital
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      react('curiosidad', 'Aquí puedes leer el periódico y la revista digital de la biblioteca. 📰');
+      localStorage.setItem(ONBOARDING_KEY, 'true');
+    }
+  }, [react]);
+
+  const normalizedType = type?.toUpperCase();
+
+  const sections = SECTIONS[normalizedType] || [];
+  const currentSection = searchParams.get('section') || sections[0];
+  const Icon = TYPE_ICONS[normalizedType];
+
+  useEffect(() => {
+    if (!normalizedType || !VALID_TYPES.includes(normalizedType) || !currentSection) return;
+    reload(normalizedType, currentSection);
+  }, [normalizedType, currentSection, reload]);
+
+  if (!normalizedType || !VALID_TYPES.includes(normalizedType)) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-ink-muted">Tipo de publicación no válido.</p>
+      </div>
+    );
+  }
+
+  const handleSectionChange = (section) => {
+    setSearchParams({ section });
+  };
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-accent animate-spin" /></div>;
+  if (error) return <div className="text-center py-20"><p className="text-danger">Error: {error}</p></div>;
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Icon className="w-8 h-8 text-accent" />
+            <h2 className="text-4xl font-serif font-semibold text-ink">{TYPE_LABELS[normalizedType]}</h2>
+          </div>
+          <p className="text-lg text-ink-muted">Explora las secciones de nuestro {TYPE_LABELS[normalizedType].toLowerCase()}.</p>
+        </div>
+        {isAdmin && (
+          <Button variant="success" onClick={() => setShowForm(true)}>
+            <Plus className="w-5 h-5" /> Nuevo Artículo
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 border-b border-edge pb-2">
+        {sections.map((section) => (
+          <button
+            key={section}
+            onClick={() => handleSectionChange(section)}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+              currentSection === section
+                ? 'bg-accent text-accent-ink'
+                : 'bg-surface-alt text-ink-muted hover:bg-accent-soft hover:text-accent'
+            }`}
+          >
+            {section}
+          </button>
+        ))}
+      </div>
+
+      {articles.length === 0 ? (
+        <div className="text-center py-20 bg-surface rounded-xl border border-edge">
+          <Newspaper className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+          <p className="text-ink-muted">No hay artículos en esta sección.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {articles.map((article) => (
+            <motion.article key={article.id} className="bg-surface border border-edge rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow relative group">
+              {isAdmin && (
+                <div className="absolute top-2 right-2 flex gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setEditingArticle(article)}
+                    className="p-1.5 rounded-full bg-gold-soft text-gold hover:opacity-80 transition shadow-md"
+                    title="Editar artículo"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => remove(article.id)}
+                    className="p-1.5 rounded-full bg-danger-soft text-danger hover:opacity-80 transition shadow-md"
+                    title="Eliminar artículo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              {article.coverImage && (
+                <div className="w-full h-48 overflow-hidden">
+                  <img src={resolveFileUrl(article.coverImage)} alt={article.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="p-6 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-ink-muted">
+                  <span className="font-semibold text-accent">{article.author}</span>
+                  <span>·</span>
+                  <span>{new Date(article.publishedAt).toLocaleDateString('es-CO', { dateStyle: 'long' })}</span>
+                  {article.edition && (
+                    <>
+                      <span>·</span>
+                      <span className="bg-surface-alt px-2 py-0.5 rounded-full text-xs">Ed. {article.edition}</span>
+                    </>
+                  )}
+                </div>
+                <h3 className="text-2xl font-serif font-semibold text-ink">{article.title}</h3>
+                <p className="text-ink-muted leading-relaxed line-clamp-4">{article.content}</p>
+                {article.attachmentUrl && (
+                  <a
+                    href={resolveFileUrl(article.attachmentUrl)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
+                  >
+                    📎 Ver {article.attachmentName || 'archivo adjunto'}
+                  </a>
+                )}
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      )}
+
+      {showForm && (
+        <ManageArticleForm
+          fixedType={normalizedType}
+          onClose={() => setShowForm(false)}
+          onSave={create}
+        />
+      )}
+      {editingArticle && (
+        <ManageArticleForm
+          article={editingArticle}
+          onClose={() => setEditingArticle(null)}
+          onSave={(data) => update(editingArticle.id, data)}
+        />
+      )}
+    </motion.div>
+  );
+}
