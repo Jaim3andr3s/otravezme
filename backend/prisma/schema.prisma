@@ -139,16 +139,18 @@ model GalleryImage {
 }
 
 model PublicationArticle {
-  id          Int         @id @default(autoincrement())
-  publication Publication
-  section     String
-  edition     String
-  title       String
-  author      String
-  content     String
-  coverImage  String?
-  publishedAt DateTime    @default(now())
-  createdAt   DateTime    @default(now())
+  id             Int         @id @default(autoincrement())
+  publication    Publication
+  section        String
+  edition        String
+  title          String
+  author         String
+  content        String
+  coverImage     String?
+  attachmentUrl  String?
+  attachmentName String?
+  publishedAt    DateTime    @default(now())
+  createdAt      DateTime    @default(now())
 }
 
 model Favorite {

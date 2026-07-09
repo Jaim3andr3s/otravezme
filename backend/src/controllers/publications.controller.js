@@ -31,12 +31,12 @@ export async function listPublications(req, res, next) {
 
 export async function createArticle(req, res, next) {
   try {
-    const { publication, section, edition, title, author, content, coverImage } = req.body;
+    const { publication, section, edition, title, author, content, coverImage, attachmentUrl, attachmentName } = req.body;
     if (!publication || !section || !title || !author || !content) {
       return res.status(400).json({ message: 'Faltan campos obligatorios.' });
     }
     const article = await prisma.publicationArticle.create({
-      data: { publication, section, edition, title, author, content, coverImage },
+      data: { publication, section, edition, title, author, content, coverImage, attachmentUrl, attachmentName },
     });
     res.status(201).json(article);
   } catch (err) {

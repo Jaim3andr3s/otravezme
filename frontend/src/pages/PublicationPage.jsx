@@ -7,6 +7,7 @@ import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
 import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import { resolveFileUrl } from '../services/api.js';
 
 const ONBOARDING_KEY = 'sofi_onboarding_publicaciones';
 
@@ -140,7 +141,7 @@ export default function PublicationPage({ type: propType }) {
               )}
               {article.coverImage && (
                 <div className="w-full h-48 overflow-hidden">
-                  <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
+                  <img src={resolveFileUrl(article.coverImage)} alt={article.title} className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="p-6 space-y-3">
@@ -157,6 +158,16 @@ export default function PublicationPage({ type: propType }) {
                 </div>
                 <h3 className="text-2xl font-serif font-semibold text-ink">{article.title}</h3>
                 <p className="text-ink-muted leading-relaxed line-clamp-4">{article.content}</p>
+                {article.attachmentUrl && (
+                  <a
+                    href={resolveFileUrl(article.attachmentUrl)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
+                  >
+                    📎 Ver {article.attachmentName || 'archivo adjunto'}
+                  </a>
+                )}
               </div>
             </motion.article>
           ))}

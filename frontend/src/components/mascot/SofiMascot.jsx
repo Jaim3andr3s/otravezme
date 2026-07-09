@@ -1,10 +1,9 @@
-import { Suspense, useRef, useEffect } from 'react';
+import { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useGLTF, Center, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Parámetros de idle por mood: qué tanto "respira" y gira Sofi cuando no
-// está haciendo un gesto especial.
+// Parámetros de idle por mood
 const MOOD_IDLE = {
   neutral: { bobAmp: 0.06, bobSpeed: 1.5, rotAmp: 0.18, rotSpeed: 0.6 },
   curiosa: { bobAmp: 0.05, bobSpeed: 1.1, rotAmp: 0.32, rotSpeed: 0.4 },
@@ -12,9 +11,6 @@ const MOOD_IDLE = {
   celebrando: { bobAmp: 0.16, bobSpeed: 3.2, rotAmp: 0.28, rotSpeed: 1.4 },
 };
 
-// "Baile" base: Sofi siempre está bailando un poco, no solo respirando.
-// Cadera y torso se mueven en contratiempo para que se note vida incluso
-// en mood neutral; celebrando la lleva a un baile grande y notorio.
 const MOOD_DANCE = {
   neutral: { armLift: 0.35, armSpeed: 1.6, hipSway: 0.12, hipSpeed: 1.6, spineTwist: 0.08 },
   curiosa: { armLift: 0.3, armSpeed: 1.3, hipSway: 0.1, hipSpeed: 1.3, spineTwist: 0.1 },
@@ -22,8 +18,6 @@ const MOOD_DANCE = {
   celebrando: { armLift: 1.35, armSpeed: 4.6, hipSway: 0.32, hipSpeed: 4.6, spineTwist: 0.22 },
 };
 
-// Nombres de huesos del rig CC_Base (Character Creator / Reallusion) que
-// controlamos a mano. El resto del esqueleto se queda en su pose base.
 const BONE_NAMES = {
   jaw: 'CC_Base_JawRoot',
   lUpper: 'CC_Base_L_Upperarm',
@@ -36,15 +30,7 @@ const BONE_NAMES = {
   head: 'CC_Base_Head',
 };
 
-// Alto (en unidades de escena, tras escalar) que debe ocupar Sofi de cuerpo
-// completo. El modelo de Character Creator viene en una escala muy pequeña
-// (unidad interna del exportador), así que se recalcula dinámicamente a
-// partir del bounding box real en vez de un valor fijo.
 const TARGET_HEIGHT = 2.0;
-
-// Color plano temporal mientras no haya texturas reales exportadas desde
-// Character Creator (el FBX no trae ningún mapa de color, solo gris PBR
-// por defecto). Se aplica una sola vez al cargar.
 const FALLBACK_COLOR = '#e8a15c';
 
 function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
@@ -58,9 +44,6 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
   const talkPhaseRef = useRef(0);
   const idleMouthRef = useRef(0);
 
-  // Localizar huesos + capturar su pose base, aplicar color temporal, y
-  // calcular el encuadre (escala/posición) de cuerpo completo una sola vez
-  // cuando el modelo termina de montarse.
   useEffect(() => {
     const bones = {};
     scene.traverse((obj) => {
@@ -81,16 +64,8 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
     });
     baseQuatRef.current = base;
 
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
-    const center = box.getCenter(new THREE.Vector3());
-
-    if (rigRef.current) {
-      rigRef.current.scale.setScalar(scale);
-      // Centrado de cuerpo completo: X/Z al centro, Y centrado verticalmente
-      // (pies y cabeza quedan ambos dentro del encuadre).
-      rigRef.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+    if (import.meta.env.DEV && Object.keys(bones).length === 0) {
+      console.warn('[SofiMascot] No se encontró ningún hueso conocido en sofi.glb. Revisa los nombres del rig.');
     }
   }, [scene]);
 
@@ -99,7 +74,6 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
     const bones = bonesRef.current;
     const base = baseQuatRef.current;
 
-    // --- Cuerpo: respiración/rotación idle ---
     if (groupRef.current && !reducedMotion) {
       const { bobAmp, bobSpeed, rotAmp, rotSpeed } = MOOD_IDLE[mood] || MOOD_IDLE.neutral;
       if (nextHopRef.current === null) nextHopRef.current = t + 20 + Math.random() * 20;
@@ -115,9 +89,6 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
 
     if (reducedMotion) return;
 
-    // --- Baile: brazos, cadera y torso en movimiento continuo, siempre
-    // activo (no solo cuando hay un mood especial), para que Sofi se vea
-    // viva de cuerpo completo en todo momento. ---
     const { armLift, armSpeed, hipSway, hipSpeed, spineTwist } = MOOD_DANCE[mood] || MOOD_DANCE.neutral;
 
     if (bones.lUpper && base.lUpper) {
@@ -164,9 +135,6 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
       bones.head.quaternion.copy(base.head).multiply(q);
     }
 
-    // --- Boca: abre y cierra rápido mientras Sofi "habla" (burbuja de
-    // mensaje activa). En reposo, chispazos ocasionales sutiles para que
-    // no se vea totalmente inerte, y vuelve suave a su pose base. ---
     if (bones.jaw && base.jaw) {
       if (talking) {
         talkPhaseRef.current += delta * 9;
@@ -185,9 +153,11 @@ function SofiModel({ reducedMotion, mood = 'neutral', talking = false }) {
 
   return (
     <group ref={groupRef}>
-      <group ref={rigRef}>
-        <primitive object={scene} />
-      </group>
+      <Center>
+        <group ref={rigRef} scale={TARGET_HEIGHT}>
+          <primitive object={scene} />
+        </group>
+      </Center>
     </group>
   );
 }
@@ -196,20 +166,52 @@ function SofiFallback() {
   return (
     <mesh>
       <capsuleGeometry args={[0.3, 0.8, 4, 8]} />
-      <meshBasicMaterial color="#f5a623" />
+      <meshBasicMaterial color="#e8a15c" />
     </mesh>
   );
 }
 
-export default function SofiMascot({ width = 160, height = 300, reducedMotion = false, mood = 'neutral', talking = false }) {
+export default function SofiMascot({ 
+  reducedMotion = false, 
+  mood = 'neutral', 
+  talking = false,
+  onLoad,
+  onError
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  // Notificar errores al padre para usar el fallback SVG
+  useEffect(() => {
+    if (hasError && onError) {
+      onError();
+    }
+  }, [hasError, onError]);
+
+  // Si el modelo falla, mostramos el fallback de Three (cápsula naranja)
+  // pero el padre también puede reemplazar con SVG.
+  if (hasError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-[#e8a15c] border-2 border-[#f3eadc]" />
+      </div>
+    );
+  }
+
   return (
-    <div style={{ width, height }}>
-      <Canvas camera={{ position: [0, 0, 3.6], fov: 35 }}>
-        <ambientLight intensity={1.0} />
-        <directionalLight position={[2, 3, 2]} intensity={1.3} />
-        <directionalLight position={[-2, 1, -2]} intensity={0.4} />
+    <div className="w-full h-full">
+      <Canvas
+        dpr={[1, 2]}
+        gl={{ alpha: true, antialias: true }}
+        camera={{ position: [0, 0, 3.6], fov: 35 }}
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <ambientLight intensity={1.1} />
+        <directionalLight position={[2, 3, 2]} intensity={1.4} />
+        <directionalLight position={[-2, 1, -2]} intensity={0.5} />
         <Suspense fallback={<SofiFallback />}>
           <SofiModel reducedMotion={reducedMotion} mood={mood} talking={talking} />
+          <ContactShadows position={[0, -1, 0]} opacity={0.35} scale={3} blur={2} far={2} />
         </Suspense>
       </Canvas>
     </div>
