@@ -4,8 +4,11 @@ import { motion } from 'framer-motion';
 import { Newspaper, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useArticles } from '../context/ArticlesContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useMascot } from '../context/MascotContext.jsx';
 import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
+
+const ONBOARDING_KEY = 'sofi_onboarding_publicaciones';
 
 const SECTIONS = {
   PERIODICO: ['Editorial', 'Informativa', 'Literatura', 'Opinión', 'Entretenimiento'],
@@ -31,9 +34,18 @@ export default function PublicationPage({ type: propType }) {
 
   const { articles, loading, error, create, update, remove, reload } = useArticles();
   const { role } = useUserAuth();
+  const { react } = useMascot();
   const isAdmin = role === 'admin';
   const [showForm, setShowForm] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
+
+  // Onboarding: primera visita a periódico/revista digital
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      react('curiosidad', 'Aquí puedes leer el periódico y la revista digital de la biblioteca. 📰');
+      localStorage.setItem(ONBOARDING_KEY, 'true');
+    }
+  }, [react]);
 
   const validTypes = Object.keys(TYPE_LABELS);
   const normalizedType = type?.toUpperCase();

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Plus, BookOpen } from 'lucide-react';
 import { useBooks } from '../context/BooksContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { BookGrid } from '../components/books/BookGrid.jsx';
 import { PublishBookForm } from '../components/admin/PublishBookForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
+import { IconTile } from '../components/ui/IconTile.jsx';
 
 export default function CatalogPage() {
   const { books, loading, error, setSelectedBook, create, update, remove } = useBooks();
@@ -30,7 +31,10 @@ export default function CatalogPage() {
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-serif font-semibold text-ink">📚 Biblioteca General ({books.length})</h2>
+          <div className="flex items-center gap-3 mb-1">
+            <IconTile icon={BookOpen} size="sm" className="bg-accent-soft text-accent" />
+            <h2 className="text-4xl font-serif font-semibold text-ink">Biblioteca General ({books.length})</h2>
+          </div>
           <p className="text-lg text-ink-muted">Explora nuestro catálogo completo de tesoros literarios.</p>
         </div>
         {isAdmin && (

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Grid3x3, Type, Puzzle, Search, Grid, Trophy } from 'lucide-react';
+import { Brain, Grid3x3, Type, Puzzle, Search, Grid, Trophy, Gamepad2 } from 'lucide-react';
 import { GameCard } from '../components/games/GameCard.jsx';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
 import { useAchievements } from '../context/AchievementsContext.jsx';
 import { useProfile } from '../context/ProfileContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
+import { IconTile } from '../components/ui/IconTile.jsx';
 
 const ONBOARDING_KEY = 'sofi_onboarding_games';
 
@@ -71,7 +72,10 @@ export default function GamesHubPage() {
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-12">
       <div className="space-y-2">
-        <h2 className="text-4xl font-serif font-semibold text-ink">🎮 Juegos de BiblioSueños</h2>
+        <div className="flex items-center gap-3">
+          <IconTile icon={Gamepad2} size="sm" className="bg-pink-soft text-pink" />
+          <h2 className="text-4xl font-serif font-semibold text-ink">Juegos de BiblioSueños</h2>
+        </div>
         <p className="text-lg text-ink-muted">Diviértete con el catálogo y gana insignias por cada logro.</p>
       </div>
 

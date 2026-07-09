@@ -1,16 +1,16 @@
 :root {
-  /* Sistema de color "BiblioSuenos Kids": brillante, saturado, dinamico */
-  --color-bg: #f5faff;
+  /* Sistema de color "BiblioSuenos Kids": amarillo/dorado, a juego con Sofi */
+  --color-bg: #fffdf5;
   --color-surface: #ffffff;
-  --color-surface-alt: #fff4d6;
-  --color-ink: #1f2937;
-  --color-ink-muted: #5b6472;
-  --color-border: #dcebfb;
+  --color-surface-alt: #fff3c4;
+  --color-ink: #2b2210;
+  --color-ink-muted: #7a6a45;
+  --color-border: #fce8a8;
 
-  --color-accent: #2f7bf6;
-  --color-accent-hover: #1e63d6;
-  --color-accent-soft: #dbe9fe;
-  --color-accent-ink: #ffffff;
+  --color-accent: #ffb703;
+  --color-accent-hover: #e6a400;
+  --color-accent-soft: #fff0bf;
+  --color-accent-ink: #2b2210;
 
   --color-purple: #a855f7;
   --color-purple-hover: #9333ea;
@@ -34,17 +34,17 @@
 }
 
 :root.dark {
-  --color-bg: #12172b;
-  --color-surface: #1c2340;
-  --color-surface-alt: #232b4d;
-  --color-ink: #f1f5ff;
-  --color-ink-muted: #a9b4d0;
-  --color-border: #313b63;
+  --color-bg: #1c1706;
+  --color-surface: #2a2210;
+  --color-surface-alt: #362b12;
+  --color-ink: #fff6da;
+  --color-ink-muted: #c9b98c;
+  --color-border: #4a3c1a;
 
-  --color-accent: #5b9dff;
-  --color-accent-hover: #7cb1ff;
-  --color-accent-soft: #23345f;
-  --color-accent-ink: #0c0f1e;
+  --color-accent: #ffc93c;
+  --color-accent-hover: #ffd666;
+  --color-accent-soft: #4a3c10;
+  --color-accent-ink: #241c05;
 
   --color-purple: #c084fc;
   --color-purple-hover: #d3a5fd;
@@ -54,8 +54,8 @@
   --color-pink-hover: #ffa8d4;
   --color-pink-soft: #4a2a3d;
 
-  --color-gold: #ffd666;
-  --color-gold-soft: #4a3a17;
+  --color-gold: #ff9f45;
+  --color-gold-soft: #4a2f12;
 
   --color-success: #4ade80;
   --color-success-soft: #1c3a29;

@@ -1,17 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Image as ImageIcon, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useGallery } from '../context/GalleryContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useMascot } from '../context/MascotContext.jsx';
 import { ManageGalleryImageForm } from '../components/admin/ManageGalleryImageForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
+
+const ONBOARDING_KEY = 'sofi_onboarding_galeria';
 
 export default function GalleryPage() {
   const { images, loading, error, create, update, remove } = useGallery();
   const { role } = useUserAuth();
+  const { react } = useMascot();
   const isAdmin = role === 'admin';
   const [showForm, setShowForm] = useState(false);
   const [editingImage, setEditingImage] = useState(null);
+
+  // Onboarding: primera visita a la galería
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      react('curiosidad', 'Esta es la galería con fotos de nuestros eventos y actividades. 🖼️');
+      localStorage.setItem(ONBOARDING_KEY, 'true');
+    }
+  }, [react]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-accent animate-spin" /></div>;
   if (error) return <div className="text-center py-20"><p className="text-danger">Error: {error}</p></div>;

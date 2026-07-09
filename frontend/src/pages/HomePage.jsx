@@ -20,21 +20,35 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { plans, loading: plansLoading } = useReadingPlans();
 
+  const BOOK_OF_MONTH_SEEN_KEY = 'sofi_last_book_of_month_seen';
+
   useEffect(() => {
     if (isAuthenticated && profile && !booksLoading && !plansLoading) {
       const name = profile.name || 'Lector';
-      let extra = '';
-      if (plans.length > 0) {
-        const inProgress = plans.find(p => {
-          return p.books && p.books.some(b => !profile.read.some(r => r.bookId === b.bookId));
-        });
-        if (inProgress) {
-          extra = `Tienes un plan de lectura en curso: "${inProgress.title}"`;
+      let extraText = '';
+      let extraAction = null;
+
+      const inProgress = plans.find((p) => {
+        return p.books && p.books.some((b) => !profile.read.some((r) => r.bookId === b.bookId));
+      });
+      if (inProgress) {
+        extraText = `Tienes un plan de lectura en curso: "${inProgress.title}". ¿Seguimos?`;
+        extraAction = { label: 'Continuar plan', to: '/planes-lectores' };
+      } else {
+        const bookOfMonth = books.find((b) => b.isBookOfMonth);
+        if (bookOfMonth) {
+          const lastSeen = localStorage.getItem(BOOK_OF_MONTH_SEEN_KEY);
+          if (lastSeen !== String(bookOfMonth.id)) {
+            extraText = `Ya está listo el libro del mes: "${bookOfMonth.title}". 📖`;
+            extraAction = { label: 'Ver libro del mes', to: '/libro-del-mes' };
+            localStorage.setItem(BOOK_OF_MONTH_SEEN_KEY, String(bookOfMonth.id));
+          }
         }
       }
-      sayHi(name, extra);
+
+      sayHi(name, { text: extraText, action: extraAction });
     }
-  }, [isAuthenticated, profile, plans, booksLoading, plansLoading, sayHi]);
+  }, [isAuthenticated, profile, plans, books, booksLoading, plansLoading, sayHi]);
 
   if (booksLoading || eventsLoading) return <FullPageLoader label="Cargando BiblioSueños..." />;
 

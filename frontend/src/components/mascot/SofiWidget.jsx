@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { useMascot } from '../../context/MascotContext.jsx';
+import { useMascot, IDLE_CHATTER, pick } from '../../context/MascotContext.jsx';
 import  SofiMascot  from './SofiMascot.jsx';
 
 // Ícono de zorro simple en SVG (fallback si el modelo 3D falla)
-function SofiIcon({ size = 56 }) {
+function SofiIcon({ size = 80 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="48" fill="#f5a623" stroke="#ffffff" strokeWidth="3" />
@@ -29,23 +30,33 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   render() {
     if (this.state.hasError) {
-      return <SofiIcon size={56} />;
+      return <SofiIcon size={80} />;
     }
     return this.props.children;
   }
 }
 
+// Animación del botón según el mood, para que también se note cuando el
+// modelo 3D no está disponible y se usa el ícono SVG de respaldo.
+const BUTTON_MOOD_ANIMATION = {
+  neutral: {},
+  curiosa: { rotate: [0, -4, 4, 0] },
+  animando: { y: [0, -6, 0] },
+  celebrando: { y: [0, -10, 0], rotate: [0, -8, 8, 0] },
+};
+
 export function SofiWidget() {
-  const { message, visible } = useMascot();
+  const { message, mood, action, visible, dismiss, showMessage } = useMascot();
   const [bubbleOpen, setBubbleOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const [modelExists, setModelExists] = useState(null);
+  const navigate = useNavigate();
 
   // Verificar si el modelo 3D existe antes de montarlo
   useEffect(() => {
@@ -69,14 +80,26 @@ export function SofiWidget() {
   if (!visible) return null;
 
   const handleToggle = () => {
-    // Sin mensaje activo no hay nada que mostrar en el globo: el tap solo da
-    // feedback táctil (whileTap ya lo cubre), no abre un globo vacío.
-    if (!message) return;
-    setBubbleOpen((open) => !open);
+    // Si ya hay un mensaje activo, el tap solo abre/cierra el globo.
+    if (message) {
+      setBubbleOpen((open) => !open);
+      return;
+    }
+    // Sin mensaje activo: Sofi siempre tiene algo que decir. Tocarla la hace
+    // hablar con una frase suelta en vez de quedarse en silencio.
+    showMessage(pick(IDLE_CHATTER), 'curiosa', 4500);
   };
 
+  const handleAction = () => {
+    if (!action) return;
+    navigate(action.to);
+    dismiss();
+  };
+
+  const buttonAnimation = prefersReducedMotion ? {} : (BUTTON_MOOD_ANIMATION[mood] || {});
+
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2">
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
       <AnimatePresence>
         {bubbleOpen && message && (
           <motion.div
@@ -94,27 +117,52 @@ export function SofiWidget() {
               <X className="w-4 h-4" />
             </button>
             <p className="text-sm font-serif italic leading-relaxed pr-6">{message}</p>
+            {action && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={handleAction}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-surface-alt text-ink border border-edge hover:opacity-80 transition"
+                >
+                  {action.label}
+                </button>
+              </div>
+            )}
             <div className="absolute -bottom-2 right-6 w-4 h-4 bg-surface border-r border-b border-edge transform rotate-45" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <motion.button
-        onClick={handleToggle}
-        className="w-16 h-16 rounded-full bg-surface border-2 border-accent shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
-        whileTap={{ scale: 0.9 }}
-        aria-label="Abrir mensaje de Sofi"
-      >
-        {modelExists === null ? (
-          <div className="w-14 h-14 rounded-full bg-surface-alt animate-pulse" />
-        ) : modelExists ? (
-          <ErrorBoundary>
-            <SofiMascot size={56} reducedMotion={prefersReducedMotion} />
-          </ErrorBoundary>
-        ) : (
-          <SofiIcon size={56} />
+      <div className="relative w-24 h-24">
+        {/* Halo pulsante detrás del botón para que Sofi se note y no se sienta
+            perdida en la esquina, incluso sin mensaje activo. */}
+        {!prefersReducedMotion && (
+          <motion.div
+            className="absolute inset-0 rounded-full bg-accent"
+            animate={{ scale: [1, 1.18, 1], opacity: [0.35, 0, 0.35] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeOut' }}
+          />
         )}
-      </motion.button>
+
+        <motion.button
+          onClick={handleToggle}
+          className="absolute inset-0 rounded-full bg-surface border-[3px] border-accent shadow-xl flex items-center justify-center hover:shadow-2xl transition-shadow focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          animate={buttonAnimation}
+          transition={{ duration: 1.6, repeat: message ? Infinity : 0, repeatDelay: 0.6 }}
+          aria-label="Hablar con Sofi"
+        >
+          {modelExists === null ? (
+            <div className="w-20 h-20 rounded-full bg-surface-alt animate-pulse" />
+          ) : modelExists ? (
+            <ErrorBoundary>
+              <SofiMascot size={80} reducedMotion={prefersReducedMotion} mood={mood} />
+            </ErrorBoundary>
+          ) : (
+            <SofiIcon size={80} />
+          )}
+        </motion.button>
+      </div>
     </div>
   );
 }

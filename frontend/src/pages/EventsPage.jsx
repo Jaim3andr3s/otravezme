@@ -7,6 +7,7 @@ import { CreateEventForm } from '../components/admin/CreateEventForm.jsx';
 import { Badge } from '../components/ui/Badge.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
+import { IconTile } from '../components/ui/IconTile.jsx';
 import { EVENT_TYPE_LABEL } from '../constants/labels.js';
 
 export default function EventsPage() {
@@ -48,7 +49,10 @@ export default function EventsPage() {
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-serif font-semibold text-ink">📣 Próximos Eventos ({events.length})</h2>
+          <div className="flex items-center gap-3 mb-1">
+            <IconTile icon={Calendar} size="sm" className="bg-purple-soft text-purple" />
+            <h2 className="text-4xl font-serif font-semibold text-ink">Próximos Eventos ({events.length})</h2>
+          </div>
           <p className="text-lg text-ink-muted">Participa en nuestros clubes de lectura, talleres y cuentacuentos.</p>
         </div>
         {isAdmin && (
