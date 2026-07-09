@@ -1,42 +1,48 @@
-import { useRef, Suspense } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, Center } from '@react-three/drei';
 
-export function SofiMascot({ size = 100, reducedMotion = false }) {
-  return (
-    <div style={{ width: size, height: size, position: 'relative' }}>
-      <Suspense fallback={<SofiFallback size={size} />}>
-        <SofiModel size={size} reducedMotion={reducedMotion} />
-      </Suspense>
-    </div>
-  );
-}
-
-function SofiFallback({ size }) {
-  return (
-    <div
-      className="flex items-center justify-center rounded-full bg-surface-alt text-accent font-serif font-semibold"
-      style={{ width: size, height: size }}
-    >
-      S
-    </div>
-  );
-}
-
-function SofiModel({ size, reducedMotion }) {
+function SofiModel({ reducedMotion }) {
   const groupRef = useRef();
   const { scene } = useGLTF('/models/sofi.glb');
 
   useFrame(({ clock }) => {
-    if (reducedMotion) return;
+    if (!groupRef.current || reducedMotion) return;
     const t = clock.getElapsedTime();
-    // Flotar suave (seno)
-    groupRef.current.position.y = Math.sin(t * 0.6) * 0.04;
-    // Balanceo (seno)
-    groupRef.current.rotation.z = Math.sin(t * 0.4) * 0.02;
-    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.01;
+    groupRef.current.position.y = Math.sin(t * 1.5) * 0.05;
+    groupRef.current.rotation.y = Math.sin(t * 0.6) * 0.15;
   });
 
-  // eslint-disable-next-line react/no-unknown-property
-  return <primitive object={scene} scale={size / 200} ref={groupRef} />;
+  return (
+    <group ref={groupRef}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  );
 }
+
+function SofiFallback() {
+  return (
+    <mesh>
+      <sphereGeometry args={[0.5, 16, 16]} />
+      <meshBasicMaterial color="#b4502e" />
+    </mesh>
+  );
+}
+
+export default function SofiMascot({ size = 72, reducedMotion = false }) {
+  return (
+    <div style={{ width: size, height: size }}>
+      <Canvas camera={{ position: [0, 0, 2.2], fov: 40 }}>
+        <ambientLight intensity={0.9} />
+        <directionalLight position={[2, 3, 2]} intensity={1.2} />
+        <Suspense fallback={<SofiFallback />}>
+          <SofiModel reducedMotion={reducedMotion} />
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+}
+
+useGLTF.preload('/models/sofi.glb');

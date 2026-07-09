@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useMascot } from '../../context/MascotContext.jsx';
-import { SofiMascot } from './SofiMascot.jsx';
+import  SofiMascot  from './SofiMascot.jsx';
 
 // Ícono de zorro simple en SVG (fallback si el modelo 3D falla)
 function SofiIcon({ size = 56 }) {
@@ -109,10 +109,10 @@ export function SofiWidget() {
           <div className="w-14 h-14 rounded-full bg-surface-alt animate-pulse" />
         ) : modelExists ? (
           <ErrorBoundary>
-            <SofiMascot size={56} reducedMotion={prefersReducedMotion} />
+            <SofiMascot size={200} reducedMotion={prefersReducedMotion} />
           </ErrorBoundary>
         ) : (
-          <SofiIcon size={56} />
+          <SofiIcon size={200} />
         )}
       </motion.button>
     </div>
