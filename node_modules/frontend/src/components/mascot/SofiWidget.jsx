@@ -42,13 +42,13 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Animación del botón según el mood, para que también se note cuando el
-// modelo 3D no está disponible y se usa el ícono SVG de respaldo.
+// Animación del contenedor según el mood, para que también se note cuando
+// el modelo 3D no está disponible y se usa el ícono SVG de respaldo.
 const BUTTON_MOOD_ANIMATION = {
   neutral: {},
-  curiosa: { rotate: [0, -4, 4, 0] },
-  animando: { y: [0, -6, 0] },
-  celebrando: { y: [0, -10, 0], rotate: [0, -8, 8, 0] },
+  curiosa: { rotate: [0, -3, 3, 0] },
+  animando: { y: [0, -8, 0] },
+  celebrando: { y: [0, -14, 0], rotate: [0, -6, 6, 0] },
 };
 
 export function SofiWidget() {
@@ -99,7 +99,7 @@ export function SofiWidget() {
   const buttonAnimation = prefersReducedMotion ? {} : (BUTTON_MOOD_ANIMATION[mood] || {});
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
+    <div className="fixed bottom-0 right-2 z-[100] flex flex-col items-end gap-2 pointer-events-none">
       <AnimatePresence>
         {bubbleOpen && message && (
           <motion.div
@@ -107,7 +107,7 @@ export function SofiWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ duration: 0.25 }}
-            className="max-w-xs bg-surface border border-edge rounded-xl shadow-lg p-4 text-ink relative"
+            className="max-w-xs bg-surface border border-edge rounded-xl shadow-lg p-4 text-ink relative mr-4 pointer-events-auto"
           >
             <button
               onClick={() => setBubbleOpen(false)}
@@ -127,32 +127,46 @@ export function SofiWidget() {
                 </button>
               </div>
             )}
-            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-surface border-r border-b border-edge transform rotate-45" />
+            <div className="absolute -bottom-2 right-10 w-4 h-4 bg-surface border-r border-b border-edge transform rotate-45" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="relative w-36 h-36">
-        <motion.button
-          onClick={handleToggle}
-          className="absolute inset-0 flex items-center justify-center bg-transparent border-none focus:outline-none"
-          whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.05 }}
-          animate={buttonAnimation}
-          transition={{ duration: 1.6, repeat: message ? Infinity : 0, repeatDelay: 0.6 }}
-          aria-label="Hablar con Sofi"
-        >
-          {modelExists === null ? (
-            <div className="w-32 h-32 rounded-full bg-surface-alt animate-pulse" />
-          ) : modelExists ? (
-            <ErrorBoundary>
-              <SofiMascot size={128} reducedMotion={prefersReducedMotion} mood={mood} />
-            </ErrorBoundary>
-          ) : (
-            <SofiIcon size={128} />
-          )}
-        </motion.button>
-      </div>
+      {/* Sofi de cuerpo completo, libre, sin fondo ni borde circular. Una
+          sombra elíptica en el piso la ancla visualmente en vez de un halo. */}
+      <motion.button
+        onClick={handleToggle}
+        className="relative w-40 h-[300px] flex items-end justify-center bg-transparent focus:outline-none pointer-events-auto"
+        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.03 }}
+        animate={buttonAnimation}
+        transition={{ duration: 1.6, repeat: message ? Infinity : 0, repeatDelay: 0.6 }}
+        aria-label="Hablar con Sofi"
+      >
+        {!prefersReducedMotion && (
+          <motion.div
+            className="absolute bottom-2 w-20 h-4 rounded-full bg-ink/20 blur-sm"
+            animate={{ scaleX: [1, 0.85, 1], opacity: [0.35, 0.2, 0.35] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
+
+        {modelExists === null ? (
+          <div className="w-32 h-64 rounded-3xl bg-surface-alt animate-pulse" />
+        ) : modelExists ? (
+          <ErrorBoundary>
+            <SofiMascot
+              width={160}
+              height={300}
+              reducedMotion={prefersReducedMotion}
+              mood={mood}
+              talking={bubbleOpen && Boolean(message)}
+            />
+          </ErrorBoundary>
+        ) : (
+          <SofiIcon size={80} />
+        )}
+      </motion.button>
     </div>
   );
 }
