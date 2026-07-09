@@ -8,16 +8,16 @@ import  SofiMascot  from './SofiMascot.jsx';
 function SofiIcon({ size = 56 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="48" fill="#b4502e" stroke="#f3eadc" strokeWidth="3" />
-      <path d="M35 45 L25 35 L35 38 L35 45Z" fill="#2b2117" />
-      <path d="M65 45 L75 35 L65 38 L65 45Z" fill="#2b2117" />
+      <circle cx="50" cy="50" r="48" fill="#f5a623" stroke="#ffffff" strokeWidth="3" />
+      <path d="M35 45 L25 35 L35 38 L35 45Z" fill="#1f2937" />
+      <path d="M65 45 L75 35 L65 38 L65 45Z" fill="#1f2937" />
       <ellipse cx="40" cy="48" rx="4" ry="5" fill="white" />
       <ellipse cx="60" cy="48" rx="4" ry="5" fill="white" />
-      <ellipse cx="42" cy="46" rx="2" ry="2" fill="#2b2117" />
-      <ellipse cx="62" cy="46" rx="2" ry="2" fill="#2b2117" />
-      <ellipse cx="50" cy="60" rx="8" ry="5" fill="#2b2117" />
-      <path d="M50 55 C50 55 44 52 40 56 C44 58 48 57 50 55Z" fill="#2b2117" />
-      <path d="M50 55 C50 55 56 52 60 56 C56 58 52 57 50 55Z" fill="#2b2117" />
+      <ellipse cx="42" cy="46" rx="2" ry="2" fill="#1f2937" />
+      <ellipse cx="62" cy="46" rx="2" ry="2" fill="#1f2937" />
+      <ellipse cx="50" cy="60" rx="8" ry="5" fill="#1f2937" />
+      <path d="M50 55 C50 55 44 52 40 56 C44 58 48 57 50 55Z" fill="#1f2937" />
+      <path d="M50 55 C50 55 56 52 60 56 C56 58 52 57 50 55Z" fill="#1f2937" />
     </svg>
   );
 }
@@ -60,19 +60,19 @@ export function SofiWidget() {
     checkModel();
   }, []);
 
+  // Cuando llega un mensaje nuevo (saludo, logro, etc.) el globo se abre solo;
+  // si el mensaje se limpia (timeout o dismiss), el globo se cierra con él.
   useEffect(() => {
-    if (!message) setBubbleOpen(false);
+    setBubbleOpen(Boolean(message));
   }, [message]);
 
   if (!visible) return null;
 
   const handleToggle = () => {
-    if (message) {
-      setBubbleOpen(!bubbleOpen);
-    } else {
-      setBubbleOpen(true);
-      setTimeout(() => setBubbleOpen(false), 2000);
-    }
+    // Sin mensaje activo no hay nada que mostrar en el globo: el tap solo da
+    // feedback táctil (whileTap ya lo cubre), no abre un globo vacío.
+    if (!message) return;
+    setBubbleOpen((open) => !open);
   };
 
   return (
@@ -109,10 +109,10 @@ export function SofiWidget() {
           <div className="w-14 h-14 rounded-full bg-surface-alt animate-pulse" />
         ) : modelExists ? (
           <ErrorBoundary>
-            <SofiMascot size={200} reducedMotion={prefersReducedMotion} />
+            <SofiMascot size={56} reducedMotion={prefersReducedMotion} />
           </ErrorBoundary>
         ) : (
-          <SofiIcon size={200} />
+          <SofiIcon size={56} />
         )}
       </motion.button>
     </div>

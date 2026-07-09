@@ -1,8 +1,8 @@
 const VARIANTS = {
   primary: 'bg-accent text-accent-ink hover:bg-accent-hover',
   success: 'bg-success text-white hover:opacity-90',
-  purple: 'bg-accent text-accent-ink hover:bg-accent-hover',
-  pink: 'bg-accent text-accent-ink hover:bg-accent-hover',
+  purple: 'bg-purple text-white hover:bg-purple-hover',
+  pink: 'bg-pink text-white hover:bg-pink-hover',
   danger: 'bg-danger text-white hover:opacity-90',
   secondary: 'bg-surface-alt text-ink hover:opacity-80 border border-edge',
   ghost: 'bg-surface-alt text-ink hover:opacity-80',

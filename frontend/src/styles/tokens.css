@@ -1,48 +1,65 @@
 :root {
-  --color-bg: #fbf6ed;
+  /* Sistema de color "BiblioSuenos Kids": brillante, saturado, dinamico */
+  --color-bg: #f5faff;
   --color-surface: #ffffff;
-  --color-surface-alt: #f3ead9;
-  --color-ink: #2b2117;
-  --color-ink-muted: #6b5d4f;
-  --color-border: #e7dcc8;
+  --color-surface-alt: #fff4d6;
+  --color-ink: #1f2937;
+  --color-ink-muted: #5b6472;
+  --color-border: #dcebfb;
 
-  --color-accent: #b4502e;
-  --color-accent-hover: #9a4025;
-  --color-accent-soft: #f1ddd0;
+  --color-accent: #2f7bf6;
+  --color-accent-hover: #1e63d6;
+  --color-accent-soft: #dbe9fe;
   --color-accent-ink: #ffffff;
 
-  --color-gold: #a8791f;
-  --color-gold-soft: #f5e6c4;
+  --color-purple: #a855f7;
+  --color-purple-hover: #9333ea;
+  --color-purple-soft: #f1e2fe;
 
-  --color-success: #3f6b4a;
-  --color-success-soft: #dce9dd;
+  --color-pink: #ff5fa2;
+  --color-pink-hover: #f43f89;
+  --color-pink-soft: #ffe0ee;
 
-  --color-danger: #a23b33;
-  --color-danger-soft: #f1dad6;
+  --color-gold: #f5a623;
+  --color-gold-soft: #ffedcc;
+
+  --color-success: #22c55e;
+  --color-success-soft: #dcf9e4;
+
+  --color-danger: #ff5757;
+  --color-danger-soft: #ffe0e0;
 
   --font-serif: 'Fraunces', ui-serif, Georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
 :root.dark {
-  --color-bg: #1b1712;
-  --color-surface: #24201a;
-  --color-surface-alt: #2e2820;
-  --color-ink: #f3eadc;
-  --color-ink-muted: #b3a493;
-  --color-border: #3b332a;
+  --color-bg: #12172b;
+  --color-surface: #1c2340;
+  --color-surface-alt: #232b4d;
+  --color-ink: #f1f5ff;
+  --color-ink-muted: #a9b4d0;
+  --color-border: #313b63;
 
-  --color-accent: #e0774e;
-  --color-accent-hover: #ef8b62;
-  --color-accent-soft: #3a281f;
-  --color-accent-ink: #1b1712;
+  --color-accent: #5b9dff;
+  --color-accent-hover: #7cb1ff;
+  --color-accent-soft: #23345f;
+  --color-accent-ink: #0c0f1e;
 
-  --color-gold: #d9ac5c;
-  --color-gold-soft: #3a2f1c;
+  --color-purple: #c084fc;
+  --color-purple-hover: #d3a5fd;
+  --color-purple-soft: #362b57;
 
-  --color-success: #7fae8b;
-  --color-success-soft: #223225;
+  --color-pink: #ff8fc7;
+  --color-pink-hover: #ffa8d4;
+  --color-pink-soft: #4a2a3d;
 
-  --color-danger: #d97d73;
-  --color-danger-soft: #3a2320;
+  --color-gold: #ffd666;
+  --color-gold-soft: #4a3a17;
+
+  --color-success: #4ade80;
+  --color-success-soft: #1c3a29;
+
+  --color-danger: #ff8484;
+  --color-danger-soft: #4a2323;
 }

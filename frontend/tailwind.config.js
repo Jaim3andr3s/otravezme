@@ -19,6 +19,16 @@ export default {
           soft: 'var(--color-accent-soft)',
           ink: 'var(--color-accent-ink)',
         },
+        purple: {
+          DEFAULT: 'var(--color-purple)',
+          hover: 'var(--color-purple-hover)',
+          soft: 'var(--color-purple-soft)',
+        },
+        pink: {
+          DEFAULT: 'var(--color-pink)',
+          hover: 'var(--color-pink-hover)',
+          soft: 'var(--color-pink-soft)',
+        },
         gold: {
           DEFAULT: 'var(--color-gold)',
           soft: 'var(--color-gold-soft)',

@@ -26,7 +26,7 @@ function SofiFallback() {
   return (
     <mesh>
       <sphereGeometry args={[0.5, 16, 16]} />
-      <meshBasicMaterial color="#b4502e" />
+      <meshBasicMaterial color="#f5a623" />
     </mesh>
   );
 }

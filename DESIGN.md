@@ -1,24 +1,26 @@
 # Design
 
 ## Theme
-Editorial cálido, mobile-first. Fondo tipo papel en claro, tinta cálida casi negra en oscuro. Un solo acento fuerte (terracota) domina CTAs/enlaces/marca; dorado, verde salvia y rojo ladrillo se usan como colores semánticos puntuales (rating/staff-pick, disponible, prestado/eliminar), no decorativos.
+Kids, brillante y dinámico, mobile-first. Fondo claro tipo cielo despejado en modo claro, azul noche profundo en oscuro. Paleta multicolor saturada (azul, dorado, morado, rosa, verde, rojo) usada libremente en CTAs, insignias, tarjetas y estados — sin miedo al color, pensado para enganchar a lectores infantiles.
 
 ## Color (CSS custom properties, `frontend/src/styles/tokens.css`, swapped por `.dark` en `<html>`)
 
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
-| `--color-bg` | `#fbf6ed` | `#1b1712` | fondo de página |
-| `--color-surface` | `#ffffff` | `#24201a` | tarjetas, modales, header |
-| `--color-surface-alt` | `#f3ead9` | `#2e2820` | badges neutros, fondos secundarios |
-| `--color-ink` | `#2b2117` | `#f3eadc` | texto principal |
-| `--color-ink-muted` | `#6b5d4f` | `#b3a493` | texto secundario |
-| `--color-border` | `#e7dcc8` | `#3b332a` | bordes |
-| `--color-accent` / `-hover` / `-soft` / `-ink` | `#b4502e` / `#9a4025` / `#f1ddd0` / `#fff` | `#e0774e` / `#ef8b62` / `#3a281f` / `#1b1712` | marca, CTAs, enlaces |
-| `--color-gold` / `-soft` | `#a8791f` / `#f5e6c4` | `#d9ac5c` / `#3a2f1c` | ratings, selección staff |
-| `--color-success` / `-soft` | `#3f6b4a` / `#dce9dd` | `#7fae8b` / `#223225` | disponible, confirmaciones |
-| `--color-danger` / `-soft` | `#a23b33` / `#f1dad6` | `#d97d73` / `#3a2320` | prestado, eliminar, error |
+| `--color-bg` | `#f5faff` | `#12172b` | fondo de página |
+| `--color-surface` | `#ffffff` | `#1c2340` | tarjetas, modales, header |
+| `--color-surface-alt` | `#fff4d6` | `#232b4d` | badges neutros, fondos secundarios |
+| `--color-ink` | `#1f2937` | `#f1f5ff` | texto principal |
+| `--color-ink-muted` | `#5b6472` | `#a9b4d0` | texto secundario |
+| `--color-border` | `#dcebfb` | `#313b63` | bordes |
+| `--color-accent` / `-hover` / `-soft` / `-ink` | `#2f7bf6` / `#1e63d6` / `#dbe9fe` / `#fff` | `#5b9dff` / `#7cb1ff` / `#23345f` / `#0c0f1e` | marca, CTAs, enlaces |
+| `--color-purple` / `-hover` / `-soft` | `#a855f7` / `#9333ea` / `#f1e2fe` | `#c084fc` / `#d3a5fd` / `#362b57` | acento secundario, variedad visual |
+| `--color-pink` / `-hover` / `-soft` | `#ff5fa2` / `#f43f89` / `#ffe0ee` | `#ff8fc7` / `#ffa8d4` / `#4a2a3d` | acento secundario, variedad visual |
+| `--color-gold` / `-soft` | `#f5a623` / `#ffedcc` | `#ffd666` / `#4a3a17` | ratings, selección staff, insignias |
+| `--color-success` / `-soft` | `#22c55e` / `#dcf9e4` | `#4ade80` / `#1c3a29` | disponible, confirmaciones |
+| `--color-danger` / `-soft` | `#ff5757` / `#ffe0e0` | `#ff8484` / `#4a2323` | prestado, eliminar, error |
 
-Mapeados en `tailwind.config.js` como `bg-*`, `text-*`, `border-*` (`bg`, `surface`, `surface-alt`, `ink`, `ink-muted`, `edge`, `accent`, `accent-hover`, `accent-soft`, `accent-ink`, `gold`, `gold-soft`, `success`, `success-soft`, `danger`, `danger-soft`).
+Mapeados en `tailwind.config.js` como `bg-*`, `text-*`, `border-*` (`bg`, `surface`, `surface-alt`, `ink`, `ink-muted`, `edge`, `accent`, `accent-hover`, `accent-soft`, `accent-ink`, `purple`, `purple-hover`, `purple-soft`, `pink`, `pink-hover`, `pink-soft`, `gold`, `gold-soft`, `success`, `success-soft`, `danger`, `danger-soft`).
 
 ## Typography
 - **Display/headings**: Fraunces (serif), self-hosted vía `@fontsource/fraunces` (400/500/600/700 + 600-italic). Clase `font-serif`.

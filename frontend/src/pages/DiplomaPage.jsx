@@ -165,7 +165,7 @@ export default function DiplomaPage() {
             border-width: 4px !important;
           }
           .print\\:border-gold {
-            border-color: #a8791f !important;
+            border-color: #f5a623 !important;
           }
           .print\\:break-inside-avoid {
             break-inside: avoid;
@@ -180,10 +180,10 @@ export default function DiplomaPage() {
             box-shadow: none !important;
           }
           .text-ink {
-            color: #2b2117 !important;
+            color: #1f2937 !important;
           }
           .border-edge {
-            border-color: #e7dcc8 !important;
+            border-color: #dcebfb !important;
           }
           .print\\:hidden {
             display: none !important;
