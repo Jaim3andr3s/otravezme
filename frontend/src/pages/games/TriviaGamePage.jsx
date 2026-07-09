@@ -1,9 +1,10 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Check, X, RotateCcw, ArrowLeft, Trophy } from 'lucide-react';
 import { useBooks } from '../../context/BooksContext.jsx';
 import { useGameScore } from '../../hooks/useGameScore.js';
+import { useMascot } from '../../context/MascotContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { FullPageLoader } from '../../components/ui/Spinner.jsx';
 import { IconTile } from '../../components/ui/IconTile.jsx';
@@ -32,6 +33,7 @@ function buildQuestions(books) {
 export default function TriviaGamePage() {
   const { books, loading } = useBooks();
   const { submitScore, submitting } = useGameScore('trivia');
+  const { react } = useMascot();
   const questions = useMemo(() => (books.length >= 5 ? buildQuestions(books) : []), [books]);
 
   const [index, setIndex] = useState(0);
@@ -50,8 +52,14 @@ export default function TriviaGamePage() {
         won: finalScore >= Math.ceil(questions.length / 2),
         metadata: { total: questions.length, perfect },
       });
+      // Mascota: reacción según puntaje
+      if (finalScore >= Math.ceil(questions.length / 2)) {
+        react('juego_ok');
+      } else {
+        react('juego_animo');
+      }
     },
-    [questions.length, submitScore]
+    [questions.length, submitScore, react]
   );
 
   const handleAnswer = (option) => {

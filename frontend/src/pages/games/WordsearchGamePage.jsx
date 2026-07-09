@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, RotateCcw, Trophy, Frown, Search } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, Search } from 'lucide-react';
 import { useGameScore } from '../../hooks/useGameScore.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { IconTile } from '../../components/ui/IconTile.jsx';
@@ -14,12 +14,10 @@ const WORDS = [
 ];
 
 function generateGrid() {
-  // Inicializar grid vacío
   const grid = Array(GRID_SIZE).fill(null).map(() => 
     Array(GRID_SIZE).fill('')
   );
   
-  // Colocar palabras horizontal y verticalmente
   const placedWords = [];
   const directions = [
     [0, 1], // horizontal
@@ -36,7 +34,6 @@ function generateGrid() {
       const dir = directions[Math.floor(Math.random() * directions.length)];
       const [dr, dc] = dir;
       
-      // Verificar si cabe
       let fits = true;
       for (let i = 0; i < word.length; i++) {
         const r = row + dr * i;
@@ -63,7 +60,6 @@ function generateGrid() {
     }
   });
   
-  // Rellenar espacios vacíos con letras aleatorias
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
@@ -102,27 +98,22 @@ export default function WordsearchGamePage() {
   const handleCellClick = (row, col) => {
     if (status !== 'playing') return;
     
-    // Si ya hay selección, verificar si forma palabra
     if (selectedCells.length > 0) {
       const last = selectedCells[selectedCells.length - 1];
       const dr = Math.abs(row - last.row);
       const dc = Math.abs(col - last.col);
       
-      // Solo permitir movimientos adyacentes (horizontal, vertical o diagonal)
       if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1) || (dr === 1 && dc === 1)) {
-        // Evitar repetir celdas
         if (!selectedCells.some(c => c.row === row && c.col === col)) {
           setSelectedCells([...selectedCells, { row, col }]);
         }
         return;
       }
       
-      // Si no es adyacente, empezar nueva selección
       setSelectedCells([{ row, col }]);
       return;
     }
     
-    // Primera selección
     setSelectedCells([{ row, col }]);
   };
   
@@ -132,7 +123,6 @@ export default function WordsearchGamePage() {
     const word = selectedCells.map(c => grid[c.row][c.col]).join('');
     const wordReversed = word.split('').reverse().join('');
     
-    // Verificar si la palabra está en la lista y no ha sido encontrada
     let foundWord = null;
     if (placedWords.includes(word) && !foundWords.includes(word)) {
       foundWord = word;
@@ -145,7 +135,6 @@ export default function WordsearchGamePage() {
       setFoundWords(newFoundWords);
       setMoves(prev => prev + 1);
       
-      // Verificar si se encontraron todas
       if (newFoundWords.length === placedWords.length) {
         setStatus('won');
         submitScore({ score: placedWords.length * 10, won: true, metadata: { moves } });
@@ -172,7 +161,7 @@ export default function WordsearchGamePage() {
         <div>
           <h2 className="text-2xl font-serif font-semibold text-ink">Sopa de Letras</h2>
           <p className="text-sm text-ink-muted">
-            Encuentra las palabras ocultas. Selecciona letras adyacentes y presiona "Enviar".
+            Encuentra las palabras ocultas. Selecciona letras adyacentes y presiona &quot;Enviar&quot;.
           </p>
         </div>
       </div>
@@ -197,10 +186,6 @@ export default function WordsearchGamePage() {
           {grid.map((row, r) => (
             row.map((letter, c) => {
               const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c);
-              const isFound = foundWords.some(word => {
-                // Verificar si la celda pertenece a alguna palabra encontrada (simplificado)
-                return false; // Simplificación: no marcamos celdas de palabras encontradas
-              });
               return (
                 <button
                   key={`${r}-${c}`}

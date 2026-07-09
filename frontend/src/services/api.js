@@ -5,7 +5,7 @@ function getToken() {
 }
 
 async function request(path, options = {}) {
-  const { auth, ...rest } = options;
+  const { ...rest } = options;
   const headers = { ...(rest.headers || {}) };
   if (rest.body) headers['Content-Type'] = 'application/json';
 

@@ -35,7 +35,7 @@ export default function CatalogPage() {
         </div>
         {isAdmin && (
           <Button variant="success" onClick={() => setShowPublish(true)} className="flex-shrink-0">
-            <Plus className="w-5 h-5" /> Publicar Nuevo Libro
+            <Plus className="w-5 h-5" /> Añadir libro
           </Button>
         )}
       </div>

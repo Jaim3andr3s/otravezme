@@ -19,9 +19,33 @@ export default function EventsPage() {
   if (loading) return <FullPageLoader label="Cargando eventos..." />;
   if (error) return <p className="text-danger text-center py-12">Error al cargar eventos: {error}</p>;
 
+  if (events.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="text-center py-20 space-y-6"
+      >
+        <div className="flex justify-center">
+          <div className="w-24 h-24 rounded-full bg-surface-alt border-2 border-edge flex items-center justify-center text-5xl">
+            📅
+          </div>
+        </div>
+        <p className="text-ink-muted font-serif italic text-lg">
+          Todavía no hay eventos programados, ¡vuelve pronto!
+        </p>
+        {isAdmin && (
+          <Button variant="purple" onClick={() => setShowCreate(true)}>
+            <Plus className="w-5 h-5" /> Añadir evento
+          </Button>
+        )}
+        {showCreate && <CreateEventForm onClose={() => setShowCreate(false)} onCreate={create} />}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-8">
-      {/* Encabezado con botón de admin en la parte superior */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-4xl font-serif font-semibold text-ink">📣 Próximos Eventos ({events.length})</h2>
@@ -29,7 +53,7 @@ export default function EventsPage() {
         </div>
         {isAdmin && (
           <Button variant="purple" onClick={() => setShowCreate(true)} className="flex-shrink-0">
-            <Plus className="w-5 h-5" /> Crear Nuevo Evento
+            <Plus className="w-5 h-5" /> Añadir evento
           </Button>
         )}
       </div>

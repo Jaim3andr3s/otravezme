@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { BookOpenCheck, Heart, Eraser, Check, ThumbsUp, ThumbsDown, Trash2, Pencil, Badge as BadgeIcon, Landmark, Star, Zap } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
@@ -6,10 +8,17 @@ import { BOOK_STATUS_LABEL } from '../../constants/labels.js';
 
 export function BookModal({ book, onClose, onVote, onDelete, onEdit, isAdmin }) {
   const { isFavorite, isRead, toggleFavorite, toggleRead } = useProfile();
+  const [readFeedback, setReadFeedback] = useState(false);
   const favorite = isFavorite(book.id);
   const read = isRead(book.id);
   const buttonClass =
-    'px-4 py-2 rounded-full font-semibold text-white transition-colors duration-200 shadow-md flex items-center justify-center';
+    'px-4 py-2 min-h-[44px] rounded-full font-semibold text-white transition-colors duration-200 shadow-md flex items-center justify-center';
+
+  const handleToggleRead = async () => {
+    await toggleRead(book.id);
+    setReadFeedback(true);
+    setTimeout(() => setReadFeedback(false), 800);
+  };
 
   return (
     <Modal title={book.title} onClose={onClose}>
@@ -80,13 +89,23 @@ export function BookModal({ book, onClose, onVote, onDelete, onEdit, isAdmin }) 
           >
             <Heart className={`w-5 h-5 ${favorite ? 'fill-white' : ''}`} />
           </button>
-          <button
-            onClick={() => toggleRead(book.id)}
-            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${read ? 'bg-accent-hover' : 'bg-accent'} hover:opacity-90`}
+          <motion.button
+            onClick={handleToggleRead}
+            className={`${buttonClass} flex-shrink-0 w-full sm:w-auto ${read ? 'bg-accent-hover' : 'bg-accent'} hover:opacity-90 relative overflow-hidden`}
             title={read ? 'Marcar como No Leído' : 'Marcar como Leído'}
+            animate={readFeedback ? { scale: 1.1 } : { scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             {read ? <Eraser className="w-5 h-5" /> : <Check className="w-5 h-5" />}
-          </button>
+            {readFeedback && (
+              <motion.div
+                className="absolute inset-0 bg-success/20"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              />
+            )}
+          </motion.button>
 
           {isAdmin && (
             <>

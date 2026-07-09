@@ -7,6 +7,7 @@ import { AchievementUnlockOverlay } from '../achievements/AchievementUnlockOverl
 import { BookModal } from '../books/BookModal.jsx';
 import { PublishBookForm } from '../admin/PublishBookForm.jsx';
 import { useBooks } from '../../context/BooksContext.jsx';
+import { SofiWidget } from '../mascot/SofiWidget.jsx';
 
 export function AppShell() {
   const { books, selectedBook, setSelectedBook, editingBook, setEditingBook, vote, remove, update } = useBooks();
@@ -28,6 +29,8 @@ export function AppShell() {
           <Outlet />
         </AnimatePresence>
       </main>
+      {/* Sofi mascota persistente */}
+      <SofiWidget />
       <AnimatePresence>
         {activeBook && (
           <BookModal

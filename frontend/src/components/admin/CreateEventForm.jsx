@@ -29,7 +29,7 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
     setMessage('');
     try {
       await onCreate({ ...formData, date: new Date(formData.date).toISOString() });
-      setMessage(isEdit ? '¡Evento actualizado exitosamente!' : '¡Evento creado exitosamente!');
+      setMessage(isEdit ? '¡Evento actualizado!' : '¡Evento añadido!');
       if (!isEdit) setFormData(emptyState);
       setTimeout(onClose, 1200);
     } catch (err) {
@@ -40,7 +40,7 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
   };
 
   return (
-    <Modal title={isEdit ? 'Editar Evento' : 'Crear Nuevo Evento'} onClose={onClose}>
+    <Modal title={isEdit ? 'Editar Evento' : 'Añadir Evento'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Evento" required />
         <Input type="datetime-local" name="date" value={formData.date} onChange={handleChange} required />
@@ -66,7 +66,7 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
+          className="w-full px-4 py-3 min-h-[44px] bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="animate-spin mr-2" />
@@ -75,7 +75,7 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
           ) : (
             <Megaphone className="mr-2 w-5 h-5" />
           )}
-          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Crear Evento'}
+          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Añadir evento'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

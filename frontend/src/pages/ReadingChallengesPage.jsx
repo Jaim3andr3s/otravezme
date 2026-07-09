@@ -1,30 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Calendar, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useChallenges } from '../context/ChallengesContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useMascot } from '../context/MascotContext.jsx';
 import { ManageChallengeForm } from '../components/admin/ManageChallengeForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
 
 export default function ReadingChallengesPage() {
   const { challenges, loading, error, create, update, remove } = useChallenges();
   const { isAuthenticated, role } = useUserAuth();
+  const { react } = useMascot();
   const isAdmin = role === 'admin';
   const [showForm, setShowForm] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState(null);
+  const notifiedRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    challenges.forEach((challenge) => {
+      if (challenge.completed && !notifiedRef.current.has(challenge.id)) {
+        notifiedRef.current.add(challenge.id);
+        react('reto_completo');
+      }
+    });
+  }, [challenges, isAuthenticated, react]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-accent animate-spin" /></div>;
   if (error) return <div className="text-center py-20"><p className="text-danger">Error: {error}</p></div>;
 
   if (challenges.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="text-center py-20 space-y-4">
-        <Target className="w-16 h-16 text-ink-muted mx-auto" />
-        <h2 className="text-3xl font-serif font-semibold text-ink">No hay retos activos</h2>
-        <p className="text-ink-muted">Pronto publicaremos nuevos retos de lectura.</p>
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="text-center py-20 space-y-6"
+      >
+        <div className="flex justify-center">
+          <div className="w-24 h-24 rounded-full bg-surface-alt border-2 border-edge flex items-center justify-center text-5xl">
+            🎯
+          </div>
+        </div>
+        <p className="text-ink-muted font-serif italic text-lg">
+          Todavía no hay retos activos, ¡vuelve pronto!
+        </p>
         {isAdmin && (
           <Button variant="success" onClick={() => setShowForm(true)}>
-            <Plus className="w-5 h-5" /> Crear Reto
+            <Plus className="w-5 h-5" /> Añadir reto
           </Button>
         )}
         {showForm && (
@@ -53,7 +75,7 @@ export default function ReadingChallengesPage() {
         </div>
         {isAdmin && (
           <Button variant="success" onClick={() => setShowForm(true)}>
-            <Plus className="w-5 h-5" /> Nuevo Reto
+            <Plus className="w-5 h-5" /> Añadir reto
           </Button>
         )}
       </div>

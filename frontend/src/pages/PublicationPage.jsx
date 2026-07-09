@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Newspaper, BookOpen, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
-import { api } from '../services/api.js';
 import { useArticles } from '../context/ArticlesContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
@@ -46,7 +45,7 @@ export default function PublicationPage({ type: propType }) {
   useEffect(() => {
     if (!normalizedType || !validTypes.includes(normalizedType) || !currentSection) return;
     reload(normalizedType, currentSection);
-  }, [normalizedType, currentSection, reload]);
+  }, [normalizedType, currentSection, reload, validTypes]);
 
   if (!normalizedType || !validTypes.includes(normalizedType)) {
     return (

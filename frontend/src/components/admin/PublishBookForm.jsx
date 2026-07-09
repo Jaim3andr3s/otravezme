@@ -19,7 +19,7 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
     setMessage('');
     try {
       await onPublish(formData);
-      setMessage(isEdit ? '¡Libro actualizado exitosamente!' : '¡Libro publicado exitosamente!');
+      setMessage(isEdit ? '¡Libro actualizado!' : '¡Libro añadido!');
       if (!isEdit) setFormData(emptyState);
       setTimeout(onClose, 1200);
     } catch (err) {
@@ -30,7 +30,7 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
   };
 
   return (
-    <Modal title={isEdit ? 'Editar Libro' : 'Publicar Nuevo Libro'} onClose={onClose}>
+    <Modal title={isEdit ? 'Editar Libro' : 'Añadir Libro'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-3">
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Libro" required />
         <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
@@ -49,7 +49,7 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-4 py-2 bg-success text-white font-semibold rounded-lg shadow-sm hover:opacity-90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+          className="w-full px-4 py-3 min-h-[44px] bg-success text-white font-semibold rounded-lg shadow-sm hover:opacity-90 transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="animate-spin mr-2" />
@@ -58,7 +58,7 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
           ) : (
             <Rocket className="mr-2 w-5 h-5" />
           )}
-          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Publicar Libro'}
+          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Añadir libro'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

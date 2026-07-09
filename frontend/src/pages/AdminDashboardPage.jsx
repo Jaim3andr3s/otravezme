@@ -70,60 +70,55 @@ export default function AdminDashboardPage() {
         <p className="text-sm text-ink-muted mb-6">Publica contenido nuevo o cierra tu sesión de administrador.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Biblioteca */}
           <div className="bg-surface-alt p-4 rounded-lg border border-edge">
             <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wide mb-3 flex items-center gap-2">
               <BookOpen className="w-4 h-4" /> Biblioteca
             </h3>
             <Button variant="success" onClick={() => setModal('book')} className="w-full justify-center text-sm">
-              <Plus className="w-4 h-4" /> Libro
+              <Plus className="w-4 h-4" /> Añadir libro
             </Button>
           </div>
 
-          {/* Club de lectura */}
           <div className="bg-surface-alt p-4 rounded-lg border border-edge">
             <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wide mb-3 flex items-center gap-2">
               <Target className="w-4 h-4" /> Club de lectura
             </h3>
             <div className="flex flex-col gap-2">
               <Button variant="pink" onClick={() => setModal('plan')} className="w-full justify-center text-sm">
-                <Plus className="w-4 h-4" /> Plan Lector
+                <Plus className="w-4 h-4" /> Plan lector
               </Button>
               <Button variant="purple" onClick={() => setModal('challenge')} className="w-full justify-center text-sm">
-                <Plus className="w-4 h-4" /> Reto de Lectura
+                <Plus className="w-4 h-4" /> Reto de lectura
               </Button>
             </div>
           </div>
 
-          {/* Publicaciones */}
           <div className="bg-surface-alt p-4 rounded-lg border border-edge">
             <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wide mb-3 flex items-center gap-2">
               <Newspaper className="w-4 h-4" /> Publicaciones
             </h3>
             <div className="flex flex-col gap-2">
               <Button variant="secondary" onClick={() => setModal('article-periodico')} className="w-full justify-center text-sm">
-                <Plus className="w-4 h-4" /> Periódico
+                <Plus className="w-4 h-4" /> Añadir artículo
               </Button>
               <Button variant="secondary" onClick={() => setModal('article-revista')} className="w-full justify-center text-sm">
-                <Plus className="w-4 h-4" /> Revista Digital
+                <Plus className="w-4 h-4" /> Añadir artículo
               </Button>
             </div>
           </div>
 
-          {/* Agenda */}
           <div className="bg-surface-alt p-4 rounded-lg border border-edge">
             <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wide mb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4" /> Agenda
             </h3>
             <Button variant="primary" onClick={() => setModal('event')} className="w-full justify-center text-sm">
-              <Plus className="w-4 h-4" /> Evento
+              <Plus className="w-4 h-4" /> Añadir evento
             </Button>
           </div>
 
-          {/* Salir */}
           <div className="bg-surface-alt p-4 rounded-lg border border-edge">
             <Button variant="secondary" onClick={handleLogout} className="w-full justify-center text-sm">
-              <XCircle className="w-4 h-4" /> Cerrar Sesión
+              <XCircle className="w-4 h-4" /> Cerrar sesión
             </Button>
           </div>
         </div>

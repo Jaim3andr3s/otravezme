@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Grid3x3, Type, Puzzle, Search, Grid, Trophy } from 'lucide-react';
 import { GameCard } from '../components/games/GameCard.jsx';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
 import { useAchievements } from '../context/AchievementsContext.jsx';
 import { useProfile } from '../context/ProfileContext.jsx';
+import { useMascot } from '../context/MascotContext.jsx';
+
+const ONBOARDING_KEY = 'sofi_onboarding_games';
 
 const GAMES = [
   {
@@ -34,7 +38,6 @@ const GAMES = [
     description: 'Ordena las piezas deslizantes para reconstruir la portada de un libro.',
     accentClass: 'bg-gold-soft text-gold',
   },
-  // NUEVOS JUEGOS (Fase C)
   {
     to: '/juegos/sopa-de-letras',
     icon: Search,
@@ -54,7 +57,16 @@ const GAMES = [
 export default function GamesHubPage() {
   const { catalog } = useAchievements();
   const { profile } = useProfile();
+  const { react } = useMascot();
   const earnedCodes = new Set((profile?.achievements ?? []).map((a) => a.code));
+
+  // Onboarding: primera visita a la sección de juegos
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      react('curiosidad', 'Aquí encontrarás juegos literarios para divertirte mientras aprendes.');
+      localStorage.setItem(ONBOARDING_KEY, 'true');
+    }
+  }, [react]);
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-12">

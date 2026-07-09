@@ -1,12 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useAchievements } from '../../context/AchievementsContext.jsx';
+import { useMascot } from '../../context/MascotContext.jsx';
 import { getAchievementIcon } from '../../constants/achievementIcons.js';
 
 export function AchievementUnlockOverlay() {
   const { current, dismissCurrent } = useAchievements();
+  const { react } = useMascot();
   const reduceMotion = useReducedMotion();
+  const notifiedRef = useRef(null);
+
+  // Notificar a Sofi cuando se desbloquea una nueva insignia
+  useEffect(() => {
+    if (current && current.code !== notifiedRef.current) {
+      react('logro');
+      notifiedRef.current = current.code;
+    }
+  }, [current, react]);
 
   useEffect(() => {
     if (!current) return undefined;

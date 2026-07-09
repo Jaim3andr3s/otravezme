@@ -20,5 +20,9 @@
     "@swc/core@1.12.7": true,
     "prisma@6.19.3": true,
     "esbuild@0.28.1": true
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1"
   }
 }
