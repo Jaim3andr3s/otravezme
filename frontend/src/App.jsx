@@ -9,6 +9,8 @@ import { ProfileProvider } from './context/ProfileContext.jsx';
 import { GalleryProvider } from './context/GalleryContext.jsx';
 import { ArticlesProvider } from './context/ArticlesContext.jsx';
 import { ChallengesProvider } from './context/ChallengesContext.jsx';
+import { ForumProvider } from './context/ForumContext.jsx';
+import { ActivitiesProvider } from './context/ActivitiesContext.jsx';
 import { MascotProvider } from './context/MascotContext.jsx';
 import { router } from './router/index.jsx';
 
@@ -23,11 +25,15 @@ export default function App() {
                 <GalleryProvider>
                   <ArticlesProvider>
                     <ChallengesProvider>
-                      <MascotProvider>
-                        <ProfileProvider>
-                          <RouterProvider router={router} />
-                        </ProfileProvider>
-                      </MascotProvider>
+                      <ForumProvider>
+                        <ActivitiesProvider>
+                          <MascotProvider>
+                            <ProfileProvider>
+                              <RouterProvider router={router} />
+                            </ProfileProvider>
+                          </MascotProvider>
+                        </ActivitiesProvider>
+                      </ForumProvider>
                     </ChallengesProvider>
                   </ArticlesProvider>
                 </GalleryProvider>

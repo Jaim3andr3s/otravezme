@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Rocket, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { FileUploadField } from '../ui/FileUploadField.jsx';
 
 const emptyState = { title: '', author: '', category: '', cover: '', description: '', ageRange: '', readOnlineUrl: '' };
 
@@ -15,6 +16,10 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.cover) {
+      setMessage('Error: falta la portada del libro. Sube una foto o pega una URL.');
+      return;
+    }
     setLoading(true);
     setMessage('');
     try {
@@ -36,7 +41,14 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
         <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
         <Input name="category" value={formData.category} onChange={handleChange} placeholder="Categoría (Ej: Fantasía, Novela)" required />
         <Input name="ageRange" value={formData.ageRange} onChange={handleChange} placeholder="Rango de Edad (Ej: 10-14 años)" required />
-        <Input type="url" name="cover" value={formData.cover} onChange={handleChange} placeholder="URL de la Portada (Imagen)" required />
+        <FileUploadField
+          label="Portada del libro"
+          kind="image"
+          required
+          url={formData.cover}
+          onUploaded={({ url }) => setFormData((prev) => ({ ...prev, cover: url }))}
+          helpText="Sube una foto de la portada desde tu computador o celular."
+        />
         <Input type="url" name="readOnlineUrl" value={formData.readOnlineUrl} onChange={handleChange} placeholder="URL de Lectura en Línea (Opcional)" />
         <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción breve del libro" required className="h-24" />
         {isEdit && (

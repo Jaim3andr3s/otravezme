@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
 import { IconTile } from '../components/ui/IconTile.jsx';
 import { EVENT_TYPE_LABEL } from '../constants/labels.js';
+import { resolveFileUrl } from '../services/api.js';
 
 export default function EventsPage() {
   const { events, loading, error, create, update, remove } = useEvents();
@@ -88,7 +89,15 @@ export default function EventsPage() {
                 </button>
               </div>
             )}
-            <Calendar className="w-10 h-10 text-accent flex-shrink-0 mr-4 mt-1" />
+            {event.imageUrl ? (
+              <img
+                src={resolveFileUrl(event.imageUrl)}
+                alt={event.title}
+                className="w-full md:w-40 h-40 object-cover rounded-lg flex-shrink-0 mr-0 md:mr-4 mb-4 md:mb-0"
+              />
+            ) : (
+              <Calendar className="w-10 h-10 text-accent flex-shrink-0 mr-4 mt-1" />
+            )}
             <div className="flex-grow">
               <h3 className="text-2xl font-serif font-semibold text-ink">{event.title}</h3>
               <p className="text-accent font-medium mb-2">

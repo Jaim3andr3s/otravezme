@@ -33,6 +33,10 @@ import ReadingChallengesPage from '../pages/ReadingChallengesPage.jsx';
 // Fase E
 import DiplomaPage from '../pages/DiplomaPage.jsx';
 
+// Fase F - Foro y Actividades
+import ForumPage from '../pages/ForumPage.jsx';
+import ActivitiesPage from '../pages/ActivitiesPage.jsx';
+
 const withUser = (element) => <RequireUser>{element}</RequireUser>;
 
 export const router = createBrowserRouter(
@@ -66,6 +70,10 @@ export const router = createBrowserRouter(
 
         // Fase D
         { path: 'club-de-lectura/retos', element: <ReadingChallengesPage /> },
+
+        // Fase F
+        { path: 'foro', element: withUser(<ForumPage />) },
+        { path: 'actividades', element: withUser(<ActivitiesPage />) },
 
         {
           path: 'admin',

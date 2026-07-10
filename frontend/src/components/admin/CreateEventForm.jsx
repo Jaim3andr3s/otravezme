@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Loader2, Megaphone, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { EVENT_TYPE_OPTIONS } from '../../constants/labels.js';
 
-const emptyState = { title: '', date: '', description: '', type: 'CLUB_LECTURA' };
+const emptyState = { title: '', date: '', description: '', type: 'CLUB_LECTURA', imageUrl: '' };
 
 function toDatetimeLocal(isoString) {
   if (!isoString) return '';
@@ -16,7 +17,15 @@ function toDatetimeLocal(isoString) {
 export function CreateEventForm({ onClose, onCreate, event = null }) {
   const isEdit = Boolean(event);
   const [formData, setFormData] = useState(() =>
-    event ? { title: event.title, date: toDatetimeLocal(event.date), description: event.description, type: event.type } : emptyState
+    event
+      ? {
+          title: event.title,
+          date: toDatetimeLocal(event.date),
+          description: event.description,
+          type: event.type,
+          imageUrl: event.imageUrl || '',
+        }
+      : emptyState
   );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -61,6 +70,14 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
           placeholder="Descripción completa del evento"
           required
           className="h-16"
+        />
+
+        <FileUploadField
+          label="Foto del evento (opcional)"
+          kind="image"
+          url={formData.imageUrl}
+          onUploaded={({ url }) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+          helpText="Aparece en la tarjeta del evento en la agenda."
         />
 
         <button

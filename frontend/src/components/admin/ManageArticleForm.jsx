@@ -2,8 +2,19 @@ import { useState } from 'react';
 import { Loader2, Newspaper, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { FileUploadField } from '../ui/FileUploadField.jsx';
 
-const emptyState = { publication: '', section: '', edition: '', title: '', author: '', content: '', coverImage: '' };
+const emptyState = {
+  publication: '',
+  section: '',
+  edition: '',
+  title: '',
+  author: '',
+  content: '',
+  coverImage: '',
+  attachmentUrl: '',
+  attachmentName: '',
+};
 
 const SECTIONS = {
   PERIODICO: ['Editorial', 'Informativa', 'Literatura', 'Opinión', 'Entretenimiento'],
@@ -43,6 +54,10 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
   return (
     <Modal title={isEdit ? 'Editar Artículo' : 'Nuevo Artículo'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <p className="text-xs text-ink-muted bg-accent-soft text-accent rounded-lg px-3 py-2">
+          💡 Consejo: escribe el contenido del artículo aquí abajo, y si quieres puedes subir una foto de portada y/o un archivo (PDF o Word) con la versión completa para que los lectores lo descarguen.
+        </p>
+
         {!fixedType && (
           <Input as="select" name="publication" value={formData.publication} onChange={handleChange} required>
             <option value="PERIODICO">Periódico</option>
@@ -57,7 +72,27 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del artículo" required />
         <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
         <Input as="textarea" name="content" value={formData.content} onChange={handleChange} placeholder="Contenido" required className="h-24" />
-        <Input name="coverImage" value={formData.coverImage} onChange={handleChange} placeholder="URL de imagen de portada (opcional)" />
+
+        <FileUploadField
+          label="Foto de portada"
+          kind="image"
+          url={formData.coverImage}
+          name=""
+          onUploaded={({ url }) => setFormData((prev) => ({ ...prev, coverImage: url }))}
+          helpText="Aparece como imagen destacada en la tarjeta del artículo (opcional)."
+        />
+
+        <FileUploadField
+          label="Archivo adjunto (PDF o Word)"
+          kind="document"
+          url={formData.attachmentUrl}
+          name={formData.attachmentName}
+          onUploaded={({ url, name }) =>
+            setFormData((prev) => ({ ...prev, attachmentUrl: url, attachmentName: name || prev.attachmentName }))
+          }
+          helpText="Súbelo si el artículo completo está en un documento (opcional)."
+        />
+
         <button
           type="submit"
           disabled={loading}

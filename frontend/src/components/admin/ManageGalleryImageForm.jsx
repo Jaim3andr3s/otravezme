@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Loader2, Image, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { FileUploadField } from '../ui/FileUploadField.jsx';
 
 const emptyState = { url: '', caption: '' };
 
 export function ManageGalleryImageForm({ onClose, onSave, image = null }) {
   const isEdit = Boolean(image);
-  const [formData, setFormData] = useState(() => image ? { url: image.url, caption: image.caption || '' } : emptyState);
+  const [formData, setFormData] = useState(() => (image ? { url: image.url, caption: image.caption || '' } : emptyState));
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -15,6 +16,10 @@ export function ManageGalleryImageForm({ onClose, onSave, image = null }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.url) {
+      setMessage('Error: falta la foto. Súbela o pega una URL.');
+      return;
+    }
     setLoading(true);
     setMessage('');
     try {
@@ -32,7 +37,14 @@ export function ManageGalleryImageForm({ onClose, onSave, image = null }) {
   return (
     <Modal title={isEdit ? 'Editar Imagen' : 'Agregar Imagen'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <Input name="url" value={formData.url} onChange={handleChange} placeholder="URL de la imagen" required />
+        <FileUploadField
+          label="Foto para la galería"
+          kind="image"
+          required
+          url={formData.url}
+          onUploaded={({ url }) => setFormData((prev) => ({ ...prev, url }))}
+          helpText="Sube una foto de eventos, talleres o actividades de la biblioteca."
+        />
         <Input name="caption" value={formData.caption} onChange={handleChange} placeholder="Subtítulo (opcional)" />
         <button
           type="submit"

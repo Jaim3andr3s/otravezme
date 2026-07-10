@@ -13,6 +13,8 @@ import galleryRoutes from './routes/gallery.routes.js';
 import publicationsRoutes from './routes/publications.routes.js';
 import challengesRoutes from './routes/challenges.routes.js';
 import uploadsRoutes from './routes/uploads.routes.js';
+import forumRoutes from './routes/forum.routes.js';
+import activitiesRoutes from './routes/activities.routes.js';
 import { UPLOADS_DIR } from './middleware/upload.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +55,8 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/publications', publicationsRoutes);
 app.use('/api/challenges', challengesRoutes);
 app.use('/api/uploads', uploadsRoutes);
+app.use('/api/forum', forumRoutes);
+app.use('/api/activities', activitiesRoutes);
 
 app.use((req, res) => res.status(404).json({ message: 'Ruta de API no encontrada.' }));
 app.use(errorHandler);

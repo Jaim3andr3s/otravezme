@@ -55,6 +55,11 @@ enum AuthProvider {
   EMAIL
 }
 
+enum ActivitySubmissionStatus {
+  ENVIADA
+  REVISADA
+}
+
 model Book {
   id            Int        @id @default(autoincrement())
   title         String
@@ -129,6 +134,10 @@ model Profile {
   achievements ProfileAchievement[]
   gameScores   GameScore[] 
   diplomas   Diploma[] 
+  forumPosts    ForumPost[]
+  forumLikes    ForumLike[]
+  forumComments ForumComment[]
+  submissions   ActivitySubmission[]
 }
 
 model GalleryImage {
@@ -240,6 +249,82 @@ model Diploma {
   profile   Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@unique([profileId, title, type])
+}
+
+// ========== FORO (estilo muro de Facebook) ==========
+// profileId es null cuando el post/comentario lo hace el admin (no tiene
+// fila en Profile); en ese caso isAdminPost/isAdminComment queda en true y
+// authorName guarda el nombre a mostrar ("Biblioteca BiblioSueños").
+model ForumPost {
+  id           Int      @id @default(autoincrement())
+  profileId    Int?
+  authorName   String
+  authorAvatar String?
+  isAdminPost  Boolean  @default(false)
+  content      String
+  imageUrl     String?
+  createdAt    DateTime @default(now())
+
+  profile  Profile?       @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  likes    ForumLike[]
+  comments ForumComment[]
+}
+
+model ForumLike {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  profileId Int
+  createdAt DateTime @default(now())
+
+  post    ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  profile Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, profileId])
+}
+
+model ForumComment {
+  id             Int      @id @default(autoincrement())
+  postId         Int
+  profileId      Int?
+  authorName     String
+  authorAvatar   String?
+  isAdminComment Boolean  @default(false)
+  content        String
+  createdAt      DateTime @default(now())
+
+  post    ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  profile Profile?  @relation(fields: [profileId], references: [id], onDelete: SetNull)
+}
+
+// ========== ACTIVIDADES (tareas que el admin publica y los lectores entregan) ==========
+model Activity {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  dueDate        DateTime?
+  attachmentUrl  String?
+  attachmentName String?
+  createdAt      DateTime  @default(now())
+
+  submissions ActivitySubmission[]
+}
+
+model ActivitySubmission {
+  id          Int                      @id @default(autoincrement())
+  activityId  Int
+  profileId   Int
+  content     String?
+  fileUrl     String?
+  fileName    String?
+  status      ActivitySubmissionStatus @default(ENVIADA)
+  feedback    String?
+  submittedAt DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  profile  Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, profileId])
 }
 
 
