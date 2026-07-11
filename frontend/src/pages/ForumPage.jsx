@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Trash2, Send, ShieldCheck, MessageSquareText, Loa
 import { useForum } from '../context/ForumContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { FileUploadField } from '../components/ui/FileUploadField.jsx';
+import { useUploadGuard } from '../hooks/useUploadGuard.js';
 import { resolveFileUrl } from '../services/api.js';
 
 function timeAgo(dateStr) {
@@ -163,6 +164,7 @@ export default function ForumPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [showImageField, setShowImageField] = useState(false);
   const [posting, setPosting] = useState(false);
+  const { isUploading, onUploadingChange } = useUploadGuard();
 
   useEffect(() => {
     reload();
@@ -170,7 +172,7 @@ export default function ForumPage() {
 
   const handlePost = async (e) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || isUploading) return;
     setPosting(true);
     try {
       await create({ content: content.trim(), imageUrl: imageUrl || undefined });
@@ -213,17 +215,18 @@ export default function ForumPage() {
             kind="image"
             url={imageUrl}
             onUploaded={({ url }) => setImageUrl(url)}
+            onUploadingChange={onUploadingChange}
           />
         )}
 
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={posting || !content.trim()}
+            disabled={posting || isUploading || !content.trim()}
             className="px-5 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition disabled:opacity-50 flex items-center gap-2"
           >
             {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Publicar
+            {isUploading ? 'Esperando la foto...' : 'Publicar'}
           </button>
         </div>
       </form>

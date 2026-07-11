@@ -3,6 +3,8 @@ import { Loader2, Newspaper, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
+import { RichTextEditor } from '../ui/RichTextEditor.jsx';
+import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
 const emptyState = {
   publication: '',
@@ -30,6 +32,7 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const { isUploading, onUploadingChange } = useUploadGuard();
 
   const sections = SECTIONS[formData.publication] || [];
 
@@ -37,6 +40,15 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isUploading) {
+      setMessage('Espera a que terminen de subir los archivos antes de guardar.');
+      return;
+    }
+    const plainContent = formData.content.replace(/<[^>]*>/g, '').trim();
+    if (!plainContent) {
+      setMessage('Error: escribe el contenido del artículo antes de guardarlo.');
+      return;
+    }
     setLoading(true);
     setMessage('');
     try {
@@ -71,7 +83,14 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
         <Input name="edition" value={formData.edition} onChange={handleChange} placeholder="Edición (ej. 2026-07)" />
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del artículo" required />
         <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
-        <Input as="textarea" name="content" value={formData.content} onChange={handleChange} placeholder="Contenido" required className="h-24" />
+        <div>
+          <label className="text-sm font-semibold text-ink block mb-1">Contenido del artículo</label>
+          <RichTextEditor
+            value={formData.content}
+            onChange={(html) => setFormData((prev) => ({ ...prev, content: html }))}
+            placeholder="Escribe el artículo aquí. Usa la barra de arriba para poner negritas, títulos, listas..."
+          />
+        </div>
 
         <FileUploadField
           label="Foto de portada"
@@ -79,6 +98,7 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
           url={formData.coverImage}
           name=""
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, coverImage: url }))}
+          onUploadingChange={onUploadingChange}
           helpText="Aparece como imagen destacada en la tarjeta del artículo (opcional)."
         />
 
@@ -90,16 +110,17 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
           onUploaded={({ url, name }) =>
             setFormData((prev) => ({ ...prev, attachmentUrl: url, attachmentName: name || prev.attachmentName }))
           }
+          onUploadingChange={onUploadingChange}
           helpText="Súbelo si el artículo completo está en un documento (opcional)."
         />
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isUploading}
           className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2 w-5 h-5" />}
-          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Crear Artículo'}
+          {isUploading ? 'Esperando archivos...' : loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Crear Artículo'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

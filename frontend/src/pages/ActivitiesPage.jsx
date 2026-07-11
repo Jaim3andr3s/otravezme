@@ -17,7 +17,8 @@ import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { CreateActivityForm } from '../components/admin/CreateActivityForm.jsx';
 import { ActivitySubmissionsModal } from '../components/admin/ActivitySubmissionsModal.jsx';
 import { FileUploadField } from '../components/ui/FileUploadField.jsx';
-import { resolveFileUrl } from '../services/api.js';
+import { DocumentLink } from '../components/DocumentLink.jsx';
+import { useUploadGuard } from '../hooks/useUploadGuard.js';
 
 function SubmissionForm({ activity, onSubmit }) {
   const existing = activity.mySubmission;
@@ -27,6 +28,7 @@ function SubmissionForm({ activity, onSubmit }) {
   const [fileName, setFileName] = useState(existing?.fileName || '');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const { isUploading, onUploadingChange } = useUploadGuard();
 
   const isReviewed = existing?.status === 'REVISADA';
 
@@ -39,9 +41,9 @@ function SubmissionForm({ activity, onSubmit }) {
         </p>
         {existing.content && <p className="text-sm text-ink-muted mt-1 whitespace-pre-wrap">{existing.content}</p>}
         {existing.fileUrl && (
-          <a href={resolveFileUrl(existing.fileUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline mt-1">
+          <DocumentLink url={existing.fileUrl} name={existing.fileName} className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline mt-1">
             <FileText className="w-3.5 h-3.5" /> Ver {existing.fileName || 'archivo entregado'}
-          </a>
+          </DocumentLink>
         )}
         {isReviewed && existing.feedback && (
           <p className="text-xs text-ink-muted mt-2 italic">💬 {existing.feedback}</p>
@@ -57,6 +59,10 @@ function SubmissionForm({ activity, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isUploading) {
+      setMessage('Espera a que termine de subir el archivo antes de entregar.');
+      return;
+    }
     setSaving(true);
     setMessage('');
     try {
@@ -86,15 +92,16 @@ function SubmissionForm({ activity, onSubmit }) {
           setFileUrl(url);
           setFileName(name || '');
         }}
+        onUploadingChange={onUploadingChange}
       />
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || isUploading}
           className="px-4 py-2 bg-accent text-accent-ink text-sm font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition disabled:opacity-50 flex items-center gap-2"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-          {existing ? 'Guardar cambios' : 'Entregar actividad'}
+          {isUploading ? 'Esperando archivo...' : existing ? 'Guardar cambios' : 'Entregar actividad'}
         </button>
         {existing && (
           <button type="button" onClick={() => setEditing(false)} className="text-sm text-ink-muted hover:underline">
@@ -134,14 +141,13 @@ function ActivityCard({ activity, isAdmin, onEdit, onDelete, onViewSubmissions, 
       <p className="text-ink-muted leading-relaxed whitespace-pre-wrap">{activity.description}</p>
 
       {activity.attachmentUrl && (
-        <a
-          href={resolveFileUrl(activity.attachmentUrl)}
-          target="_blank"
-          rel="noreferrer"
+        <DocumentLink
+          url={activity.attachmentUrl}
+          name={activity.attachmentName}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline bg-accent-soft px-3 py-1.5 rounded-lg w-fit"
         >
           <FileText className="w-4 h-4" /> Ver {activity.attachmentName || 'guía adjunta'}
-        </a>
+        </DocumentLink>
       )}
 
       {isAdmin ? (

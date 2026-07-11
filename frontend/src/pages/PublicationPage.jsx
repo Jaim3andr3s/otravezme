@@ -9,6 +9,7 @@ import { ManageArticleForm } from '../components/admin/ManageArticleForm.jsx';
 import { ArticleReaderModal } from '../components/ArticleReaderModal.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { resolveFileUrl } from '../services/api.js';
+import { htmlToPlainText } from '../utils/htmlToPlainText.js';
 
 const ONBOARDING_KEY = 'sofi_onboarding_publicaciones';
 
@@ -162,7 +163,7 @@ export default function PublicationPage({ type: propType }) {
                       <span>{new Date(featured.publishedAt).toLocaleDateString('es-CO', { dateStyle: 'long' })}</span>
                     </div>
                     <h3 className="text-3xl font-serif font-semibold text-ink">{featured.title}</h3>
-                    <p className="text-ink-muted leading-relaxed line-clamp-3">{featured.content}</p>
+                    <p className="text-ink-muted leading-relaxed line-clamp-3">{htmlToPlainText(featured.content)}</p>
                     <button
                       onClick={() => setReadingArticle(featured)}
                       className="text-sm font-semibold text-accent hover:underline w-fit"
@@ -212,7 +213,7 @@ export default function PublicationPage({ type: propType }) {
                             )}
                           </div>
                           <h3 className="text-2xl font-serif font-semibold text-ink">{article.title}</h3>
-                          <p className="text-ink-muted leading-relaxed line-clamp-4">{article.content}</p>
+                          <p className="text-ink-muted leading-relaxed line-clamp-4">{htmlToPlainText(article.content)}</p>
                           <button
                             onClick={() => setReadingArticle(article)}
                             className="text-sm font-semibold text-accent hover:underline"

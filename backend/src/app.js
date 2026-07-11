@@ -15,7 +15,6 @@ import challengesRoutes from './routes/challenges.routes.js';
 import uploadsRoutes from './routes/uploads.routes.js';
 import forumRoutes from './routes/forum.routes.js';
 import activitiesRoutes from './routes/activities.routes.js';
-import { UPLOADS_DIR } from './middleware/upload.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -42,7 +41,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use('/uploads', express.static(UPLOADS_DIR));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);

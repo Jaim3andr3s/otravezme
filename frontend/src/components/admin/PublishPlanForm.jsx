@@ -4,6 +4,7 @@ import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { useBooks } from '../../context/BooksContext.jsx';
+import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
 const emptyState = { title: '', description: '', level: '', durationWeeks: '', documentUrl: '' };
 
@@ -35,6 +36,7 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
   const [bookSelection, setBookSelection] = useState(() => (plan ? booksArrayToMap(plan.books) : {}));
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const { isUploading, onUploadingChange } = useUploadGuard();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -58,6 +60,11 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+
+    if (isUploading) {
+      setMessage('Espera a que termine de subir el documento antes de guardar.');
+      return;
+    }
 
     const booksArray = Object.entries(bookSelection).map(([bookId, v]) => ({
       bookId: Number(bookId),
@@ -112,6 +119,7 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
           kind="document"
           url={formData.documentUrl}
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, documentUrl: url }))}
+          onUploadingChange={onUploadingChange}
           helpText="Súbelo si tienes una guía en PDF o Word para acompañar el plan."
         />
 
@@ -164,7 +172,7 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isUploading}
           className="w-full px-4 py-2 bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? (
@@ -174,7 +182,7 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
           ) : (
             <NotebookText className="mr-2 w-5 h-5" />
           )}
-          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Publicar Plan'}
+          {isUploading ? 'Esperando el documento...' : loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Publicar Plan'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

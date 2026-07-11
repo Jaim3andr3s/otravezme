@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Loader2, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { activitiesService } from '../../services/activities.service.js';
-import { resolveFileUrl } from '../../services/api.js';
+import { DocumentLink } from '../DocumentLink.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 
 function SubmissionRow({ submission, onReviewed }) {
@@ -39,14 +39,13 @@ function SubmissionRow({ submission, onReviewed }) {
       </div>
       {submission.content && <p className="text-sm text-ink mt-2 whitespace-pre-wrap">{submission.content}</p>}
       {submission.fileUrl && (
-        <a
-          href={resolveFileUrl(submission.fileUrl)}
-          target="_blank"
-          rel="noreferrer"
+        <DocumentLink
+          url={submission.fileUrl}
+          name={submission.fileName}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline mt-2"
         >
           <FileText className="w-3.5 h-3.5" /> Ver {submission.fileName || 'archivo entregado'}
-        </a>
+        </DocumentLink>
       )}
       <div className="mt-3 flex flex-col sm:flex-row gap-2">
         <input

@@ -1,0 +1,15 @@
+# Netlify necesita que le digamos que el proyecto real está en /frontend
+# (el repo es un monorepo con /frontend y /backend juntos).
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Sin esto, entrar directo a una ruta como /foro o /biblioteca (o recargar
+# la página estando en una de ellas) da 404, porque Netlify busca un archivo
+# físico en esa ruta. Esta regla reenvía todo a index.html para que
+# React Router decida qué mostrar.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

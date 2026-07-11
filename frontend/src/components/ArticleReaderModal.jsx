@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { XCircle, FileText } from 'lucide-react';
 import { resolveFileUrl } from '../services/api.js';
+import { DocumentLink } from './DocumentLink.jsx';
 
 // Vista de lectura completa de un artículo de periódico/revista. El listado
 // (PublicationPage) solo muestra un resumen; aquí se ve el texto completo,
@@ -44,17 +45,23 @@ export function ArticleReaderModal({ article, onClose }) {
             </button>
           </div>
 
-          <p className="text-ink leading-relaxed whitespace-pre-wrap">{article.content}</p>
+          {/\<[a-z][\s\S]*\>/i.test(article.content) ? (
+            <div
+              className="text-ink leading-relaxed prose prose-sm sm:prose-base max-w-none [&_*]:text-ink"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          ) : (
+            <p className="text-ink leading-relaxed whitespace-pre-wrap">{article.content}</p>
+          )}
 
           {article.attachmentUrl && (
-            <a
-              href={resolveFileUrl(article.attachmentUrl)}
-              target="_blank"
-              rel="noreferrer"
+            <DocumentLink
+              url={article.attachmentUrl}
+              name={article.attachmentName}
               className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline bg-accent-soft px-4 py-2 rounded-lg"
             >
               <FileText className="w-4 h-4" /> Ver {article.attachmentName || 'archivo adjunto'}
-            </a>
+            </DocumentLink>
           )}
         </div>
       </motion.div>

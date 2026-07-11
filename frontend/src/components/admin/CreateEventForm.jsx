@@ -4,6 +4,7 @@ import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { EVENT_TYPE_OPTIONS } from '../../constants/labels.js';
+import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
 const emptyState = { title: '', date: '', description: '', type: 'CLUB_LECTURA', imageUrl: '' };
 
@@ -29,11 +30,16 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
   );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const { isUploading, onUploadingChange } = useUploadGuard();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isUploading) {
+      setMessage('Espera a que termine de subir la foto antes de guardar.');
+      return;
+    }
     setLoading(true);
     setMessage('');
     try {
@@ -77,12 +83,13 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
           kind="image"
           url={formData.imageUrl}
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+          onUploadingChange={onUploadingChange}
           helpText="Aparece en la tarjeta del evento en la agenda."
         />
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isUploading}
           className="w-full px-4 py-3 min-h-[44px] bg-accent text-accent-ink font-semibold rounded-lg shadow-sm hover:bg-accent-hover transition duration-150 flex items-center justify-center disabled:opacity-50"
         >
           {loading ? (
@@ -92,7 +99,7 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
           ) : (
             <Megaphone className="mr-2 w-5 h-5" />
           )}
-          {loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Añadir evento'}
+          {isUploading ? 'Esperando la foto...' : loading ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Añadir evento'}
         </button>
         {message && <p className={`text-sm text-center ${message.startsWith('Error') ? 'text-danger' : 'text-success'}`}>{message}</p>}
       </form>

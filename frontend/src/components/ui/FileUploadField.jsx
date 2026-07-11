@@ -25,7 +25,7 @@ function isImageUrl(url = '') {
   return /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(url);
 }
 
-export function FileUploadField({ label, kind = 'any', url = '', name = '', onUploaded, helpText, required = false }) {
+export function FileUploadField({ label, kind = 'any', url = '', name = '', onUploaded, helpText, required = false, onUploadingChange }) {
   const inputRef = useRef(null);
   const [mode, setMode] = useState('subir'); // 'subir' | 'url'
   const [uploading, setUploading] = useState(false);
@@ -37,6 +37,7 @@ export function FileUploadField({ label, kind = 'any', url = '', name = '', onUp
     if (!file) return;
     setError('');
     setUploading(true);
+    onUploadingChange?.(true);
     setProgressMsg(`Subiendo "${file.name}"...`);
     try {
       const result = await uploadFile(file);
@@ -47,6 +48,7 @@ export function FileUploadField({ label, kind = 'any', url = '', name = '', onUp
       setProgressMsg('');
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = '';
     }
   };

@@ -10,6 +10,7 @@ import { PublishPlanForm } from '../components/admin/PublishPlanForm.jsx';
 import { Badge } from '../components/ui/Badge.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
+import { DocumentLink } from '../components/DocumentLink.jsx';
 
 export default function PlansPage() {
   const { plans, setPlans, loading: plansLoading, error } = useReadingPlans();
@@ -97,14 +98,13 @@ export default function PlansPage() {
 
               <div className="mt-4">
                 {plan.documentUrl && (
-                  <a
-                    href={plan.documentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <DocumentLink
+                    url={plan.documentUrl}
+                    name={`Plan - ${plan.title}`}
                     className="text-sm font-semibold text-accent hover:underline flex items-center mb-4"
                   >
                     <Globe className="w-4 h-4 mr-1" /> Ver Documento del Plan
-                  </a>
+                  </DocumentLink>
                 )}
 
                 <h4 className="text-sm font-semibold text-ink mb-2">Libros Destacados:</h4>
