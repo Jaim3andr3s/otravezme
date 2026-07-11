@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch-path=src --watch-path=prisma src/server.js",
     "start": "node src/server.js",
+    "render-build": "npm install && npx prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
