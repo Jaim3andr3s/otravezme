@@ -18,10 +18,19 @@ import activitiesRoutes from './routes/activities.routes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const allowedOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = new Set([
+  // Fallback fijo: aunque la variable de entorno CORS_ORIGINS en Render
+  // esté vacía o mal configurada, estos dominios siempre van a funcionar.
+  'https://biblioyenecomunity.netlify.app',
+  'https://bibliosuenos.netlify.app',
+  'http://localhost:5173',
+  'capacitor://localhost',
+  'https://localhost',
+  ...(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+]);
 
 // Dominios de túneles ngrok (cambian en cada sesión), para poder probar la
 // app completa (frontend + backend) expuesta públicamente sin tener que
@@ -33,7 +42,7 @@ const app = express();
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin) || NGROK_HOST_PATTERN.test(origin)) {
+      if (!origin || allowedOrigins.has(origin) || NGROK_HOST_PATTERN.test(origin)) {
         return callback(null, true);
       }
       callback(new Error('Origen no permitido por CORS.'));
