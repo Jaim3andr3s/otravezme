@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Save, ClipboardList } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
@@ -57,10 +58,13 @@ export function CreateActivityForm({ onClose, onSave, activity = null }) {
         <p className="text-xs text-ink-muted bg-accent-soft text-accent rounded-lg px-3 py-2">
           💡 Describe la tarea que deben entregar los lectores. Si quieres, adjunta una guía en foto, PDF o Word.
         </p>
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título de la actividad" required />
-        <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Instrucciones para los lectores" required className="h-24" />
-        <div>
-          <label className="text-sm font-semibold text-ink block mb-1">Fecha límite (opcional)</label>
+        <Field label="Título de la actividad" required>
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título de la actividad" required />
+        </Field>
+        <Field label="Instrucciones" required>
+          <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Instrucciones para los lectores" required className="h-24" />
+        </Field>
+        <Field label="Fecha límite">
           <input
             type="date"
             name="dueDate"
@@ -68,9 +72,9 @@ export function CreateActivityForm({ onClose, onSave, activity = null }) {
             onChange={handleChange}
             className="w-full p-3 border border-edge rounded-lg shadow-sm focus:ring-2 focus:ring-accent focus:border-accent bg-surface text-ink"
           />
-        </div>
+        </Field>
         <FileUploadField
-          label="Archivo de apoyo (opcional)"
+          label="Archivo de apoyo"
           kind="any"
           url={formData.attachmentUrl}
           name={formData.attachmentName}

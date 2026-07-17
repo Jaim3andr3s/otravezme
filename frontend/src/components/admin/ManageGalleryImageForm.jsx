@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
@@ -52,7 +53,9 @@ export function ManageGalleryImageForm({ onClose, onSave, image = null }) {
           onUploadingChange={onUploadingChange}
           helpText="Sube una foto de eventos, talleres o actividades de la biblioteca."
         />
-        <Input name="caption" value={formData.caption} onChange={handleChange} placeholder="Subtítulo (opcional)" />
+        <Field label="Subtítulo">
+          <Input name="caption" value={formData.caption} onChange={handleChange} placeholder="Subtítulo" />
+        </Field>
         <button
           type="submit"
           disabled={loading || isUploading}

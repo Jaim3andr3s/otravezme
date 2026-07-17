@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, NotebookText, Save, BookOpen } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { useBooks } from '../../context/BooksContext.jsx';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
@@ -108,14 +109,21 @@ export function PublishPlanForm({ onClose, onPublish, plan = null }) {
         <p className="text-xs text-ink-muted bg-accent-soft text-accent rounded-lg px-3 py-2">
           💡 Marca los libros que hacen parte del plan y dinos en qué semana se leen. Puedes agregar más libros luego editando el plan.
         </p>
-        <p className="text-xs text-ink-muted">* Campos obligatorios.</p>
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="* Título del Plan (Ej: Novelas para el Verano)" required />
-        <Input name="level" value={formData.level} onChange={handleChange} placeholder="* Nivel (Ej: Básico, Intermedio, Adultos)" required />
-        <Input type="number" name="durationWeeks" value={formData.durationWeeks} onChange={handleChange} placeholder="* Duración (Semanas)" required min="1" />
-        <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="* Descripción breve del Plan" required className="h-16" />
+        <Field label="Título del plan" required hint="Ej: Novelas para el Verano">
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del plan" required />
+        </Field>
+        <Field label="Nivel" required hint="Ej: Básico, Intermedio, Adultos">
+          <Input name="level" value={formData.level} onChange={handleChange} placeholder="Nivel" required />
+        </Field>
+        <Field label="Duración (semanas)" required>
+          <Input type="number" name="durationWeeks" value={formData.durationWeeks} onChange={handleChange} placeholder="Duración (semanas)" required min="1" />
+        </Field>
+        <Field label="Descripción breve" required>
+          <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción breve del plan" required className="h-16" />
+        </Field>
 
         <FileUploadField
-          label="Documento del plan (PDF o Word, opcional)"
+          label="Documento del plan (PDF o Word)"
           kind="document"
           url={formData.documentUrl}
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, documentUrl: url }))}

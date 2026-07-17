@@ -63,8 +63,13 @@ export function FileUploadField({ label, kind = 'any', url = '', name = '', onUp
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-ink">
-          {label} {required && <span className="text-danger">*</span>}
+        <label className="text-sm font-semibold text-ink flex items-center gap-1">
+          {label}
+          {required ? (
+            <span className="text-danger" aria-hidden="true">*</span>
+          ) : (
+            <span className="text-ink-muted font-normal text-xs">(opcional)</span>
+          )}
         </label>
         <div className="flex text-xs rounded-full bg-surface-alt border border-edge overflow-hidden">
           <button

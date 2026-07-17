@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Rocket, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
 
@@ -43,10 +44,18 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
   return (
     <Modal title={isEdit ? 'Editar Libro' : 'Añadir Libro'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-3">
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Libro" required />
-        <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
-        <Input name="category" value={formData.category} onChange={handleChange} placeholder="Categoría (Ej: Fantasía, Novela)" required />
-        <Input name="ageRange" value={formData.ageRange} onChange={handleChange} placeholder="Rango de Edad (Ej: 10-14 años)" required />
+        <Field label="Título del libro" required>
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Libro" required />
+        </Field>
+        <Field label="Autor" required>
+          <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
+        </Field>
+        <Field label="Categoría" required hint="Ej: Fantasía, Novela">
+          <Input name="category" value={formData.category} onChange={handleChange} placeholder="Categoría" required />
+        </Field>
+        <Field label="Rango de edad" required hint="Ej: 10-14 años">
+          <Input name="ageRange" value={formData.ageRange} onChange={handleChange} placeholder="Rango de edad" required />
+        </Field>
         <FileUploadField
           label="Portada del libro"
           kind="image"
@@ -56,13 +65,19 @@ export function PublishBookForm({ onClose, onPublish, book = null }) {
           onUploadingChange={onUploadingChange}
           helpText="Sube una foto de la portada desde tu computador o celular."
         />
-        <Input type="url" name="readOnlineUrl" value={formData.readOnlineUrl} onChange={handleChange} placeholder="URL de Lectura en Línea (Opcional)" />
-        <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción breve del libro" required className="h-24" />
+        <Field label="URL de lectura en línea">
+          <Input type="url" name="readOnlineUrl" value={formData.readOnlineUrl} onChange={handleChange} placeholder="https://..." />
+        </Field>
+        <Field label="Descripción breve" required>
+          <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción breve del libro" required className="h-24" />
+        </Field>
         {isEdit && (
-          <Input as="select" name="status" value={formData.status} onChange={handleChange}>
-            <option value="DISPONIBLE">Disponible</option>
-            <option value="PRESTADO">Prestado</option>
-          </Input>
+          <Field label="Estado" required>
+            <Input as="select" name="status" value={formData.status} onChange={handleChange}>
+              <option value="DISPONIBLE">Disponible</option>
+              <option value="PRESTADO">Prestado</option>
+            </Input>
+          </Field>
         )}
 
         <button

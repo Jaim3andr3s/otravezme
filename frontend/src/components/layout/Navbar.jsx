@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenCheck, X, LogOut, ShieldCheck, 
-  Image, Star, BookOpen, Target, Newspaper, MessageSquareText, ClipboardList
+  Image, Star, BookOpen, Target, MessageSquareText, ClipboardList
 } from 'lucide-react';
 import { useUserAuth } from '../../context/UserAuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
@@ -14,6 +14,8 @@ import { MenuToggle } from '../ui/MenuToggle.jsx';
 const NAV_LINKS = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/biblioteca', label: 'Biblioteca' },
+  { to: '/periodico', label: 'Periódico' },
+  { to: '/revista-digital', label: 'Revista Digital' },
   { to: '/foro', label: 'Foro' },
   { to: '/eventos', label: 'Eventos' },
   { to: '/juegos', label: 'Juegos' },
@@ -26,8 +28,6 @@ const DROPDOWN_LINKS = [
   { to: '/planes-lectores', label: 'Planes Lectores', icon: BookOpen },
   { to: '/club-de-lectura/retos', label: 'Retos de Lectura', icon: Target },
   { to: '/actividades', label: 'Actividades', icon: ClipboardList },
-  { to: '/periodico', label: 'Periódico', icon: Newspaper },
-  { to: '/revista-digital', label: 'Revista Digital', icon: BookOpen },
 ];
 
 export function Navbar() {

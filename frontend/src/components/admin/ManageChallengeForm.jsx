@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Target, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 
 const emptyState = { title: '', description: '', goalBooks: '', startDate: '', endDate: '' };
 
@@ -54,12 +55,22 @@ export function ManageChallengeForm({ onClose, onSave, challenge = null }) {
   return (
     <Modal title={isEdit ? 'Editar Reto' : 'Nuevo Reto de Lectura'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del reto" required />
-        <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción" required className="h-16" />
-        <Input type="number" name="goalBooks" value={formData.goalBooks} onChange={handleChange} placeholder="Meta (número de libros)" required min="1" />
+        <Field label="Título del reto" required>
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del reto" required />
+        </Field>
+        <Field label="Descripción" required>
+          <Input as="textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción" required className="h-16" />
+        </Field>
+        <Field label="Meta (número de libros)" required>
+          <Input type="number" name="goalBooks" value={formData.goalBooks} onChange={handleChange} placeholder="Meta (número de libros)" required min="1" />
+        </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
-          <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required />
+          <Field label="Fecha de inicio" required>
+            <Input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+          </Field>
+          <Field label="Fecha de fin" required>
+            <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required />
+          </Field>
         </div>
         <button
           type="submit"

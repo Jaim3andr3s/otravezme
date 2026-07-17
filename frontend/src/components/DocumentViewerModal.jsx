@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { XCircle, Loader2, Download, FileWarning } from 'lucide-react';
 import { resolveFileUrl } from '../services/api.js';
+import { BookReader } from './ui/BookReader.jsx';
+import { BookFrame } from './ui/BookFrame.jsx';
 
 function getExtension(url = '') {
   const clean = url.split('?')[0].split('#')[0];
@@ -78,7 +80,7 @@ export function DocumentViewerModal({ url, name, onClose }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-surface-alt/40">
+        <div className={`bg-surface-alt/40 ${isPdf || (isDocx && html && !error) ? 'h-[70vh] flex flex-col p-4' : 'flex-1 overflow-y-auto'}`}>
           {loading && (
             <div className="flex flex-col items-center justify-center gap-2 py-20 text-ink-muted">
               <Loader2 className="w-8 h-8 animate-spin text-accent" />
@@ -91,15 +93,12 @@ export function DocumentViewerModal({ url, name, onClose }) {
           )}
 
           {!loading && isPdf && (
-            <iframe title={name || 'Documento PDF'} src={resolvedUrl} className="w-full h-[75vh] border-0" />
+            <BookFrame>
+              <iframe title={name || 'Documento PDF'} src={resolvedUrl} className="w-full h-full border-0 rounded-lg sm:rounded-xl" />
+            </BookFrame>
           )}
 
-          {!loading && isDocx && html && !error && (
-            <div
-              className="prose prose-sm sm:prose-base max-w-none p-6 bg-surface m-4 rounded-lg shadow-sm text-ink [&_*]:text-ink"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          )}
+          {!loading && isDocx && html && !error && <BookReader html={html} />}
 
           {!loading && (error || (!canPreview && !isImage && !isPdf)) && (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center px-6">

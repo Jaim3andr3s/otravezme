@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Megaphone, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { EVENT_TYPE_OPTIONS } from '../../constants/labels.js';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
@@ -57,29 +58,37 @@ export function CreateEventForm({ onClose, onCreate, event = null }) {
   return (
     <Modal title={isEdit ? 'Editar Evento' : 'Añadir Evento'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Evento" required />
-        <Input type="datetime-local" name="date" value={formData.date} onChange={handleChange} required />
+        <Field label="Título del evento" required>
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del Evento" required />
+        </Field>
+        <Field label="Fecha y hora" required>
+          <Input type="datetime-local" name="date" value={formData.date} onChange={handleChange} required />
+        </Field>
 
-        <Input as="select" name="type" value={formData.type} onChange={handleChange}>
-          {EVENT_TYPE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Input>
+        <Field label="Tipo de evento" required>
+          <Input as="select" name="type" value={formData.type} onChange={handleChange}>
+            {EVENT_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </Input>
+        </Field>
 
-        <Input
-          as="textarea"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Descripción completa del evento"
-          required
-          className="h-16"
-        />
+        <Field label="Descripción" required>
+          <Input
+            as="textarea"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Descripción completa del evento"
+            required
+            className="h-16"
+          />
+        </Field>
 
         <FileUploadField
-          label="Foto del evento (opcional)"
+          label="Foto del evento"
           kind="image"
           url={formData.imageUrl}
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, imageUrl: url }))}

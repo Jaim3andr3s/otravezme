@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, Newspaper, Save } from 'lucide-react';
 import { Modal } from '../ui/Modal.jsx';
 import { Input } from '../ui/Input.jsx';
+import { Field } from '../ui/Field.jsx';
 import { FileUploadField } from '../ui/FileUploadField.jsx';
 import { RichTextEditor } from '../ui/RichTextEditor.jsx';
 import { useUploadGuard } from '../../hooks/useUploadGuard.js';
@@ -71,26 +72,35 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
         </p>
 
         {!fixedType && (
-          <Input as="select" name="publication" value={formData.publication} onChange={handleChange} required>
-            <option value="PERIODICO">Periódico</option>
-            <option value="REVISTA">Revista Digital</option>
-          </Input>
+          <Field label="Tipo de publicación" required>
+            <Input as="select" name="publication" value={formData.publication} onChange={handleChange} required>
+              <option value="PERIODICO">Periódico</option>
+              <option value="REVISTA">Revista Digital</option>
+            </Input>
+          </Field>
         )}
-        <Input as="select" name="section" value={formData.section} onChange={handleChange} required>
-          <option value="">Seleccionar sección</option>
-          {sections.map((s) => <option key={s} value={s}>{s}</option>)}
-        </Input>
-        <Input name="edition" value={formData.edition} onChange={handleChange} placeholder="Edición (ej. 2026-07)" />
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del artículo" required />
-        <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
-        <div>
-          <label className="text-sm font-semibold text-ink block mb-1">Contenido del artículo</label>
+        <Field label="Sección" required>
+          <Input as="select" name="section" value={formData.section} onChange={handleChange} required>
+            <option value="">Seleccionar sección</option>
+            {sections.map((s) => <option key={s} value={s}>{s}</option>)}
+          </Input>
+        </Field>
+        <Field label="Edición" hint="Ej. 2026-07">
+          <Input name="edition" value={formData.edition} onChange={handleChange} placeholder="Edición" />
+        </Field>
+        <Field label="Título del artículo" required>
+          <Input name="title" value={formData.title} onChange={handleChange} placeholder="Título del artículo" required />
+        </Field>
+        <Field label="Autor" required>
+          <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
+        </Field>
+        <Field label="Contenido del artículo" required>
           <RichTextEditor
             value={formData.content}
             onChange={(html) => setFormData((prev) => ({ ...prev, content: html }))}
             placeholder="Escribe el artículo aquí. Usa la barra de arriba para poner negritas, títulos, listas..."
           />
-        </div>
+        </Field>
 
         <FileUploadField
           label="Foto de portada"
@@ -99,7 +109,7 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
           name=""
           onUploaded={({ url }) => setFormData((prev) => ({ ...prev, coverImage: url }))}
           onUploadingChange={onUploadingChange}
-          helpText="Aparece como imagen destacada en la tarjeta del artículo (opcional)."
+          helpText="Aparece como imagen destacada en la tarjeta del artículo."
         />
 
         <FileUploadField
@@ -111,7 +121,7 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
             setFormData((prev) => ({ ...prev, attachmentUrl: url, attachmentName: name || prev.attachmentName }))
           }
           onUploadingChange={onUploadingChange}
-          helpText="Súbelo si el artículo completo está en un documento (opcional)."
+          helpText="Súbelo si el artículo completo está en un documento."
         />
 
         <button
