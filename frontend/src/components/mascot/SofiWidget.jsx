@@ -137,7 +137,7 @@ export function SofiWidget() {
           Tamaño escalado por breakpoint para que no tape contenido en móvil. */}
       <motion.button
         onClick={handleToggle}
-        className="relative w-28 h-[190px] sm:w-40 sm:h-[300px] flex items-end justify-center bg-transparent focus:outline-none pointer-events-auto touch-manipulation"
+        className="relative w-[92px] h-[155px] sm:w-40 sm:h-[300px] flex items-end justify-center bg-transparent focus:outline-none pointer-events-auto touch-manipulation"
         whileTap={{ scale: 0.95 }}
         whileHover={{ scale: 1.03 }}
         animate={buttonAnimation}
@@ -146,7 +146,7 @@ export function SofiWidget() {
       >
         {!prefersReducedMotion && (
           <motion.div
-            className="absolute bottom-2 w-14 sm:w-20 h-3 sm:h-4 rounded-full bg-ink/20 blur-sm"
+            className="absolute bottom-2 w-11 sm:w-20 h-2.5 sm:h-4 rounded-full bg-ink/20 blur-sm"
             animate={{ scaleX: [1, 0.85, 1], opacity: [0.35, 0.2, 0.35] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
           />

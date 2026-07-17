@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { XCircle, Loader2, Download, FileWarning } from 'lucide-react';
 import { resolveFileUrl } from '../services/api.js';
 import { BookReader } from './ui/BookReader.jsx';
-import { BookFrame } from './ui/BookFrame.jsx';
+import { PdfBookReader } from './ui/PdfBookReader.jsx';
 
 function getExtension(url = '') {
   const clean = url.split('?')[0].split('#')[0];
@@ -13,7 +14,9 @@ function getExtension(url = '') {
 
 // Previsualiza el archivo dentro de la app en vez de forzar la descarga:
 // - Imágenes: se muestran directamente.
-// - PDF: el navegador ya sabe renderizarlo, lo mostramos en un iframe.
+// - PDF: se renderiza página por página con pdf.js dentro del marco de
+//   libro (PdfBookReader), en vez de incrustar el visor nativo del
+//   navegador con su propia barra de herramientas.
 // - Word moderno (.docx): se convierte a texto con formato usando "mammoth",
 //   en el propio navegador (nada se sube a ningún servidor externo).
 // - Word antiguo (.doc) u otros formatos: no se pueden previsualizar en el
@@ -55,16 +58,22 @@ export function DocumentViewerModal({ url, name, onClose }) {
   const isDocx = ext === 'docx';
   const canPreview = isImage || isPdf || (isDocx && html && !error);
 
-  return (
+  // Portal a document.body: este visor suele abrirse desde dentro de otro
+  // modal (ej. ArticleReaderModal), que usa framer-motion y por lo tanto
+  // tiene un `transform` propio. Un `transform` en un ancestro convierte a
+  // ese ancestro en el "contenedor" de cualquier `position: fixed` interno
+  // (así lo define CSS), así que sin el portal este visor quedaba encerrado
+  // dentro del tamaño del modal padre en vez de cubrir toda la pantalla.
+  return createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-75 z-[160] flex items-center justify-center p-4" onClick={onClose}>
       <motion.div
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.96, opacity: 0 }}
-        className="bg-surface rounded-xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden"
+        className="bg-surface rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-4 border-b border-edge flex-shrink-0">
+        <div className="flex justify-between items-center p-3 border-b border-edge flex-shrink-0">
           <h2 className="text-lg font-semibold text-ink truncate pr-4">{name || 'Documento'}</h2>
           <div className="flex items-center gap-3 flex-shrink-0">
             <a
@@ -80,7 +89,7 @@ export function DocumentViewerModal({ url, name, onClose }) {
           </div>
         </div>
 
-        <div className={`bg-surface-alt/40 ${isPdf || (isDocx && html && !error) ? 'h-[70vh] flex flex-col p-4' : 'flex-1 overflow-y-auto'}`}>
+        <div className={`bg-surface-alt/40 ${isPdf || (isDocx && html && !error) ? 'flex-1 min-h-0 flex flex-col p-2 sm:p-4' : 'flex-1 overflow-y-auto'}`}>
           {loading && (
             <div className="flex flex-col items-center justify-center gap-2 py-20 text-ink-muted">
               <Loader2 className="w-8 h-8 animate-spin text-accent" />
@@ -92,11 +101,7 @@ export function DocumentViewerModal({ url, name, onClose }) {
             <img src={resolvedUrl} alt={name || 'Imagen'} className="max-w-full mx-auto" />
           )}
 
-          {!loading && isPdf && (
-            <BookFrame>
-              <iframe title={name || 'Documento PDF'} src={resolvedUrl} className="w-full h-full border-0 rounded-lg sm:rounded-xl" />
-            </BookFrame>
-          )}
+          {!loading && isPdf && <PdfBookReader url={resolvedUrl} />}
 
           {!loading && isDocx && html && !error && <BookReader html={html} />}
 
@@ -117,6 +122,7 @@ export function DocumentViewerModal({ url, name, onClose }) {
           )}
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { BookFrame } from './BookFrame.jsx';
+import { ReaderFrame } from './ReaderFrame.jsx';
 
 const PAGE_GAP = 40;
 const SWIPE_THRESHOLD = 60;
@@ -79,7 +79,7 @@ export function BookReader({ html }) {
 
   return (
     <div className="flex flex-col h-full flex-1 min-h-0">
-      <BookFrame>
+      <ReaderFrame>
         <div ref={viewportRef} className="relative h-full">
           <motion.div
             drag={pageCount > 1 ? 'x' : false}
@@ -105,31 +105,33 @@ export function BookReader({ html }) {
             />
           </motion.div>
         </div>
-      </BookFrame>
+      </ReaderFrame>
 
-      <div className="flex items-center justify-between pt-3 flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => goTo(page - 1)}
-          disabled={page === 0}
-          className="p-2 rounded-full bg-surface-alt text-ink disabled:opacity-30 hover:bg-accent-soft hover:text-accent transition"
-          aria-label="Página anterior"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <span className="text-sm font-medium text-ink-muted font-serif">
-          Página {page + 1} de {pageCount}
-        </span>
-        <button
-          type="button"
-          onClick={() => goTo(page + 1)}
-          disabled={page >= pageCount - 1}
-          className="p-2 rounded-full bg-surface-alt text-ink disabled:opacity-30 hover:bg-accent-soft hover:text-accent transition"
-          aria-label="Página siguiente"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between pt-3 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => goTo(page - 1)}
+            disabled={page === 0}
+            className="p-2 rounded-full bg-surface-alt text-ink disabled:opacity-30 hover:bg-accent-soft hover:text-accent transition"
+            aria-label="Página anterior"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="text-sm font-medium text-ink-muted font-serif">
+            Página {page + 1} de {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => goTo(page + 1)}
+            disabled={page >= pageCount - 1}
+            className="p-2 rounded-full bg-surface-alt text-ink disabled:opacity-30 hover:bg-accent-soft hover:text-accent transition"
+            aria-label="Página siguiente"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

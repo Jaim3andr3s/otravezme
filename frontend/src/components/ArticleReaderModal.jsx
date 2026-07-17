@@ -22,13 +22,19 @@ function toContentHtml(content = '') {
     .join('');
 }
 
-// Vista de lectura completa de un artículo de periódico/revista, mostrada
-// como un libro paginado (ver BookReader) en vez de un scroll continuo. El
-// listado (PublicationPage) solo muestra un resumen; aquí se lee el texto
-// completo página por página, con la portada y el archivo adjunto (PDF/Word)
-// si el admin subió uno.
+function hasRealContent(content = '') {
+  return content.replace(/<[^>]*>/g, '').trim().length > 0;
+}
+
+// Vista de lectura completa de un artículo de periódico/revista. El listado
+// (PublicationPage) solo muestra un resumen; aquí se lee el texto completo
+// paginado (ver BookReader), con la portada y el archivo adjunto (PDF/Word)
+// si el admin subió uno. El contenido es opcional: si el artículo no tiene
+// texto, no se muestra el lector paginado, solo el encabezado y el adjunto
+// (si hay uno).
 export function ArticleReaderModal({ article, onClose }) {
   if (!article) return null;
+  const showReader = hasRealContent(article.content);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-[160] flex items-center justify-center p-4" onClick={onClose}>
       <motion.div
@@ -36,7 +42,7 @@ export function ArticleReaderModal({ article, onClose }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '4vh', opacity: 0 }}
         transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-        className="bg-surface rounded-xl shadow-2xl w-full max-w-3xl h-[88vh] flex flex-col overflow-hidden"
+        className={`bg-surface rounded-xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden ${showReader ? 'h-[88vh]' : 'max-h-[90vh]'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 p-4 sm:p-6 pb-4 flex-shrink-0 border-b border-edge">
@@ -69,19 +75,35 @@ export function ArticleReaderModal({ article, onClose }) {
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 p-4 sm:p-6 flex flex-col gap-3">
-          <BookReader html={toContentHtml(article.content)} />
+        {showReader ? (
+          <div className="flex-1 min-h-0 p-4 sm:p-6 flex flex-col gap-3">
+            <BookReader html={toContentHtml(article.content)} />
 
-          {article.attachmentUrl && (
-            <DocumentLink
-              url={article.attachmentUrl}
-              name={article.attachmentName}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline bg-accent-soft px-4 py-2 rounded-lg w-fit flex-shrink-0"
-            >
-              <FileText className="w-4 h-4" /> Ver {article.attachmentName || 'archivo adjunto'}
-            </DocumentLink>
-          )}
-        </div>
+            {article.attachmentUrl && (
+              <DocumentLink
+                url={article.attachmentUrl}
+                name={article.attachmentName}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline bg-accent-soft px-4 py-2 rounded-lg w-fit flex-shrink-0"
+              >
+                <FileText className="w-4 h-4" /> Ver {article.attachmentName || 'archivo adjunto'}
+              </DocumentLink>
+            )}
+          </div>
+        ) : (
+          <div className="p-4 sm:p-6 overflow-y-auto">
+            {article.attachmentUrl ? (
+              <DocumentLink
+                url={article.attachmentUrl}
+                name={article.attachmentName}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline bg-accent-soft px-4 py-2 rounded-lg w-fit"
+              >
+                <FileText className="w-4 h-4" /> Ver {article.attachmentName || 'archivo adjunto'}
+              </DocumentLink>
+            ) : (
+              <p className="text-ink-muted text-sm">Este artículo no tiene contenido adicional.</p>
+            )}
+          </div>
+        )}
       </motion.div>
     </div>
   );

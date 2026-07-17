@@ -45,11 +45,6 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
       setMessage('Espera a que terminen de subir los archivos antes de guardar.');
       return;
     }
-    const plainContent = formData.content.replace(/<[^>]*>/g, '').trim();
-    if (!plainContent) {
-      setMessage('Error: escribe el contenido del artículo antes de guardarlo.');
-      return;
-    }
     setLoading(true);
     setMessage('');
     try {
@@ -94,7 +89,7 @@ export function ManageArticleForm({ onClose, onSave, article = null, fixedType =
         <Field label="Autor" required>
           <Input name="author" value={formData.author} onChange={handleChange} placeholder="Autor" required />
         </Field>
-        <Field label="Contenido del artículo" required>
+        <Field label="Contenido del artículo" hint="Si lo dejas vacío, los lectores solo verán el título, autor y el archivo adjunto (si subes uno).">
           <RichTextEditor
             value={formData.content}
             onChange={(html) => setFormData((prev) => ({ ...prev, content: html }))}
