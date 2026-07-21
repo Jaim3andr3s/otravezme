@@ -6,8 +6,9 @@ import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
 import { ManageGalleryImageForm } from '../components/admin/ManageGalleryImageForm.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import { STORAGE_KEYS } from '../constants/storage.js';
 
-const ONBOARDING_KEY = 'sofi_onboarding_galeria';
+const ONBOARDING_KEY = STORAGE_KEYS.SOFI_ONBOARDING_GALLERY;
 
 export default function GalleryPage() {
   const { images, loading, error, create, update, remove } = useGallery();

@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { requireAdmin } from '../middleware/requireAdmin.js';
-import { requireUser } from '../middleware/requireUser.js';
-import { requireAnyAuth } from '../middleware/requireAnyAuth.js';
+import { requireAdmin, requireUser, requireAnyAuth } from '../middleware/authenticate.js';
+import { validateId } from '../middleware/validateId.js';
 import {
   listActivities,
   createActivity,
@@ -14,19 +13,14 @@ import {
 
 const router = Router();
 
-// Listar requiere sesión (lector ve su propia entrega; admin ve totales).
 router.get('/', requireAnyAuth, listActivities);
-
-// Solo el admin publica, edita o borra actividades.
 router.post('/', requireAdmin, createActivity);
-router.put('/:id', requireAdmin, updateActivity);
-router.delete('/:id', requireAdmin, deleteActivity);
+router.put('/:id', requireAdmin, validateId(), updateActivity);
+router.delete('/:id', requireAdmin, validateId(), deleteActivity);
 
-// Solo el admin revisa el listado completo de entregas y las califica.
-router.get('/:id/submissions', requireAdmin, listSubmissions);
-router.put('/:id/submissions/:submissionId/review', requireAdmin, reviewSubmission);
+router.get('/:id/submissions', requireAdmin, validateId(), listSubmissions);
+router.put('/:id/submissions/:submissionId/review', requireAdmin, validateId('submissionId'), reviewSubmission);
 
-// Solo un lector logueado entrega su propia actividad.
-router.post('/:id/submit', requireUser, submitActivity);
+router.post('/:id/submit', requireUser, validateId(), submitActivity);
 
 export default router;

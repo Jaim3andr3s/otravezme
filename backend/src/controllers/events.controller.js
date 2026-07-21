@@ -1,48 +1,36 @@
 import prisma from '../lib/prisma.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
 import { eventCreateSchema, eventUpdateSchema } from '../validators/events.schema.js';
+import { parsePagination, paginatedResponse } from '../lib/paginate.js';
 
-export async function listEvents(req, res, next) {
-  try {
-    const events = await prisma.event.findMany({ orderBy: { date: 'asc' } });
-    res.json(events);
-  } catch (err) {
-    next(err);
-  }
-}
+export const listEvents = asyncHandler(async (req, res) => {
+  const { page, limit, skip, take } = parsePagination(req.query);
+  const [events, total] = await Promise.all([
+    prisma.event.findMany({ orderBy: { date: 'asc' }, skip, take }),
+    prisma.event.count(),
+  ]);
+  res.json(paginatedResponse(events, total, { page, limit }));
+});
 
-export async function createEvent(req, res, next) {
-  try {
-    const data = eventCreateSchema.parse(req.body);
-    const event = await prisma.event.create({
-      data: { ...data, imageUrl: data.imageUrl || null },
-    });
-    res.status(201).json(event);
-  } catch (err) {
-    next(err);
-  }
-}
+export const createEvent = asyncHandler(async (req, res) => {
+  const data = eventCreateSchema.parse(req.body);
+  const event = await prisma.event.create({
+    data: { ...data, imageUrl: data.imageUrl || null },
+  });
+  res.status(201).json(event);
+});
 
-export async function updateEvent(req, res, next) {
-  try {
-    const id = Number(req.params.id);
-    const data = eventUpdateSchema.parse(req.body);
-    if (data.imageUrl !== undefined) data.imageUrl = data.imageUrl || null;
+export const updateEvent = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const data = eventUpdateSchema.parse(req.body);
+  if (data.imageUrl !== undefined) data.imageUrl = data.imageUrl || null;
 
-    const event = await prisma.event.update({ where: { id }, data });
-    res.json({ message: 'Evento actualizado exitosamente.', event });
-  } catch (err) {
-    if (err.code === 'P2025') return res.status(404).json({ message: 'Evento no encontrado para actualizar.' });
-    next(err);
-  }
-}
+  const event = await prisma.event.update({ where: { id }, data });
+  res.json(event);
+});
 
-export async function deleteEvent(req, res, next) {
-  try {
-    const id = Number(req.params.id);
-    await prisma.event.delete({ where: { id } });
-    res.json({ message: 'Evento eliminado exitosamente.' });
-  } catch (err) {
-    if (err.code === 'P2025') return res.status(404).json({ message: 'Evento no encontrado para eliminar.' });
-    next(err);
-  }
-}
+export const deleteEvent = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  await prisma.event.delete({ where: { id } });
+  res.status(204).send();
+});

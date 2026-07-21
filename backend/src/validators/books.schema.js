@@ -10,6 +10,7 @@ export const bookCreateSchema = z.object({
   ageRange: z.string().min(1),
   status: z.enum(['DISPONIBLE', 'PRESTADO']).optional(),
   isStaffPick: z.boolean().optional(),
+  isBookOfMonth: z.boolean().optional(),
   readOnlineUrl: uploadableUrl().optional().or(z.literal('')),
 });
 

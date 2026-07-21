@@ -8,9 +8,9 @@ export function ArticlesProvider({ children }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { showNotification } = useNotification();
   const [currentType, setCurrentType] = useState(null);
   const [currentSection, setCurrentSection] = useState(null);
+  const { showNotification } = useNotification();
 
   const reload = useCallback(async (type, section) => {
     setLoading(true);
@@ -33,9 +33,6 @@ export function ArticlesProvider({ children }) {
   const create = useCallback(
     async (data) => {
       const article = await api.post('/publications', data, { auth: 'user' });
-      // Solo se inserta en la lista visible si coincide con el tipo y la
-      // sección que se está viendo actualmente; si no, se recarga la vista
-      // actual para no mezclar artículos de otras secciones/publicaciones.
       if (article.publication === currentType && (!currentSection || article.section === currentSection)) {
         setArticles((prev) => [article, ...prev]);
       }
@@ -48,8 +45,6 @@ export function ArticlesProvider({ children }) {
     async (id, data) => {
       const article = await api.put(`/publications/${id}`, data, { auth: 'user' });
       setArticles((prev) => {
-        // Si al editar cambió de tipo/sección y ya no pertenece a la vista
-        // actual, se quita de la lista en vez de dejarlo desactualizado.
         const stillMatches = article.publication === currentType && (!currentSection || article.section === currentSection);
         if (!stillMatches) return prev.filter((a) => a.id !== id);
         return prev.map((a) => (a.id === id ? article : a));

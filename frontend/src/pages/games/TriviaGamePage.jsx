@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Check, X, RotateCcw, ArrowLeft, Trophy } from 'lucide-react';
@@ -11,21 +11,26 @@ import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const QUESTION_COUNT = 8;
 
-function shuffle(array) {
-  return [...array].sort(() => Math.random() - 0.5);
+function fisherYatesShuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function buildQuestions(books) {
-  const pool = shuffle(books).slice(0, QUESTION_COUNT);
+  const pool = fisherYatesShuffle(books).slice(0, QUESTION_COUNT);
   return pool.map((book) => {
     const askAuthor = Math.random() > 0.5;
     const field = askAuthor ? 'author' : 'category';
     const prompt = askAuthor ? `¿Quién escribió "${book.title}"?` : `¿A qué categoría pertenece "${book.title}"?`;
-    const distractors = shuffle(
+    const distractors = fisherYatesShuffle(
       books.filter((b) => b.id !== book.id && b[field] !== book[field]).map((b) => b[field])
     );
     const uniqueDistractors = [...new Set(distractors)].slice(0, 3);
-    const options = shuffle([book[field], ...uniqueDistractors]);
+    const options = fisherYatesShuffle([book[field], ...uniqueDistractors]);
     return { book, prompt, correct: book[field], options };
   });
 }
@@ -41,6 +46,9 @@ export default function TriviaGamePage() {
   const [selected, setSelected] = useState(null);
   const [finished, setFinished] = useState(false);
 
+  const scoreRef = useRef(0);
+  const indexRef = useRef(0);
+
   const current = questions[index];
 
   const finish = useCallback(
@@ -52,7 +60,6 @@ export default function TriviaGamePage() {
         won: finalScore >= Math.ceil(questions.length / 2),
         metadata: { total: questions.length, perfect },
       });
-      // Mascota: reacción según puntaje
       if (finalScore >= Math.ceil(questions.length / 2)) {
         react('juego_ok');
       } else {
@@ -66,20 +73,25 @@ export default function TriviaGamePage() {
     if (selected) return;
     setSelected(option);
     const isCorrect = option === current.correct;
-    const nextScore = isCorrect ? score + 1 : score;
-    if (isCorrect) setScore(nextScore);
+    const currentScore = scoreRef.current + (isCorrect ? 1 : 0);
+    scoreRef.current = currentScore;
+    if (isCorrect) setScore(currentScore);
 
     setTimeout(() => {
-      if (index + 1 < questions.length) {
-        setIndex((i) => i + 1);
+      const nextIndex = indexRef.current + 1;
+      if (nextIndex < questions.length) {
+        indexRef.current = nextIndex;
+        setIndex(nextIndex);
         setSelected(null);
       } else {
-        finish(nextScore);
+        finish(currentScore);
       }
     }, 900);
   };
 
   const restart = () => {
+    scoreRef.current = 0;
+    indexRef.current = 0;
     setIndex(0);
     setScore(0);
     setSelected(null);

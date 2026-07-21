@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { achievementsService } from '../services/games.service.js';
+import { achievementsService } from '../services/achievements.service.js';
 
 const AchievementsContext = createContext(null);
 

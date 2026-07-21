@@ -10,17 +10,22 @@ import { IconTile } from '../../components/ui/IconTile.jsx';
 
 const PAIR_COUNT = 6;
 
-function shuffle(array) {
-  return [...array].sort(() => Math.random() - 0.5);
+function fisherYatesShuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function buildDeck(books) {
-  const chosen = shuffle(books).slice(0, PAIR_COUNT);
+  const chosen = fisherYatesShuffle(books).slice(0, PAIR_COUNT);
   const cards = chosen.flatMap((book) => [
     { key: `${book.id}-a`, bookId: book.id, cover: book.cover, title: book.title },
     { key: `${book.id}-b`, bookId: book.id, cover: book.cover, title: book.title },
   ]);
-  return shuffle(cards);
+  return fisherYatesShuffle(cards);
 }
 
 export default function MemoryGamePage() {

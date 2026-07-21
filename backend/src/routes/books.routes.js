@@ -1,17 +1,16 @@
 import { Router } from 'express';
 import { listBooks, getBook, createBook, updateBook, deleteBook, voteBook } from '../controllers/books.controller.js';
-import { requireAdmin } from '../middleware/requireAdmin.js';
+import { requireAdmin } from '../middleware/authenticate.js';
+import { validateId } from '../middleware/validateId.js';
 
 const router = Router();
 
-// Rutas públicas (no requieren autenticación)
 router.get('/', listBooks);
-router.get('/:id', getBook);
-router.post('/:id/vote', voteBook);
+router.get('/:id', validateId(), getBook);
+router.post('/:id/vote', validateId(), voteBook);
 
-// Rutas protegidas (solo admin)
 router.post('/', requireAdmin, createBook);
-router.put('/:id', requireAdmin, updateBook);
-router.delete('/:id', requireAdmin, deleteBook);
+router.put('/:id', requireAdmin, validateId(), updateBook);
+router.delete('/:id', requireAdmin, validateId(), deleteBook);
 
 export default router;

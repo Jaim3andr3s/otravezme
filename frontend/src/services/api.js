@@ -1,7 +1,17 @@
+import { STORAGE_KEYS } from '../constants/storage.js';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || API_BASE_URL.replace(/\/api\/?$/, '');
 
 function getToken() {
-  return localStorage.getItem('bibliosuenos_user_token');
+  return localStorage.getItem(STORAGE_KEYS.TOKEN);
+}
+
+export class AuthError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'AuthError';
+  }
 }
 
 async function request(path, options = {}) {
@@ -14,9 +24,7 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  // Construir URL completa
   const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
-  console.log(`🌐 ${rest.method || 'GET'} ${url}`);
 
   const response = await fetch(url, { ...rest, headers });
 
@@ -27,7 +35,7 @@ async function request(path, options = {}) {
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem('bibliosuenos_user_token');
+      throw new AuthError(data?.message || 'Sesión inválida.');
     }
     throw new Error(data?.message || `Error HTTP ${response.status}`);
   }
@@ -35,15 +43,10 @@ async function request(path, options = {}) {
   return data;
 }
 
-// Los archivos subidos (fotos, PDF, Word) se sirven desde /uploads en la raíz
-// del backend, no bajo /api. Esta función arma la URL completa a partir de la
-// ruta relativa que devuelve uploadFile(), y deja intactas las URLs externas
-// que el admin pueda seguir pegando a mano (ej. imágenes de otro sitio).
 export function resolveFileUrl(pathOrUrl) {
   if (!pathOrUrl) return pathOrUrl;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  const backendOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
-  return `${backendOrigin}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
+  return `${API_ORIGIN}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
 export const api = {
@@ -53,9 +56,6 @@ export const api = {
   delete: (path, opts = {}) => request(path, { method: 'DELETE', ...opts }),
 };
 
-// Subida de archivos (fotos, PDF, Word) usada por los formularios de admin.
-// No pasa por `request` porque el body es FormData: el navegador debe poner
-// su propio Content-Type con el boundary, no "application/json".
 export async function uploadFile(file) {
   const token = getToken();
   const formData = new FormData();
@@ -71,16 +71,19 @@ export async function uploadFile(file) {
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new AuthError(data?.message || 'Sesión inválida.');
+    }
     throw new Error(data?.message || `Error HTTP ${response.status}`);
   }
 
-  return data; // { url, originalName, mimeType, size }
+  return data;
 }
 
 export function setUserToken(token) {
   if (token) {
-    localStorage.setItem('bibliosuenos_user_token', token);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
   } else {
-    localStorage.removeItem('bibliosuenos_user_token');
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
   }
 }

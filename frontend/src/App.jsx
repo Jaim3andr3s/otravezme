@@ -12,36 +12,32 @@ import { ChallengesProvider } from './context/ChallengesContext.jsx';
 import { ForumProvider } from './context/ForumContext.jsx';
 import { ActivitiesProvider } from './context/ActivitiesContext.jsx';
 import { MascotProvider } from './context/MascotContext.jsx';
+import { ComposeProviders } from './utils/composeProviders.jsx';
+import { ErrorBoundary } from './components/ui/ErrorBoundary.jsx';
 import { router } from './router/index.jsx';
+
+const providers = [
+  ThemeProvider,
+  NotificationProvider,
+  UserAuthProvider,
+  AchievementsProvider,
+  BooksProvider,
+  EventsProvider,
+  GalleryProvider,
+  ArticlesProvider,
+  ChallengesProvider,
+  ForumProvider,
+  ActivitiesProvider,
+  MascotProvider,
+  ProfileProvider,
+];
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <NotificationProvider>
-        <UserAuthProvider>
-          <AchievementsProvider>
-            <BooksProvider>
-              <EventsProvider>
-                <GalleryProvider>
-                  <ArticlesProvider>
-                    <ChallengesProvider>
-                      <ForumProvider>
-                        <ActivitiesProvider>
-                          <MascotProvider>
-                            <ProfileProvider>
-                              <RouterProvider router={router} />
-                            </ProfileProvider>
-                          </MascotProvider>
-                        </ActivitiesProvider>
-                      </ForumProvider>
-                    </ChallengesProvider>
-                  </ArticlesProvider>
-                </GalleryProvider>
-              </EventsProvider>
-            </BooksProvider>
-          </AchievementsProvider>
-        </UserAuthProvider>
-      </NotificationProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ComposeProviders providers={providers}>
+        <RouterProvider router={router} />
+      </ComposeProviders>
+    </ErrorBoundary>
   );
 }

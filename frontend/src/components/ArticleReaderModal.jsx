@@ -15,7 +15,7 @@ function escapeHtml(text = '') {
 // BookReader siempre reciba HTML, sin importar si el artículo viene del
 // editor enriquecido o de texto simple.
 function toContentHtml(content = '') {
-  if (/\<[a-z][\s\S]*\>/i.test(content)) return content;
+  if (/<[a-z][\s\S]*>/i.test(content)) return content;
   return content
     .split(/\n{2,}/)
     .map((para) => `<p>${escapeHtml(para).replace(/\n/g, '<br/>')}</p>`)

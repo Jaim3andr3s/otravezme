@@ -5,9 +5,9 @@ import {
   setFavorites, 
   setRead, 
   recordGameScore,
-  getDiplomas, // NUEVO
+  getDiplomas,
 } from '../controllers/profile.controller.js';
-import { requireUser } from '../middleware/requireUser.js';
+import { requireUser } from '../middleware/authenticate.js';
 
 const router = Router();
 
@@ -18,8 +18,6 @@ router.put('/me', updateProfile);
 router.put('/me/favorites', setFavorites);
 router.put('/me/read', setRead);
 router.post('/me/games/:game/score', recordGameScore);
-
-// NUEVO: diplomas del usuario autenticado
 router.get('/me/diplomas', getDiplomas);
 
 export default router;

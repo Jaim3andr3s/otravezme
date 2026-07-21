@@ -10,6 +10,7 @@ import { useMascot } from '../context/MascotContext.jsx';
 import { useReadingPlans } from '../hooks/useReadingPlans.js';
 import { BookGrid } from '../components/books/BookGrid.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
+import { STORAGE_KEYS } from '../constants/storage.js';
 
 export default function HomePage() {
   const { books, loading: booksLoading, setSelectedBook } = useBooks();
@@ -19,8 +20,6 @@ export default function HomePage() {
   const { sayHi } = useMascot();
   const navigate = useNavigate();
   const { plans, loading: plansLoading } = useReadingPlans();
-
-  const BOOK_OF_MONTH_SEEN_KEY = 'sofi_last_book_of_month_seen';
 
   useEffect(() => {
     if (isAuthenticated && profile && !booksLoading && !plansLoading) {
@@ -37,11 +36,11 @@ export default function HomePage() {
       } else {
         const bookOfMonth = books.find((b) => b.isBookOfMonth);
         if (bookOfMonth) {
-          const lastSeen = localStorage.getItem(BOOK_OF_MONTH_SEEN_KEY);
+          const lastSeen = localStorage.getItem(STORAGE_KEYS.SOFI_BOOK_OF_MONTH_SEEN);
           if (lastSeen !== String(bookOfMonth.id)) {
             extraText = `Ya está listo el libro del mes: "${bookOfMonth.title}". 📖`;
             extraAction = { label: 'Ver libro del mes', to: '/libro-del-mes' };
-            localStorage.setItem(BOOK_OF_MONTH_SEEN_KEY, String(bookOfMonth.id));
+            localStorage.setItem(STORAGE_KEYS.SOFI_BOOK_OF_MONTH_SEEN, String(bookOfMonth.id));
           }
         }
       }

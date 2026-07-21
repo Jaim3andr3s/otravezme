@@ -14,8 +14,8 @@ export function ForumProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const data = await forumService.list();
-      setPosts(data);
+      const result = await forumService.list();
+      setPosts(result?.data ?? result ?? []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,24 +43,25 @@ export function ForumProvider({ children }) {
     [showNotification]
   );
 
-  const toggleLike = useCallback(async (id) => {
-    // Actualización optimista: la UI responde de inmediato al toque de
-    // "me gusta" sin esperar la respuesta del servidor.
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, likedByMe: !p.likedByMe, likeCount: p.likeCount + (p.likedByMe ? -1 : 1) }
-          : p
-      )
-    );
-    try {
-      const updated = await forumService.toggleLike(id);
-      setPosts((prev) => prev.map((p) => (p.id === id ? updated : p)));
-    } catch (err) {
-      showNotification(`Error: ${err.message}`, 'error');
-      reload();
-    }
-  }, [showNotification, reload]);
+  const toggleLike = useCallback(
+    async (id) => {
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, likedByMe: !p.likedByMe, likeCount: p.likeCount + (p.likedByMe ? -1 : 1) }
+            : p
+        )
+      );
+      try {
+        const updated = await forumService.toggleLike(id);
+        setPosts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      } catch (err) {
+        showNotification(`Error: ${err.message}`, 'error');
+        reload();
+      }
+    },
+    [showNotification, reload]
+  );
 
   const addComment = useCallback(async (id, content) => {
     const updated = await forumService.comment(id, content);

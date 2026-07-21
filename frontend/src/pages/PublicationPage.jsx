@@ -10,8 +10,9 @@ import { ArticleReaderModal } from '../components/ArticleReaderModal.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { resolveFileUrl } from '../services/api.js';
 import { htmlToPlainText } from '../utils/htmlToPlainText.js';
+import { STORAGE_KEYS } from '../constants/storage.js';
 
-const ONBOARDING_KEY = 'sofi_onboarding_publicaciones';
+const ONBOARDING_KEY = STORAGE_KEYS.SOFI_ONBOARDING_PUBLICATIONS;
 
 const SECTIONS = {
   PERIODICO: ['Editorial', 'Informativa', 'Literatura', 'Opinión', 'Entretenimiento'],

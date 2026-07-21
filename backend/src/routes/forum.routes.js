@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { requireAnyAuth } from '../middleware/requireAnyAuth.js';
+import { requireAnyAuth } from '../middleware/authenticate.js';
+import { validateId } from '../middleware/validateId.js';
 import {
   listPosts,
   createPost,
@@ -11,15 +12,13 @@ import {
 
 const router = Router();
 
-// Todo el foro requiere sesión (lector o admin); es un espacio de la
-// comunidad de la biblioteca, no contenido público abierto.
 router.use(requireAnyAuth);
 
 router.get('/posts', listPosts);
 router.post('/posts', createPost);
-router.delete('/posts/:id', deletePost);
-router.post('/posts/:id/like', toggleLike);
-router.post('/posts/:id/comments', createComment);
-router.delete('/posts/:id/comments/:commentId', deleteComment);
+router.delete('/posts/:id', validateId(), deletePost);
+router.post('/posts/:id/like', validateId(), toggleLike);
+router.post('/posts/:id/comments', validateId(), createComment);
+router.delete('/posts/:id/comments/:commentId', validateId('commentId'), deleteComment);
 
 export default router;

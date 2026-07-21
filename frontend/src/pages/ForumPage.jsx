@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heart, MessageCircle, Trash2, Send, ShieldCheck, MessageSquareText, Loader2 } from 'lucide-react';
 import { useForum } from '../context/ForumContext.jsx';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useProfile } from '../context/ProfileContext.jsx';
 import { FileUploadField } from '../components/ui/FileUploadField.jsx';
 import { useUploadGuard } from '../hooks/useUploadGuard.js';
 import { resolveFileUrl } from '../services/api.js';
@@ -157,7 +158,8 @@ function PostCard({ post, isAdmin, myProfileId, onLike, onDelete, onComment, onR
 
 export default function ForumPage() {
   const { posts, loading, error, reload, create, remove, toggleLike, addComment, removeComment } = useForum();
-  const { role, profile } = useUserAuth();
+  const { role } = useUserAuth();
+  const { profile } = useProfile();
   const isAdmin = role === 'admin';
 
   const [content, setContent] = useState('');

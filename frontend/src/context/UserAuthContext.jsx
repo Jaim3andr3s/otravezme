@@ -1,158 +1,98 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { authService } from '../services/auth.service.js';
 import { setUserToken } from '../services/api.js';
+import { STORAGE_KEYS } from '../constants/storage.js';
 
 const UserAuthContext = createContext(null);
-const TOKEN_KEY = 'bibliosuenos_user_token';
-const GUEST_TOKEN_KEY = 'bibliosuenos_guest_token';
-const ROLE_KEY = 'bibliosuenos_user_role';
-const PROFILE_KEY = 'bibliosuenos_user_profile';
 
 export function UserAuthProvider({ children }) {
-  // Estado inicial desde localStorage
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
-  const [role, setRole] = useState(() => localStorage.getItem(ROLE_KEY) || null);
-  const [profile, setProfile] = useState(() => {
-    const saved = localStorage.getItem(PROFILE_KEY);
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEYS.TOKEN));
+  const [role, setRole] = useState(() => localStorage.getItem(STORAGE_KEYS.ROLE) || null);
   const [checkingSession, setCheckingSession] = useState(true);
   const attemptedAutoLogin = useRef(false);
 
-  // Sincronizar token con el interceptor de API
   useEffect(() => {
     setUserToken(token);
   }, [token]);
 
-  // Guardar perfil en localStorage cuando cambie
-  useEffect(() => {
-    if (profile) {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    } else {
-      localStorage.removeItem(PROFILE_KEY);
-    }
-  }, [profile]);
+  function saveAuth(newToken, newRole) {
+    localStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
+    localStorage.setItem(STORAGE_KEYS.ROLE, newRole);
+    setRole(newRole);
+    setUserToken(newToken);
+    setToken(newToken);
+  }
 
-  // ========== LOGIN CON GOOGLE ==========
   const loginWithGoogle = useCallback(async (credential) => {
-    const { token: newToken, profile: userProfile } = await authService.loginWithGoogle(credential);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(ROLE_KEY, 'user');
-    setRole('user');
-    setProfile(userProfile);
-    setUserToken(newToken);
-    setToken(newToken);
-    return { profile: userProfile };
+    const { token: newToken } = await authService.loginWithGoogle(credential);
+    saveAuth(newToken, 'user');
   }, []);
 
-  // ========== LOGIN COMO INVITADO ==========
   const loginAsGuest = useCallback(async () => {
-    const existingGuestToken = localStorage.getItem(GUEST_TOKEN_KEY);
-    const { token: newToken, guestToken, profile: userProfile } = await authService.loginAsGuest(existingGuestToken);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(GUEST_TOKEN_KEY, guestToken);
-    localStorage.setItem(ROLE_KEY, 'user');
-    setRole('user');
-    setProfile(userProfile);
-    setUserToken(newToken);
-    setToken(newToken);
-    return { profile: userProfile };
+    const existingGuestToken = localStorage.getItem(STORAGE_KEYS.GUEST_TOKEN);
+    const { token: newToken, guestToken } = await authService.loginAsGuest(existingGuestToken);
+    localStorage.setItem(STORAGE_KEYS.GUEST_TOKEN, guestToken);
+    saveAuth(newToken, 'user');
   }, []);
 
-  // ========== REGISTRO CON EMAIL ==========
   const register = useCallback(async (name, email, password) => {
-    const { token: newToken, profile: userProfile } = await authService.register(name, email, password);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(ROLE_KEY, 'user');
-    setRole('user');
-    setProfile(userProfile);
-    setUserToken(newToken);
-    setToken(newToken);
-    return { profile: userProfile };
+    const { token: newToken } = await authService.register(name, email, password);
+    saveAuth(newToken, 'user');
   }, []);
 
-  // ========== LOGIN CON EMAIL (usuario normal) ==========
   const loginWithEmail = useCallback(async (email, password) => {
-    const { token: newToken, profile: userProfile } = await authService.loginWithEmail(email, password);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(ROLE_KEY, 'user');
-    setRole('user');
-    setProfile(userProfile);
-    setUserToken(newToken);
-    setToken(newToken);
-    return { profile: userProfile };
+    const { token: newToken } = await authService.loginWithEmail(email, password);
+    saveAuth(newToken, 'user');
   }, []);
 
-  // ========== LOGIN UNIFICADO (admin + usuario normal) ==========
   const loginUnified = useCallback(async (email, password) => {
-    const { token: newToken, role: userRole, profile: userProfile } = await authService.loginUnified(email, password);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(ROLE_KEY, userRole);
-    setRole(userRole);
-    if (userProfile) {
-      setProfile(userProfile);
-    } else {
-      // Si es admin, no tiene perfil en la tabla Profile
-      setProfile(null);
-    }
-    setUserToken(newToken);
-    setToken(newToken);
-    return { role: userRole, profile: userProfile };
+    const { token: newToken, role: userRole } = await authService.loginUnified(email, password);
+    saveAuth(newToken, userRole);
+    return { role: userRole };
   }, []);
 
-  // ========== CIERRE DE SESIÓN ==========
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(GUEST_TOKEN_KEY);
-    localStorage.removeItem(ROLE_KEY);
-    localStorage.removeItem(PROFILE_KEY);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.ROLE);
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
     setRole(null);
-    setProfile(null);
     setUserToken(null);
     setToken(null);
   }, []);
 
-  // ========== AUTO-LOGIN COMO INVITADO ==========
   useEffect(() => {
     if (token || attemptedAutoLogin.current) {
       setCheckingSession(false);
       return;
     }
     attemptedAutoLogin.current = true;
-    const guestToken = localStorage.getItem(GUEST_TOKEN_KEY);
+    const guestToken = localStorage.getItem(STORAGE_KEYS.GUEST_TOKEN);
     if (!guestToken) {
       setCheckingSession(false);
       return;
     }
     loginAsGuest()
       .catch(() => {
-        localStorage.removeItem(GUEST_TOKEN_KEY);
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(ROLE_KEY);
-        localStorage.removeItem(PROFILE_KEY);
+        localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.ROLE);
+        localStorage.removeItem(STORAGE_KEYS.PROFILE);
         setRole(null);
-        setProfile(null);
       })
       .finally(() => setCheckingSession(false));
   }, [token, loginAsGuest]);
 
-  // ========== CONTEXT VALUE ==========
   const value = {
     isAuthenticated: Boolean(token),
     checkingSession,
     role,
-    profile,
     loginWithGoogle,
     loginAsGuest,
     register,
     loginWithEmail,
     loginUnified,
     logout,
-    // Método para actualizar el perfil desde otros componentes (ej. ProfileContext)
-    updateProfile: useCallback((newProfile) => {
-      setProfile(newProfile);
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(newProfile));
-    }, []),
   };
 
   return (

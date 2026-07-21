@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { useMascot, IDLE_CHATTER, pick } from '../../context/MascotContext.jsx';
+import { useMascot } from '../../context/MascotContext.jsx';
+import { IDLE_CHATTER, pick } from '../../constants/mascot.js';
 import  SofiMascot  from './SofiMascot.jsx';
 
 // Ícono de zorro simple en SVG (fallback si el modelo 3D falla)

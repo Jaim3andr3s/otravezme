@@ -55,9 +55,8 @@ export function BookReader({ html }) {
   }, [pageWidth, html]);
 
   const goTo = useCallback((next) => {
-    setPage((p) => {
-      const clamped = Math.max(0, Math.min(pageCount - 1, next));
-      return clamped;
+    setPage(() => {
+      return Math.max(0, Math.min(pageCount - 1, next));
     });
   }, [pageCount]);
 

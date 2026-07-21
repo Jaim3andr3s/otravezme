@@ -208,10 +208,9 @@ export default function SofiMascot({
   reducedMotion = false, 
   mood = 'neutral', 
   talking = false,
-  onLoad,
   onError
 }) {
-  const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = useState(false); // eslint-disable-line no-unused-vars
 
   // Notificar errores al padre para usar el fallback SVG
   useEffect(() => {

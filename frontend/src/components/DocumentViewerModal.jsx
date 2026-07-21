@@ -42,7 +42,7 @@ export function DocumentViewerModal({ url, name, onClose }) {
         const arrayBuffer = await response.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer });
         if (!cancelled) setHtml(result.value);
-      } catch (err) {
+      } catch {
         if (!cancelled) setError('No se pudo previsualizar este documento. Puedes descargarlo abajo.');
       } finally {
         if (!cancelled) setLoading(false);

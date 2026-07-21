@@ -3,14 +3,14 @@ import { motion } from 'framer-motion';
 import { Printer, Loader2, Award, Calendar, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { profileService } from '../services/profile.service.js';
-import { useUserAuth } from '../context/UserAuthContext.jsx';
+import { useProfile } from '../context/ProfileContext.jsx';
 import { useNotification } from '../context/NotificationContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
 
 const STORAGE_KEY = 'sofi_last_diploma_seen';
 
 export default function DiplomaPage() {
-  const { profile } = useUserAuth();
+  const { profile } = useProfile();
   const { showNotification } = useNotification();
   const { react } = useMascot();
   const [diplomas, setDiplomas] = useState([]);

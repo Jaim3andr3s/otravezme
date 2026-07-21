@@ -7,8 +7,9 @@ import { useAchievements } from '../context/AchievementsContext.jsx';
 import { useProfile } from '../context/ProfileContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
 import { IconTile } from '../components/ui/IconTile.jsx';
+import { STORAGE_KEYS } from '../constants/storage.js';
 
-const ONBOARDING_KEY = 'sofi_onboarding_games';
+const ONBOARDING_KEY = STORAGE_KEYS.SOFI_ONBOARDING_GAMES;
 
 const GAMES = [
   {

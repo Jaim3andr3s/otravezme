@@ -7,18 +7,16 @@ import { useBooks } from '../context/BooksContext.jsx';
 import { BookCard } from '../components/books/BookCard.jsx';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
 import { Badge } from '../components/ui/Badge.jsx';
+import { Navigate } from 'react-router-dom';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
-import AdminDashboardPage from './AdminDashboardPage.jsx';
 
 export default function ProfilePage() {
   const { profile, loading: profileLoading } = useProfile();
   const { role } = useUserAuth();
   const { books, loading: booksLoading, setSelectedBook } = useBooks();
 
-  // El administrador no tiene un perfil de lector: al entrar a "Mi Perfil"
-  // debe ver directamente su panel de administración.
   if (role === 'admin') {
-    return <AdminDashboardPage />;
+    return <Navigate to="/admin" replace />;
   }
 
   if (profileLoading || booksLoading || !profile) return <FullPageLoader label="Cargando tu perfil..." />;

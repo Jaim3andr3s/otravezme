@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import prisma from './lib/prisma.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.routes.js';
 import booksRoutes from './routes/books.routes.js';
@@ -19,8 +20,6 @@ import activitiesRoutes from './routes/activities.routes.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const allowedOrigins = new Set([
-  // Fallback fijo: aunque la variable de entorno CORS_ORIGINS en Render
-  // esté vacía o mal configurada, estos dominios siempre van a funcionar.
   'https://biblioyenecomunity.netlify.app',
   'https://bibliosuenos.netlify.app',
   'http://localhost:5173',
@@ -32,9 +31,6 @@ const allowedOrigins = new Set([
     .filter(Boolean),
 ]);
 
-// Dominios de túneles ngrok (cambian en cada sesión), para poder probar la
-// app completa (frontend + backend) expuesta públicamente sin tener que
-// actualizar CORS_ORIGINS cada vez.
 const NGROK_HOST_PATTERN = /^https:\/\/[a-z0-9-]+\.(ngrok-free\.app|ngrok\.app|ngrok\.io)$/i;
 
 const app = express();
@@ -51,7 +47,14 @@ app.use(
 );
 app.use(express.json());
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected' });
+  } catch {
+    res.status(503).json({ status: 'error', database: 'disconnected' });
+  }
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/events', eventsRoutes);

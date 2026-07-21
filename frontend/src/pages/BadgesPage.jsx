@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Loader2, Lock } from 'lucide-react';
 import { BadgeTile } from '../components/achievements/BadgeTile.jsx';
-import { achievementsService } from '../services/games.service.js';
+import { achievementsService } from '../services/achievements.service.js';
 import { profileService } from '../services/profile.service.js';
 import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useNotification } from '../context/NotificationContext.jsx';

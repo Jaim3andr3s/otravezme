@@ -36,8 +36,13 @@ export default defineConfig([
   {
     files: ['src/context/**/*.jsx'],
     rules: {
-      // Provider + hook co-located in one file is the standard context pattern here.
       'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['**/SofiMascot.jsx', '**/*.glsl'],
+    rules: {
+      'react/no-unknown-property': ['error', { ignore: ['object', 'args', 'intensity', 'position'] }],
     },
   },
 ])
