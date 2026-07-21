@@ -13,6 +13,9 @@ export function AppShell() {
   const { books, selectedBook, setSelectedBook, editingBook, setEditingBook, vote, remove, update } = useBooks();
   const activeBook = selectedBook ? books.find((b) => b.id === selectedBook.id) || selectedBook : null;
   const { pathname } = useLocation();
+  // Sofi se oculta en los juegos: el widget flotante compite por espacio con
+  // tableros/grillas ya ajustados de por sí en pantallas chicas.
+  const showSofi = !pathname.startsWith('/juegos');
 
   useEffect(() => {
     setSelectedBook(null);
@@ -29,8 +32,8 @@ export function AppShell() {
           <Outlet />
         </AnimatePresence>
       </main>
-      {/* Sofi mascota persistente */}
-      <SofiWidget />
+      {/* Sofi mascota persistente (oculta en /juegos, ver showSofi arriba) */}
+      {showSofi && <SofiWidget />}
       <AnimatePresence>
         {activeBook && (
           <BookModal
