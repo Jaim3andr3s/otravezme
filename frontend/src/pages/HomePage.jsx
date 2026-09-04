@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Book, Sparkles, Calendar, Megaphone, ChevronRight } from 'lucide-react';
+import { Sparkles, Calendar, Megaphone, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBooks } from '../context/BooksContext.jsx';
 import { useEvents } from '../context/EventsContext.jsx';
@@ -9,6 +9,7 @@ import { useUserAuth } from '../context/UserAuthContext.jsx';
 import { useMascot } from '../context/MascotContext.jsx';
 import { useReadingPlans } from '../hooks/useReadingPlans.js';
 import { BookGrid } from '../components/books/BookGrid.jsx';
+import { HeroSection } from '../components/home/HeroSection.jsx';
 import { FullPageLoader } from '../components/ui/Spinner.jsx';
 import { STORAGE_KEYS } from '../constants/storage.js';
 
@@ -55,16 +56,7 @@ export default function HomePage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }} className="space-y-12">
-      <header className="text-center py-20 bg-accent rounded-3xl shadow-xl text-accent-ink">
-        <h1 className="text-6xl font-serif font-semibold mb-4 tracking-tight">BiblioSueños</h1>
-        <p className="text-2xl font-light italic font-serif">Donde las palabras se encuentran con la imaginación.</p>
-        <button
-          onClick={() => navigate('/biblioteca')}
-          className="mt-8 px-8 py-3 min-h-[44px] bg-surface text-accent font-semibold rounded-full shadow-lg hover:opacity-90 transition duration-300 transform hover:scale-105 flex items-center mx-auto"
-        >
-          <Book className="w-5 h-5 mr-2" /> Explorar la biblioteca
-        </button>
-      </header>
+      <HeroSection onExplore={() => navigate('/biblioteca')} />
 
       <section className="space-y-6">
         <h2 className="text-3xl font-serif font-semibold text-ink flex items-center">

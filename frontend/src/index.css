@@ -7,6 +7,10 @@
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/playfair-display/900.css';
+@import '@fontsource/playfair-display/500-italic.css';
 @import './styles/tokens.css';
 
 @tailwind base;
@@ -21,4 +25,25 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--font-serif);
+}
+
+.hero-shimmer {
+  background: linear-gradient(120deg, #c98b00 0%, #f6dfa0 25%, #c98b00 50%, #f6dfa0 75%, #c98b00 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-shimmer-sweep 5s linear infinite;
+}
+
+@keyframes hero-shimmer-sweep {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-shimmer {
+    animation: none;
+    background-position: 0% center;
+  }
 }

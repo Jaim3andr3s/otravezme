@@ -56,8 +56,8 @@ export function Navbar() {
   };
 
   const desktopLinkClass = ({ isActive }) =>
-    `font-semibold text-lg transition duration-150 p-2 rounded-lg ${
-      isActive ? 'text-accent bg-accent-soft' : 'text-ink-muted hover:text-accent'
+    `font-semibold text-sm whitespace-nowrap px-3 py-2 rounded-full transition duration-150 ${
+      isActive ? 'text-accent-ink bg-accent shadow-sm' : 'text-ink-muted hover:text-accent hover:bg-accent-soft'
     }`;
 
   const mobileLinkClass = ({ isActive }) =>
@@ -73,20 +73,25 @@ export function Navbar() {
           <span className="text-2xl font-serif font-semibold text-ink hidden sm:block">BiblioSueños</span>
         </NavLink>
 
-        <nav className="hidden lg:flex space-x-6 items-center">
+        <nav className="hidden xl:flex items-center gap-1">
           {NAV_LINKS.map((link) => (
             <NavLink key={link.to} to={link.to} end={link.end} className={desktopLinkClass}>
               {link.label}
             </NavLink>
           ))}
-          
+
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="font-semibold text-lg transition duration-150 p-2 rounded-lg text-ink-muted hover:text-accent flex items-center gap-1"
+              className={`font-semibold text-sm whitespace-nowrap transition duration-150 px-3 py-2 rounded-full flex items-center gap-1 ${
+                isDropdownOpen ? 'text-accent bg-accent-soft' : 'text-ink-muted hover:text-accent hover:bg-accent-soft'
+              }`}
             >
               Club de Lectura
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -149,7 +154,9 @@ export function Navbar() {
             </button>
           )}
 
-          <MenuToggle open={isMenuOpen} onClick={() => setIsMenuOpen((prev) => !prev)} />
+          <div className="xl:hidden">
+            <MenuToggle open={isMenuOpen} onClick={() => setIsMenuOpen((prev) => !prev)} />
+          </div>
         </div>
       </div>
 
@@ -161,7 +168,7 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed top-0 right-0 h-screen w-80 max-w-[85vw] bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 lg:hidden border-l border-edge overflow-y-auto overscroll-contain"
+            className="fixed top-0 right-0 h-screen w-80 max-w-[85vw] bg-white dark:bg-gray-800 z-[200] shadow-2xl p-6 xl:hidden border-l border-edge overflow-y-auto overscroll-contain"
             style={{
               height: '100dvh', // Ocupa toda la altura visible
               paddingTop: 'clamp(60px, 10vh, 80px)', // Espacio para el header

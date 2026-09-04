@@ -7,7 +7,7 @@ export function MenuToggle({ open, onClick, className = '' }) {
       onClick={onClick}
       title={open ? 'Cerrar menú' : 'Abrir menú'}
       aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-      className={`relative w-11 h-11 rounded-full bg-accent-soft text-accent shadow-sm ring-1 ring-accent/15 flex items-center justify-center transition-transform active:scale-95 lg:hidden ${className}`}
+      className={`relative w-11 h-11 rounded-full bg-accent-soft text-accent shadow-sm ring-1 ring-accent/15 flex items-center justify-center transition-transform active:scale-95 ${className}`}
     >
       <motion.span
         className="absolute h-[2px] w-5 rounded-full bg-current"

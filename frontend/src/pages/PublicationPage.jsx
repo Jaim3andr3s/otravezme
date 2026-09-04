@@ -92,6 +92,12 @@ export default function PublicationPage({ type: propType }) {
             <h2 className="text-4xl font-serif font-semibold text-ink">{TYPE_LABELS[normalizedType]}</h2>
           </div>
           <p className="text-lg text-ink-muted">Explora las secciones de nuestro {TYPE_LABELS[normalizedType].toLowerCase()}.</p>
+          {articles.length > 0 && (
+            <p className="text-sm text-accent font-medium mt-1 truncate">
+              Última edición: <span className="font-semibold">"{articles[0].title}"</span> ·{' '}
+              {new Date(articles[0].publishedAt).toLocaleDateString('es-CO', { dateStyle: 'long' })}
+            </p>
+          )}
         </div>
         {isAdmin && (
           <Button variant="success" onClick={() => setShowForm(true)}>
